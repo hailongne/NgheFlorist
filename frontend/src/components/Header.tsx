@@ -1,0 +1,1457 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  SearchOutlined, 
+  ShoppingOutlined, 
+  MenuOutlined, 
+  CloseOutlined, 
+  CompassOutlined,
+  AppstoreOutlined,
+  GiftOutlined,
+  MessageOutlined,
+  UserOutlined,
+  LogoutOutlined,
+  DownOutlined,
+  UpOutlined,
+  ArrowLeftOutlined,
+  CrownOutlined,
+  DashboardOutlined
+} from '@ant-design/icons';
+import { useCustomerRequest } from '../context/RequestContext';
+import { useAdminAuth } from '../admin/AdminAuthContext';
+import { useSiteSettings } from '../context/SiteSettingsContext';
+import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
+
+interface SearchResult {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  image_url: string;
+  category_name: string;
+}
+
+interface MenuItem {
+  id: number;
+  label: string;
+  url: string;
+  sort_order: number;
+}
+
+export default function Header() {
+  const { openRequestModal } = useCustomerRequest();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const formatVND = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isCollectionsExpanded, setIsCollectionsExpanded] = useState(true);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [customerUser, setCustomerUser] = useState<{ id: number; username: string; email: string; full_name?: string } | null>(null);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showZaloDropdown, setShowZaloDropdown] = useState(false);
+
+  // Admin Auth context & local fallback
+  const { user: adminUser, isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAdminAuth();
+  const localAdminSaved = localStorage.getItem('nghe_admin_user');
+  const localAdminToken = localStorage.getItem('nghe_admin_token');
+  let isLocalAdmin = false;
+  let activeAdminUser = adminUser;
+  if (localAdminToken && localAdminSaved) {
+    try {
+      const p = JSON.parse(localAdminSaved);
+      if (p.role_name === 'admin' && p.email === 'admin@ngheflorist.vn' && p.id === 1) {
+        isLocalAdmin = true;
+        if (!activeAdminUser) activeAdminUser = p;
+      }
+    } catch {}
+  }
+  const isEffectiveAdmin = Boolean(isAdminAuthenticated && adminUser?.role_name === 'admin') || isLocalAdmin;
+
+  const { zaloUrl1, zaloUrl2, hotline1, hotline2, ctaText1, ctaText2 } = useSiteSettings();
+
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+  const zaloDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isMobileSearchOpen) {
+      const timer = setTimeout(() => {
+        mobileSearchInputRef.current?.focus();
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobileSearchOpen]);
+
+  useEffect(() => {
+    const syncCustomer = () => {
+      const saved = localStorage.getItem('nghe_customer_user');
+      if (saved) {
+        try {
+          setCustomerUser(JSON.parse(saved));
+        } catch {
+          setCustomerUser(null);
+        }
+      } else {
+        setCustomerUser(null);
+      }
+    };
+    syncCustomer();
+    window.addEventListener('storage', syncCustomer);
+    return () => window.removeEventListener('storage', syncCustomer);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setShowUserDropdown(false);
+      }
+      if (zaloDropdownRef.current && !zaloDropdownRef.current.contains(e.target as Node)) {
+        setShowZaloDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleCustomerLogout = () => {
+    localStorage.removeItem('nghe_customer_token');
+    localStorage.removeItem('nghe_customer_user');
+    setCustomerUser(null);
+    setShowUserDropdown(false);
+    navigate('/');
+  };
+
+  const handleAdminLogout = () => {
+    adminLogout();
+    localStorage.removeItem('nghe_admin_token');
+    localStorage.removeItem('nghe_admin_user');
+    localStorage.removeItem('nghe_customer_token');
+    localStorage.removeItem('nghe_customer_user');
+    setCustomerUser(null);
+    setShowUserDropdown(false);
+    navigate('/');
+  };
+
+  // Fetch dynamic menu
+  useEffect(() => {
+    fetch('/api/content/menu')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setMenuItems(data);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  // Debounced search
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      fetch(`/api/products?search=${encodeURIComponent(searchTerm.trim())}&limit=5`)
+        .then(r => r.json())
+        .then(data => {
+          setSearchResults(data.products || []);
+          setIsSearching(false);
+        })
+        .catch(() => {
+          setSearchResults([]);
+          setIsSearching(false);
+        });
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Click outside to close search dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowSearchDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setShowSearchDropdown(false);
+  }, [location.pathname]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    setShowSearchDropdown(false);
+    navigate(`/flowers?search=${encodeURIComponent(searchTerm.trim())}`);
+  };
+
+  const selectSearchResult = (slug: string) => {
+    setShowSearchDropdown(false);
+    setSearchTerm('');
+    navigate(`/product/${slug}`);
+  };
+
+  const defaultMenuItems = [
+    { id: 1, label: 'Trang chủ', url: '/', sort_order: 1 },
+    { id: 2, label: 'Bộ sưu tập hoa', url: '/flowers', sort_order: 2 },
+    { id: 3, label: 'Thiết kế riêng', url: '/custom-order', sort_order: 3 },
+    { id: 4, label: 'Về Nghệ Florist', url: '/about', sort_order: 4 },
+    { id: 5, label: 'Chính sách', url: '/policy', sort_order: 5 }
+  ];
+
+  const displayMenu = menuItems.length > 0 ? menuItems : defaultMenuItems;
+
+  return (
+    <>
+      {/* Mobile & Tablet Dedicated Search Overlay */}
+      {isMobileSearchOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'var(--color-white)',
+            zIndex: 2200,
+            display: 'flex',
+            flexDirection: 'column',
+            animation: 'fadeIn 0.2s ease'
+          }}
+        >
+          {/* Top Search Input Bar */}
+          <div style={{
+            height: 64,
+            borderBottom: '1px solid var(--color-border)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 14px',
+            gap: 10,
+            background: '#FFFFFF',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+          }}>
+            <button
+              onClick={() => {
+                setIsMobileSearchOpen(false);
+                setShowSearchDropdown(false);
+              }}
+              style={{
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--color-background-soft)',
+                border: 'none',
+                borderRadius: '50%',
+                fontSize: 18,
+                color: 'var(--color-text)',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+              aria-label="Đóng tìm kiếm"
+            >
+              <ArrowLeftOutlined />
+            </button>
+
+            <form 
+              onSubmit={(e) => {
+                handleSearchSubmit(e);
+                setIsMobileSearchOpen(false);
+              }}
+              style={{ flexGrow: 1, position: 'relative', display: 'flex', alignItems: 'center' }}
+            >
+              <SearchOutlined style={{
+                position: 'absolute',
+                left: 14,
+                color: 'var(--color-primary-dark)',
+                fontSize: 16,
+                pointerEvents: 'none'
+              }} />
+              <input
+                ref={mobileSearchInputRef}
+                type="text"
+                placeholder="Tìm hoa tươi, lan hồ điệp, bó hoa..."
+                value={searchTerm}
+                onChange={e => {
+                  setSearchTerm(e.target.value);
+                  setShowSearchDropdown(true);
+                }}
+                style={{
+                  width: '100%',
+                  height: 44,
+                  padding: '0 38px 0 40px',
+                  borderRadius: 'var(--radius-full)',
+                  border: '1.5px solid var(--color-primary-dark)',
+                  background: 'var(--color-background-soft)',
+                  fontSize: '0.94rem',
+                  outline: 'none',
+                  color: 'var(--color-text)'
+                }}
+                aria-label="Tìm kiếm mẫu hoa"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSearchResults([]);
+                    mobileSearchInputRef.current?.focus();
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    background: '#CBD5E1',
+                    border: 'none',
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: 11
+                  }}
+                  aria-label="Xóa từ khóa"
+                >
+                  <CloseOutlined />
+                </button>
+              )}
+            </form>
+          </div>
+
+          {/* Search Content & Results Body */}
+          <div style={{ flexGrow: 1, overflowY: 'auto', padding: '20px 16px' }}>
+            {isSearching ? (
+              <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.92rem' }}>
+                <div style={{ marginBottom: 10, fontSize: 24 }}>🌸</div>
+                Đang tìm các tác phẩm hoa phù hợp...
+              </div>
+            ) : searchResults.length > 0 && searchTerm.trim() ? (
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--color-text-secondary)', marginBottom: 12 }}>
+                  Tác phẩm gợi ý ({searchResults.length})
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {searchResults.map(p => (
+                    <div
+                      key={p.id}
+                      onClick={() => {
+                        selectSearchResult(p.slug);
+                        setIsMobileSearchOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 12px',
+                        background: '#FFFFFF',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-md)',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.02)'
+                      }}
+                    >
+                      <div style={{ width: 56, height: 56, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, background: 'var(--color-background-soft)' }}>
+                        <ImageWithFallback
+                          src={p.image_url}
+                          alt={p.name}
+                          fallbackSrc={getFallbackForId(p.id)}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div style={{ flexGrow: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>
+                          {p.name}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
+                          {p.category_name}
+                        </div>
+                        <div style={{ fontSize: '0.86rem', color: 'var(--color-primary-dark)', fontWeight: 700, marginTop: 2 }}>
+                          {formatVND(p.price)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 20, textAlign: 'center' }}>
+                  <button
+                    onClick={(e) => {
+                      handleSearchSubmit(e);
+                      setIsMobileSearchOpen(false);
+                    }}
+                    className="btn btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: 'var(--radius-full)',
+                      fontWeight: 700,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    Xem tất cả kết quả cho "{searchTerm}" →
+                  </button>
+                </div>
+              </div>
+            ) : searchTerm.trim() ? (
+              <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                  Không tìm thấy tác phẩm hoa nào
+                </div>
+                <div style={{ fontSize: '0.88rem', maxWidth: 320, margin: '0 auto 20px' }}>
+                  Không có mẫu hoa nào khớp với từ khóa "{searchTerm}". Vui lòng thử tìm với từ khóa khác hoặc xem các gợi ý bên dưới.
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+                  {['Hoa hồng', 'Hoa khai trương', 'Lan hồ điệp', 'Hoa sinh nhật'].map((tag, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSearchTerm(tag);
+                        navigate(`/flowers?search=${encodeURIComponent(tag)}`);
+                        setIsMobileSearchOpen(false);
+                      }}
+                      className="budget-chip"
+                      style={{ fontSize: '0.84rem', padding: '6px 14px' }}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div>
+                {/* Popular Keywords */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                    Tìm kiếm phổ biến
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {[
+                      '🌸 Bó hoa hồng',
+                      '🧺 Giỏ hoa khai trương',
+                      '🪴 Lan hồ điệp cao cấp',
+                      '🎨 Tone pastel',
+                      '🎂 Hoa sinh nhật',
+                      '💐 Hoa chúc mừng'
+                    ].map((tag, idx) => {
+                      const cleanKeyword = tag.replace(/^[^\w\s\u00C0-\u1EF9]+/, '').trim();
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setSearchTerm(cleanKeyword);
+                            navigate(`/flowers?search=${encodeURIComponent(cleanKeyword)}`);
+                            setIsMobileSearchOpen(false);
+                          }}
+                          className="budget-chip"
+                          style={{
+                            fontSize: '0.84rem',
+                            padding: '7px 14px',
+                            background: 'var(--color-background-soft)',
+                            border: '1px solid var(--color-border)'
+                          }}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Quick Category Jump */}
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                    Bộ sưu tập hoa nổi bật
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                    {[
+                      { name: 'Lan Hồ Điệp', slug: 'lan-ho-diep', emoji: '🪴' },
+                      { name: 'Bó Hoa Tươi', slug: 'bo-hoa', emoji: '💐' },
+                      { name: 'Giỏ Hoa Sang Trọng', slug: 'gio-hoa', emoji: '🧺' },
+                      { name: 'Hoa Cưới & Sự Kiện', slug: 'hoa-cuoi', emoji: '💍' },
+                    ].map(cat => (
+                      <div
+                        key={cat.slug}
+                        onClick={() => {
+                          navigate(`/flowers?category=${cat.slug}`);
+                          setIsMobileSearchOpen(false);
+                        }}
+                        style={{
+                          padding: '12px 14px',
+                          background: 'var(--color-background-soft)',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          color: 'var(--color-text)'
+                        }}
+                      >
+                        <span style={{ fontSize: 20 }}>{cat.emoji}</span>
+                        <span>{cat.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Main Header */}
+      <header className="site-header">
+        <div className="container header-inner" style={{ position: 'relative' }}>
+          {/* Left: Mobile Toggle (on mobile) or Brand Logo (on desktop) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <button 
+              className="mobile-menu-btn"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Mở menu điều hướng"
+              style={{ width: 44, height: 44 }}
+            >
+              <MenuOutlined style={{ fontSize: 20 }} />
+            </button>
+
+            {/* Desktop Brand Logo */}
+            <Link to="/" className="site-logo desktop-only-action" title="Nghệ Florist - Tiệm hoa & quả nhập khẩu">
+              <img 
+                src="/images/logoNgheFlorist-dark.png" 
+                alt="Nghệ Florist" 
+                className="site-logo-img"
+              />
+            </Link>
+          </div>
+
+          {/* Center on Mobile: Brand Logo Centered */}
+          <Link 
+            to="/" 
+            className="site-logo mobile-only-element" 
+            title="Nghệ Florist"
+            style={{ 
+              position: 'absolute', 
+              left: '50%', 
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <img 
+              src="/images/logoNgheFlorist-dark.png" 
+              alt="Nghệ Florist" 
+              style={{ height: 38, width: 'auto', objectFit: 'contain' }}
+            />
+          </Link>
+
+          {/* Center on Desktop/Tablet: Prominent Search Bar */}
+          <div className="header-search-extended desktop-only-action" ref={searchContainerRef}>
+            <form onSubmit={handleSearchSubmit} style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Tìm hoa tươi, lan hồ điệp, bó hoa, giỏ hoa khai trương..."
+                value={searchTerm}
+                onChange={e => {
+                  setSearchTerm(e.target.value);
+                  setShowSearchDropdown(true);
+                }}
+                onFocus={() => setShowSearchDropdown(true)}
+                aria-label="Tìm kiếm sản phẩm hoa"
+              />
+              <button type="submit" className="search-icon-btn" aria-label="Nút tìm kiếm">
+                <SearchOutlined />
+              </button>
+            </form>
+
+            {/* Autocomplete Dropdown */}
+            {showSearchDropdown && searchTerm.trim() && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  left: 0,
+                  right: 0,
+                  background: 'var(--color-white)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-lg)',
+                  padding: 12,
+                  zIndex: 150,
+                  maxHeight: 380,
+                  overflowY: 'auto'
+                }}
+              >
+                {isSearching ? (
+                  <div style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.88rem' }}>
+                    Đang tìm kiếm...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-text-light)', padding: '4px 8px 8px' }}>
+                      Gợi ý sản phẩm ({searchResults.length})
+                    </div>
+                    {searchResults.map(p => (
+                      <div
+                        key={p.id}
+                        onClick={() => selectSearchResult(p.slug)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '8px 10px',
+                          borderRadius: 'var(--radius-sm)',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-light)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ width: 44, height: 44, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
+                          <ImageWithFallback
+                            src={p.image_url}
+                            alt={p.name}
+                            fallbackSrc={getFallbackForId(p.id)}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </div>
+                        <div style={{ flexGrow: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {p.name}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
+                            {p.category_name} • <span style={{ color: 'var(--color-primary-dark)', fontWeight: 700 }}>{formatVND(p.price)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ borderTop: '1px solid var(--color-border)', marginTop: 8, paddingTop: 8, textAlign: 'center' }}>
+                      <button
+                        onClick={handleSearchSubmit}
+                        style={{ fontSize: '0.85rem', color: 'var(--color-primary-dark)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        Xem tất cả kết quả cho "{searchTerm}" →
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ padding: '20px 12px', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                    Không tìm thấy hoa phù hợp với "{searchTerm}".
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Right: Mobile Search Button (on Mobile) */}
+          <button
+            className="mobile-search-btn"
+            onClick={() => setIsMobileSearchOpen(true)}
+            aria-label="Mở tìm kiếm"
+            title="Tìm kiếm mẫu hoa"
+          >
+            <SearchOutlined />
+          </button>
+
+          {/* Right: Conversion Actions & Auth (on Desktop/Tablet) */}
+          <div className="header-actions desktop-only-action" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Floral Custom Order CTA */}
+            <button
+              onClick={() => openRequestModal(null, 'CUSTOM_DESIGN')}
+              className="btn btn-soft btn-sm"
+              style={{ 
+                borderRadius: 'var(--radius-full)', 
+                padding: '8px 18px',
+                fontSize: '0.86rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                whiteSpace: 'nowrap'
+              }}
+              title="Thiết kế hoa theo yêu cầu"
+            >
+              <GiftOutlined /> Thiết kế riêng
+            </button>
+
+            {/* Direct Zalo 1-Click Consultation Dropdown */}
+            <div ref={zaloDropdownRef} style={{ position: 'relative' }}>
+              <button 
+                onClick={() => setShowZaloDropdown(!showZaloDropdown)}
+                className="btn btn-primary btn-sm"
+                style={{ 
+                  borderRadius: 'var(--radius-full)', 
+                  padding: '8px 20px',
+                  fontSize: '0.86rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  boxShadow: '0 2px 8px rgba(42, 117, 211, 0.25)',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer'
+                }}
+                title="Tư vấn Zalo ngay (Không cần điền form)"
+              >
+                <MessageOutlined /> Tư vấn Zalo
+              </button>
+
+              {showZaloDropdown && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    right: 0,
+                    width: 290,
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: 14,
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 104, 255, 0.12)',
+                    border: '1px solid #E2E8F0',
+                    padding: 14,
+                    zIndex: 1000
+                  }}
+                >
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1E293B', marginBottom: 2 }}>
+                    TƯ VẤN NHANH QUA ZALO
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 600, marginBottom: 10 }}>
+                    ● 1 chạm sang Zalo (Không cần điền form)
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <a
+                      href={zaloUrl1}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowZaloDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        backgroundColor: '#0068FF',
+                        color: '#FFFFFF',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        textDecoration: 'none',
+                        fontSize: '0.86rem',
+                        fontWeight: 700
+                      }}
+                    >
+                      <MessageOutlined style={{ fontSize: 16 }} />
+                      <div>
+                        <div>Zalo 1: {hotline1}</div>
+                        <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText1 || 'Báo giá & chọn mẫu nhanh'}</div>
+                      </div>
+                    </a>
+
+                    <a
+                      href={zaloUrl2}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowZaloDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        backgroundColor: '#0284C7',
+                        color: '#FFFFFF',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        textDecoration: 'none',
+                        fontSize: '0.86rem',
+                        fontWeight: 700
+                      }}
+                    >
+                      <MessageOutlined style={{ fontSize: 16 }} />
+                      <div>
+                        <div>Zalo 2: {hotline2}</div>
+                        <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText2 || 'Sự kiện & thiết kế riêng'}</div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Admin or Customer Auth Button (Far Right) */}
+            {isEffectiveAdmin && activeAdminUser ? (
+              <div ref={userDropdownRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  style={{
+                    borderRadius: 'var(--radius-full)',
+                    padding: '5px 14px 5px 7px',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #1B3F48 0%, #152E35 100%)',
+                    color: '#FFFFFF',
+                    border: '1.5px solid #E29B42',
+                    boxShadow: '0 2px 10px rgba(226, 155, 66, 0.25)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Tài khoản Quản trị viên Nghệ Florist"
+                >
+                  <span style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(226, 155, 66, 0.25)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#FDBA74',
+                    fontSize: '0.85rem'
+                  }}>
+                    <CrownOutlined />
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {activeAdminUser.full_name || 'Admin'}
+                    </span>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 800,
+                      backgroundColor: '#E29B42',
+                      color: '#FFF',
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      letterSpacing: '0.5px'
+                    }}>
+                      ADMIN
+                    </span>
+                  </span>
+                  <DownOutlined style={{ fontSize: '0.62rem', color: '#FDBA74', opacity: 0.85, transition: 'transform 0.2s', transform: showUserDropdown ? 'rotate(180deg)' : 'none' }} />
+                </button>
+
+                {showUserDropdown && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 8px)',
+                      right: 0,
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                      minWidth: 230,
+                      width: 'max-content',
+                      maxWidth: 290,
+                      padding: '6px 0',
+                      zIndex: 200,
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ padding: '12px 16px', fontSize: '0.8rem', color: '#64748B', borderBottom: '1px solid #F1F5F9', background: '#FFFDF9' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                        <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          ★ QUẢN TRỊ VIÊN HỆ THỐNG
+                        </span>
+                      </div>
+                      <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {activeAdminUser.full_name || activeAdminUser.username}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: 1 }}>
+                        {activeAdminUser.email}
+                      </div>
+                    </div>
+
+                    <Link
+                      to="/admin/requests"
+                      onClick={() => setShowUserDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#B45309',
+                        textDecoration: 'none',
+                        backgroundColor: '#FFFBEB',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <MessageOutlined style={{ color: '#D97706', fontSize: '1rem' }} />
+                      <span>Yêu cầu khách hàng</span>
+                    </Link>
+
+                    <Link
+                      to="/admin/products"
+                      onClick={() => setShowUserDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                        color: '#1E293B',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <ShoppingOutlined style={{ color: '#5D9EAF', fontSize: '0.95rem' }} />
+                      <span>Quản lý sản phẩm</span>
+                    </Link>
+
+                    <div style={{ height: 1, backgroundColor: '#F1F5F9', margin: '4px 0' }} />
+
+                    <button
+                      onClick={handleAdminLogout}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                        background: 'none',
+                        border: 'none',
+                        color: '#EF4444',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <LogoutOutlined style={{ fontSize: '0.95rem' }} />
+                      <span>Đăng xuất Admin</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : customerUser ? (
+              <div ref={userDropdownRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  style={{
+                    borderRadius: 'var(--radius-full)',
+                    padding: '5px 14px 5px 7px',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #1B3F48 0%, #29535E 100%)',
+                    color: '#FFFFFF',
+                    border: '1px solid #366572',
+                    boxShadow: '0 2px 8px rgba(27, 63, 72, 0.2)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Tài khoản cá nhân"
+                >
+                  <span style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#B9DCE8',
+                    fontSize: '0.82rem'
+                  }}>
+                    <UserOutlined />
+                  </span>
+                  <span style={{ maxWidth: 115, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {customerUser.full_name || customerUser.username}
+                  </span>
+                  <DownOutlined style={{ fontSize: '0.62rem', color: '#B9DCE8', opacity: 0.85, transition: 'transform 0.2s', transform: showUserDropdown ? 'rotate(180deg)' : 'none' }} />
+                </button>
+
+                {showUserDropdown && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 8px)',
+                      right: 0,
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                      minWidth: 220,
+                      width: 'max-content',
+                      maxWidth: 280,
+                      padding: '6px 0',
+                      zIndex: 200,
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ padding: '10px 16px', fontSize: '0.8rem', color: '#64748B', borderBottom: '1px solid #F1F5F9', background: '#F8FAFC' }}>
+                      <div style={{ fontSize: '0.74rem', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Đang đăng nhập</div>
+                      <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '0.86rem', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {customerUser.full_name || customerUser.username}
+                      </div>
+                    </div>
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowUserDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                        color: '#1E293B',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <UserOutlined style={{ color: '#5D9EAF', fontSize: '0.95rem' }} />
+                      <span>Hồ sơ thông tin</span>
+                    </Link>
+                    <div style={{ height: 1, backgroundColor: '#F1F5F9', margin: '4px 0' }} />
+                    <button
+                      onClick={handleCustomerLogout}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                        background: 'none',
+                        border: 'none',
+                        color: '#EF4444',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <LogoutOutlined style={{ fontSize: '0.95rem' }} />
+                      <span>Đăng xuất</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                style={{
+                  borderRadius: 'var(--radius-full)',
+                  padding: '5px 16px 5px 8px',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                  background: 'linear-gradient(135deg, #1B3F48 0%, #29535E 100%)',
+                  color: '#FFFFFF',
+                  border: '1px solid #366572',
+                  boxShadow: '0 2px 8px rgba(27, 63, 72, 0.2)',
+                  transition: 'all 0.2s ease'
+                }}
+                title="Đăng nhập hoặc đăng ký tài khoản"
+              >
+                <span style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#B9DCE8',
+                  fontSize: '0.82rem'
+                }}>
+                  <UserOutlined />
+                </span>
+                <span>Đăng nhập / Đăng ký</span>
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Menu Drawer - Clean Showroom Hierarchy */}
+      {isMobileMenuOpen && (
+          <>
+            <div 
+              className="mobile-backdrop"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <div className="mobile-drawer">
+              {/* Drawer Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--color-border)' }}>
+                <img 
+                  src="/images/logoNgheFlorist-dark.png" 
+                  alt="Nghệ Florist" 
+                  style={{ height: 38, width: 'auto', objectFit: 'contain' }}
+                />
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', fontSize: 20, color: 'var(--color-text)', cursor: 'pointer' }}
+                  aria-label="Đóng menu"
+                >
+                  <CloseOutlined />
+                </button>
+              </div>
+
+              {/* Drawer Navigation Links */}
+              <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 12px', flexGrow: 1, overflowY: 'auto' }}>
+                <Link
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="mobile-nav-link"
+                >
+                  Trang chủ
+                </Link>
+
+                {/* Bộ sưu tập Accordion */}
+                <div style={{ margin: '4px 0', borderBottom: '1px solid var(--color-border)', paddingBottom: 6 }}>
+                  <div
+                    onClick={() => setIsCollectionsExpanded(!isCollectionsExpanded)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 14px',
+                      color: 'var(--color-text)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '0.96rem'
+                    }}
+                  >
+                    <span>Bộ sưu tập hoa</span>
+                    {isCollectionsExpanded ? <UpOutlined style={{ fontSize: 12, color: '#94A3B8' }} /> : <DownOutlined style={{ fontSize: 12, color: '#94A3B8' }} />}
+                  </div>
+
+                  {isCollectionsExpanded && (
+                    <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Link
+                        to="/flowers"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-primary-dark)', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
+                      >
+                        ✦ Tất cả mẫu hoa
+                      </Link>
+                      <Link
+                        to="/category/bo-hoa"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
+                      >
+                        💐 Bó hoa
+                      </Link>
+                      <Link
+                        to="/category/gio-hoa"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
+                      >
+                        🧺 Giỏ hoa
+                      </Link>
+                      <Link
+                        to="/category/ke-hoa"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
+                      >
+                        🏵️ Kệ hoa
+                      </Link>
+                      <Link
+                        to="/category/lan-ho-diep"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
+                      >
+                        🪴 Lan hồ điệp
+                      </Link>
+                      <Link
+                        to="/category/hoa-cuoi"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
+                      >
+                        👰 Hoa cưới
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  to="/about"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="mobile-nav-link"
+                >
+                  Về Nghệ
+                </Link>
+
+                <Link
+                  to="/policy"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="mobile-nav-link"
+                >
+                  Liên hệ
+                </Link>
+
+                {/* Primary CTA Buttons in Drawer: Thiết kế riêng & 2 Zalo 1-click */}
+                <div style={{ marginTop: 20, padding: '0 4px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      openRequestModal(null, 'CUSTOM_DESIGN');
+                    }}
+                    className="btn btn-soft"
+                    style={{ 
+                      width: '100%', 
+                      padding: '12px 14px', 
+                      borderRadius: 'var(--radius-full)', 
+                      fontWeight: 700, 
+                      fontSize: '0.88rem',
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: 8
+                    }}
+                  >
+                    <GiftOutlined /> Đặt cắm hoa thiết kế riêng
+                  </button>
+
+                  <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 700, textAlign: 'center', marginTop: 4 }}>
+                    ● 1 chạm chat Zalo tư vấn ngay (Không cần điền form)
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <a
+                      href={zaloUrl1}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="btn btn-primary"
+                      style={{ 
+                        padding: '10px 8px', 
+                        borderRadius: 'var(--radius-full)', 
+                        fontWeight: 700, 
+                        fontSize: '0.82rem',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: 6,
+                        textDecoration: 'none',
+                        boxShadow: '0 3px 12px rgba(42, 117, 211, 0.25)',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <MessageOutlined /> Zalo 1: {hotline1}
+                    </a>
+
+                    <a
+                      href={zaloUrl2}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="btn btn-soft"
+                      style={{ 
+                        padding: '10px 8px', 
+                        borderRadius: 'var(--radius-full)', 
+                        fontWeight: 700, 
+                        fontSize: '0.82rem',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: 6,
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <MessageOutlined /> Zalo 2: {hotline2}
+                    </a>
+                  </div>
+                </div>
+
+                {/* Mobile Auth Button */}
+                {isEffectiveAdmin && activeAdminUser ? (
+                  <div style={{
+                    padding: '14px',
+                    marginTop: 20,
+                    backgroundColor: '#FEFBF6',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid #FDE68A',
+                    boxShadow: '0 2px 8px rgba(217, 119, 6, 0.06)'
+                  }}>
+                    {/* User profile row */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+                        <div style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          background: '#FEF3C7',
+                          color: '#D97706',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          fontSize: 14
+                        }}>
+                          <CrownOutlined />
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            color: '#92400E',
+                            lineHeight: 1.3,
+                            wordBreak: 'break-word'
+                          }}>
+                            {activeAdminUser.full_name || 'Quản Trị Viên'}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#B45309' }}>Tài khoản quản trị</div>
+                        </div>
+                      </div>
+                      <span style={{
+                        fontSize: '0.62rem',
+                        backgroundColor: '#E29B42',
+                        color: '#FFF',
+                        padding: '2px 6px',
+                        borderRadius: 4,
+                        fontWeight: 800,
+                        letterSpacing: 0.5,
+                        flexShrink: 0
+                      }}>
+                        ADMIN
+                      </span>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <Link
+                        to="/admin/requests"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          background: '#B45309',
+                          color: '#FFF',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                          padding: '8px 12px',
+                          borderRadius: 'var(--radius-sm)',
+                          boxShadow: '0 2px 6px rgba(180, 83, 9, 0.2)'
+                        }}
+                      >
+                        <DashboardOutlined /> Quản trị Showroom (CMS)
+                      </Link>
+                      <button
+                        onClick={() => { setIsMobileMenuOpen(false); handleAdminLogout(); }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          width: '100%',
+                          background: '#FFF',
+                          border: '1px solid #FECACA',
+                          color: '#EF4444',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          padding: '7px 12px',
+                          borderRadius: 'var(--radius-sm)'
+                        }}
+                      >
+                        <LogoutOutlined /> Đăng xuất Admin
+                      </button>
+                    </div>
+                  </div>
+                ) : customerUser ? (
+                  <div style={{
+                    padding: '14px',
+                    marginTop: 20,
+                    backgroundColor: 'var(--color-background-soft)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: 'var(--color-primary-light)',
+                        color: 'var(--color-primary-dark)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        fontSize: 14
+                      }}>
+                        <UserOutlined />
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--color-text)', wordBreak: 'break-word' }}>
+                          {customerUser.full_name || customerUser.username}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)' }}>Thành viên</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="btn btn-outline btn-sm"
+                        style={{ flex: 1, fontSize: '0.8rem', padding: '6px 0', textAlign: 'center', textDecoration: 'none' }}
+                      >
+                        ✦ Hồ sơ
+                      </Link>
+                      <button
+                        onClick={() => { setIsMobileMenuOpen(false); handleCustomerLogout(); }}
+                        className="btn btn-soft btn-sm"
+                        style={{ flex: 1, fontSize: '0.8rem', padding: '6px 0', color: '#EF4444', borderColor: '#FECACA' }}
+                      >
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="mobile-nav-link"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text)', fontWeight: 600, borderTop: '1px solid var(--color-border)', marginTop: 16, paddingTop: 14 }}
+                  >
+                    <UserOutlined style={{ color: 'var(--color-primary-dark)' }} /> Đăng nhập / Đăng ký
+                  </Link>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+    </>
+  );
+}
