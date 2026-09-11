@@ -134,7 +134,7 @@ async function runAdminCmsMigration() {
   const hash = await bcrypt.hash(plainPass, saltRounds);
 
   // Check if admin user exists
-  const [existingUser] = await conn.query('SELECT id FROM users WHERE email = ? OR username = ?', [adminEmail, 'admin']);
+  const [existingUser] = await conn.query('SELECT id FROM users WHERE email = ?', [adminEmail]);
   if (existingUser.length > 0) {
     const adminUserId = existingUser[0].id;
     await conn.query(`
@@ -152,13 +152,13 @@ async function runAdminCmsMigration() {
     console.log(`Admin user updated (ID: ${adminUserId}) with email: ${adminEmail}`);
   } else {
     const [createRes] = await conn.query(`
-      INSERT INTO users (username, email, password_hash, full_name, phone, is_active)
-      VALUES ('admin', ?, ?, 'Quản Trị Viên Nghệ Florist', '0987654321', 1)
+      INSERT INTO users (email, password_hash, full_name, phone, is_active)
+      VALUES (?, ?, 'Quản Trị Viên Nghệ Florist', '0987654321', 1)
     `, [adminEmail, hash]);
     await conn.query(`
-      INSERT INTO user_roles (user_id, role_id) VALUES (?, 1)
+      INSERT IGNORE INTO user_roles (user_id, role_id) VALUES (?, 1)
     `, [createRes.insertId]);
-    console.log(`Created new Admin user (ID: ${createRes.insertId}) with email: ${adminEmail}`);
+    console.log(`Admin user created with email: ${adminEmail}`);
   }
 
   // Seed Settings
