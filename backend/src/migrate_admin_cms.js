@@ -1,12 +1,14 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
+const dotenv = require('dotenv');
+dotenv.config();
 
 async function runAdminCmsMigration() {
   const conn = await mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '',
-    database: 'ngheflorist'
+    host: process.env.DB_HOST || '127.0.0.1',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'ngheflorist'
   });
 
   console.log('Connected to ngheflorist database.');

@@ -1,13 +1,15 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config();
 
 async function runLeadsMigration() {
   const conn = await mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '',
-    database: 'ngheflorist'
+    host: process.env.DB_HOST || '127.0.0.1',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'ngheflorist'
   });
 
   console.log('Connected to ngheflorist database for leads migration.');
