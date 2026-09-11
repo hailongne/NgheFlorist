@@ -35,3 +35,7 @@ coverage/
 # Local uploads (preserve folder structure via .gitkeep)
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Deployment scripts with credentials
+deploy_to_vps.js
+exec_remote.js
