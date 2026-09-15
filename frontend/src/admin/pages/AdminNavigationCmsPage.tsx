@@ -209,16 +209,18 @@ export default function AdminNavigationCmsPage() {
           <EyeOutlined /> Xem trước chân trang thực tế (Live Footer Preview):
         </div>
 
-        {/* Realistic Footer Container (#26383D) */}
+        {/* Realistic Footer Container - Exact Light Theme matching Website Footer */}
         <div 
           style={{ 
-            background: '#26383D', 
-            color: '#CBD5E1', 
-            padding: '40px 32px 24px', 
+            background: '#FFFFFF', 
+            color: '#475569', 
+            padding: '44px 36px 24px', 
             borderRadius: 14, 
+            border: '1px solid #E2E8F0',
             fontSize: '0.88rem', 
             lineHeight: 1.65,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.14)'
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+            position: 'relative'
           }}
         >
           {/* 4-Column Grid matching desktop site-footer */}
@@ -226,7 +228,7 @@ export default function AdminNavigationCmsPage() {
             style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-              gap: 32,
+              gap: 36,
               marginBottom: 36
             }}
           >
@@ -234,22 +236,25 @@ export default function AdminNavigationCmsPage() {
             <div>
               <div style={{ marginBottom: 16 }}>
                 <img 
-                  src="/images/logoNgheFlorist-dark.png" 
+                  src="/images/logoNgheFlorist.png" 
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/images/logoNgheFlorist-dark.png';
+                  }}
                   alt="Nghệ Florist" 
                   style={{ height: 48, width: 'auto', objectFit: 'contain' }} 
                 />
               </div>
-              <p style={{ margin: 0, color: '#94A3B8', fontSize: '0.88rem', lineHeight: 1.65 }}>
+              <p style={{ margin: 0, color: '#64748B', fontSize: '0.88rem', lineHeight: 1.65 }}>
                 {footerConfig.brand_desc || 'Mô tả tiệm hoa tươi nghệ thuật...'}
               </p>
             </div>
 
             {/* Col 2: Khám phá */}
             <div>
-              <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '1rem', marginBottom: 16 }}>
+              <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '1rem', marginBottom: 16 }}>
                 Khám phá
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, color: '#94A3B8', fontSize: '0.88rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, color: '#64748B', fontSize: '0.88rem' }}>
                 <span style={{ cursor: 'pointer' }}>Trang chủ</span>
                 <span style={{ cursor: 'pointer' }}>Tất cả sản phẩm</span>
                 <span style={{ cursor: 'pointer' }}>Cắm hoa theo yêu cầu</span>
@@ -260,34 +265,35 @@ export default function AdminNavigationCmsPage() {
 
             {/* Col 3: Danh mục hoa */}
             <div>
-              <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '1rem', marginBottom: 16 }}>
+              <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '1rem', marginBottom: 16 }}>
                 Danh mục hoa
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, color: '#94A3B8', fontSize: '0.88rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, color: '#64748B', fontSize: '0.88rem' }}>
                 <span style={{ cursor: 'pointer' }}>Bó hoa tươi</span>
                 <span style={{ cursor: 'pointer' }}>Giỏ hoa tươi</span>
                 <span style={{ cursor: 'pointer' }}>Hoa cưới cô dâu</span>
                 <span style={{ cursor: 'pointer' }}>Kệ hoa khai trương</span>
                 <span style={{ cursor: 'pointer' }}>Lan hồ điệp</span>
+                <span style={{ color: '#0D9488', fontWeight: 600 }}>Quản trị viên (CMS)</span>
               </div>
             </div>
 
             {/* Col 4: Cam kết của chúng tôi */}
             <div>
-              <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '1rem', marginBottom: 16 }}>
+              <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '1rem', marginBottom: 16 }}>
                 Cam kết của chúng tôi
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, color: '#94A3B8', fontSize: '0.84rem', marginBottom: 18 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, color: '#64748B', fontSize: '0.84rem', marginBottom: 18 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <CheckCircleOutlined style={{ color: '#46B8B3', marginTop: 3, fontSize: '0.95rem' }} />
+                  <CheckCircleOutlined style={{ color: '#0D9488', marginTop: 3, fontSize: '0.95rem' }} />
                   <span>Luôn chụp ảnh thành phẩm gửi khách hàng duyệt trước khi giao.</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <CheckCircleOutlined style={{ color: '#46B8B3', marginTop: 3, fontSize: '0.95rem' }} />
+                  <CheckCircleOutlined style={{ color: '#0D9488', marginTop: 3, fontSize: '0.95rem' }} />
                   <span>Hoa nhập khẩu tươi mới rạng sáng mỗi ngày.</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <CheckCircleOutlined style={{ color: '#46B8B3', marginTop: 3, fontSize: '0.95rem' }} />
+                  <CheckCircleOutlined style={{ color: '#0D9488', marginTop: 3, fontSize: '0.95rem' }} />
                   <span>Tặng kèm thiệp thiết kế & banner cao cấp theo yêu cầu.</span>
                 </div>
               </div>
@@ -296,12 +302,13 @@ export default function AdminNavigationCmsPage() {
                   display: 'inline-block',
                   width: '100%', 
                   textAlign: 'center', 
-                  padding: '9px 14px', 
-                  border: '1px solid rgba(255,255,255,0.35)', 
-                  borderRadius: 6, 
-                  color: '#FFFFFF',
+                  padding: '9px 16px', 
+                  border: '1.5px solid #0D9488', 
+                  borderRadius: 24, 
+                  color: '#0D9488',
+                  background: '#FFFFFF',
                   fontWeight: 600,
-                  fontSize: '0.84rem',
+                  fontSize: '0.85rem',
                   cursor: 'pointer'
                 }}
               >
@@ -313,8 +320,8 @@ export default function AdminNavigationCmsPage() {
           {/* Footer bottom bar */}
           <div 
             style={{ 
-              borderTop: '1px solid rgba(255,255,255,0.1)', 
-              paddingTop: 18, 
+              borderTop: '1px solid #E2E8F0', 
+              paddingTop: 20, 
               display: 'flex', 
               flexWrap: 'wrap', 
               justifyContent: 'space-between', 
