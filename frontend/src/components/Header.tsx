@@ -18,7 +18,8 @@ import {
   DashboardOutlined,
   PhoneOutlined,
   FacebookOutlined,
-  InstagramOutlined
+  InstagramOutlined,
+  RightOutlined
 } from '@ant-design/icons';
 import { useCustomerRequest } from '../context/RequestContext';
 import { useAdminAuth } from '../admin/AdminAuthContext';
@@ -1430,7 +1431,7 @@ export default function Header() {
                     ● 1 chạm kết nối tư vấn ngay (Không cần điền form)
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {activeContactWidgets.length > 0 ? (
                       activeContactWidgets.map((w, idx) => {
                         const isZalo = w.platform_type === 'zalo';
@@ -1438,12 +1439,8 @@ export default function Header() {
                         const isFb = w.platform_type === 'facebook';
                         const isInsta = w.platform_type === 'instagram';
                         
-                        const bg = isZalo 
-                          ? (idx % 2 === 0 ? '#0068FF' : '#0284C7')
-                          : isPhone ? '#10B981'
-                          : isFb ? '#0084FF'
-                          : isInsta ? 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)'
-                          : '#0F172A';
+                        const badgeBg = isZalo ? '#EBF5FF' : isPhone ? '#ECFDF5' : isFb ? '#EEF2FF' : isInsta ? '#FFF1F2' : '#F1F5F9';
+                        const badgeColor = isZalo ? '#0068FF' : isPhone ? '#059669' : isFb ? '#1877F2' : isInsta ? '#E1306C' : '#334155';
 
                         return (
                           <a
@@ -1455,40 +1452,45 @@ export default function Header() {
                             style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 10,
-                              background: bg,
-                              color: '#FFFFFF',
-                              borderRadius: 12,
-                              padding: '10px 14px',
+                              gap: 9,
+                              background: '#FFFFFF',
+                              border: '1px solid #E2E8F0',
+                              color: '#1E293B',
+                              borderRadius: 10,
+                              padding: '8px 10px',
                               textDecoration: 'none',
                               fontSize: '0.84rem',
-                              fontWeight: 700,
-                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                              fontWeight: 600,
+                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+                              transition: 'all 0.15s ease'
                             }}
                           >
                             <div style={{
                               width: 28,
                               height: 28,
-                              borderRadius: 6,
-                              backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                              borderRadius: 7,
+                              backgroundColor: badgeBg,
+                              color: badgeColor,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: 14,
+                              fontSize: 13,
+                              fontWeight: 700,
                               flexShrink: 0
                             }}>
-                              {isZalo ? 'Z' : isPhone ? <PhoneOutlined /> : isFb ? <FacebookOutlined /> : isInsta ? <InstagramOutlined /> : <MessageOutlined />}
+                              {isZalo ? `Z${idx + 1}` : isPhone ? <PhoneOutlined /> : isFb ? <FacebookOutlined /> : isInsta ? <InstagramOutlined /> : <MessageOutlined />}
                             </div>
                             <div style={{ flexGrow: 1, minWidth: 0 }}>
-                              <div style={{ lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {w.title}
                               </div>
                               {w.subtitle && (
-                                <div style={{ fontSize: '0.7rem', opacity: 0.9, fontWeight: 400, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 400, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {w.subtitle}
                                 </div>
                               )}
                             </div>
+                            <RightOutlined style={{ fontSize: 10, color: '#94A3B8', flexShrink: 0 }} />
                           </a>
                         );
                       })

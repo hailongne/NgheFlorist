@@ -3,9 +3,9 @@ import {
   PhoneOutlined,
   MessageOutlined,
   CloseOutlined,
-  ThunderboltOutlined,
   FacebookOutlined,
-  InstagramOutlined
+  InstagramOutlined,
+  RightOutlined
 } from '@ant-design/icons';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 
@@ -42,7 +42,6 @@ export default function QuickContactWidget({
 
   const [isOpen, setIsOpen] = useState(false);
   const [widgets, setWidgets] = useState<ContactWidgetItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const widgetRef = useRef<HTMLDivElement>(null);
 
   // Fetch dynamic contact widgets from API
@@ -59,8 +58,7 @@ export default function QuickContactWidget({
       })
       .catch(err => {
         console.warn('Using fallback contact widgets:', err);
-      })
-      .finally(() => setLoading(false));
+      });
   }, []);
 
   // Close when clicking outside
@@ -79,346 +77,390 @@ export default function QuickContactWidget({
   const cleanPhone1 = hotline1.replace(/\s+/g, '');
   const cleanPhone2 = hotline2.replace(/\s+/g, '');
 
-  const getPlatformStyle = (type: PlatformType, idx: number) => {
+  const getPlatformConfig = (type: PlatformType, idx: number) => {
     switch (type) {
       case 'zalo':
         return {
-          bgColor: idx % 2 === 0 ? '#0068FF' : '#0284C7',
-          hoverBg: idx % 2 === 0 ? '#0053cc' : '#0369A1',
-          shadow: idx % 2 === 0 ? '0 4px 12px rgba(0, 104, 255, 0.28)' : '0 4px 12px rgba(2, 132, 199, 0.28)',
+          badgeBg: '#EBF5FF',
+          badgeColor: '#0068FF',
+          borderHover: '#93C5FD',
+          bgHover: '#F8FAFF',
           iconText: `Z${idx + 1}`,
-          textColor: idx % 2 === 0 ? '#0068FF' : '#0284C7'
+          arrowColor: '#0068FF'
         };
       case 'facebook':
         return {
-          bgColor: '#0084FF',
-          hoverBg: '#006ed6',
-          shadow: '0 4px 12px rgba(0, 132, 255, 0.28)',
+          badgeBg: '#EEF2FF',
+          badgeColor: '#1877F2',
+          borderHover: '#C7D2FE',
+          bgHover: '#FAF5FF',
           iconText: 'FB',
-          textColor: '#0084FF'
+          arrowColor: '#1877F2'
         };
       case 'instagram':
         return {
-          bgColor: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
-          hoverBg: 'linear-gradient(45deg, #e08423 0%, #d6582c 25%, #cc1733 50%, #bc1356 75%, #ac0878 100%)',
-          shadow: '0 4px 12px rgba(225, 48, 108, 0.28)',
+          badgeBg: '#FFF1F2',
+          badgeColor: '#E1306C',
+          borderHover: '#FBCFE8',
+          bgHover: '#FFF5F5',
           iconText: 'IG',
-          textColor: '#E1306C'
+          arrowColor: '#E1306C'
         };
       case 'phone':
         return {
-          bgColor: '#10B981',
-          hoverBg: '#059669',
-          shadow: '0 4px 12px rgba(16, 185, 129, 0.28)',
+          badgeBg: '#ECFDF5',
+          badgeColor: '#059669',
+          borderHover: '#A7F3D0',
+          bgHover: '#F6FDF9',
           iconText: 'TEL',
-          textColor: '#059669'
+          arrowColor: '#059669'
         };
     }
   };
 
   return (
-    <div
-      ref={widgetRef}
-      className="quick-contact-widget-root"
-      style={{
-        position: 'fixed',
-        zIndex: 999,
-        bottom: '24px',
-        right: '24px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end'
-      }}
-    >
-      {/* Popover / Speed Dial Menu */}
-      {isOpen && (
-        <div
-          className="quick-contact-panel"
-          style={{
-            marginBottom: 12,
-            backgroundColor: '#FFFFFF',
-            borderRadius: 16,
-            boxShadow: '0 14px 40px rgba(15, 23, 42, 0.2), 0 4px 14px rgba(0, 104, 255, 0.12)',
-            border: '1px solid rgba(226, 232, 240, 0.9)',
-            width: 'min(340px, calc(100vw - 32px))',
-            padding: '18px 16px',
-            animation: 'fadeInUp 0.25s ease-out'
-          }}
-        >
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid #F1F5F9' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div
+    <>
+      {/* Scoped CSS for delicate luxury styling & responsive tablet/mobile scaling */}
+      <style>{`
+        .quick-contact-widget-root {
+          position: fixed;
+          z-index: 999;
+          bottom: 24px;
+          right: 24px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          font-family: inherit;
+        }
+
+        .quick-contact-panel {
+          margin-bottom: 12px;
+          background-color: #FFFFFF;
+          border-radius: 16px;
+          box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04);
+          border: 1px solid #E2E8F0;
+          width: 320px;
+          padding: 16px 14px;
+          animation: quickContactFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes quickContactFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.97);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .quick-contact-item-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 12px;
+          background: #FFFFFF;
+          border: 1px solid #E8EFF5;
+          border-radius: 10px;
+          text-decoration: none;
+          transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .quick-contact-item-link:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        }
+
+        .quick-contact-item-link:hover .quick-contact-arrow {
+          transform: translateX(2px);
+        }
+
+        .quick-contact-arrow {
+          transition: transform 0.18s ease;
+        }
+
+        .quick-call-chip {
+          display: flex;
+          align-items: center;
+          justifyContent: center;
+          gap: 6px;
+          background-color: #F8FAFC;
+          border: 1px solid #E2E8F0;
+          color: #334155;
+          border-radius: 8px;
+          padding: 7px 10px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.15s ease;
+        }
+
+        .quick-call-chip:hover {
+          background-color: #F1F5F9;
+          border-color: #CBD5E1;
+          color: #0F172A;
+        }
+
+        .quick-contact-fab {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #26383D;
+          color: #FFFFFF;
+          font-size: 20px;
+          box-shadow: 0 6px 20px rgba(38, 56, 61, 0.35);
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+        }
+
+        .quick-contact-fab:hover {
+          transform: scale(1.05);
+          box-shadow: 0 8px 24px rgba(38, 56, 61, 0.45);
+        }
+
+        /* TABLET & MOBILE RESPONSIVE TUNING */
+        @media (max-width: 768px) {
+          .quick-contact-widget-root {
+            bottom: 16px;
+            right: 14px;
+          }
+
+          .quick-contact-panel {
+            width: min(285px, calc(100vw - 28px));
+            padding: 12px 10px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+          }
+
+          .quick-contact-item-link {
+            padding: 6px 9px;
+            gap: 8px;
+            border-radius: 8px;
+          }
+
+          .quick-contact-badge {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 12px !important;
+            border-radius: 6px !important;
+          }
+
+          .quick-contact-title {
+            font-size: 0.8rem !important;
+          }
+
+          .quick-contact-subtitle {
+            font-size: 0.68rem !important;
+          }
+
+          .quick-call-chip {
+            padding: 5px 8px;
+            font-size: 0.74rem;
+          }
+
+          .quick-contact-fab {
+            width: 44px;
+            height: 44px;
+            font-size: 17px;
+          }
+        }
+      `}</style>
+
+      <div ref={widgetRef} className="quick-contact-widget-root">
+        {/* Popover Menu */}
+        {isOpen && (
+          <div className="quick-contact-panel">
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #F1F5F9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+                <div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1E293B', letterSpacing: 0.2 }}>
+                    TƯ VẤN & DUYỆT ẢNH HOA
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748B' }}>
+                    Phản hồi nhanh trong 3 phút
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Đóng bảng tư vấn"
                 style={{
-                  width: 32,
-                  height: 32,
+                  border: 'none',
+                  background: '#F1F5F9',
+                  width: 24,
+                  height: 24,
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #0068FF 0%, #004ecc 100%)',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#FFFFFF'
+                  color: '#64748B',
+                  fontSize: 11
                 }}
               >
-                <ThunderboltOutlined style={{ fontSize: 16 }} />
-              </div>
-              <div>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>
-                  KẾT NỐI TƯ VẤN NHANH
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 600 }}>
-                  ● 1 chạm phản hồi ngay qua Florist
-                </div>
-              </div>
+                <CloseOutlined />
+              </button>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              aria-label="Đóng bảng tư vấn"
-              style={{
-                border: 'none',
-                background: '#F1F5F9',
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#64748B',
-                fontSize: 12
-              }}
-            >
-              <CloseOutlined />
-            </button>
-          </div>
 
-          <div style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: 14, lineHeight: 1.45 }}>
-            Chọn kênh liên hệ thuận tiện nhất để nhận tư vấn & duyệt ảnh hoa:
-          </div>
-
-          {/* Dynamic Buttons (or Fallback) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
-            {widgets.length > 0 ? (
-              widgets.map((w, idx) => {
-                const style = getPlatformStyle(w.platform_type, idx);
-                return (
+            {/* Contact Items List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+              {widgets.length > 0 ? (
+                widgets.map((w, idx) => {
+                  const cfg = getPlatformConfig(w.platform_type, idx);
+                  return (
+                    <a
+                      key={w.id}
+                      href={w.action_link}
+                      target={w.platform_type === 'phone' ? '_self' : '_blank'}
+                      rel="noopener noreferrer"
+                      onClick={() => setIsOpen(false)}
+                      className="quick-contact-item-link"
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = cfg.borderHover;
+                        e.currentTarget.style.backgroundColor = cfg.bgHover;
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = '#E8EFF5';
+                        e.currentTarget.style.backgroundColor = '#FFFFFF';
+                      }}
+                    >
+                      <div
+                        className="quick-contact-badge"
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          backgroundColor: cfg.badgeBg,
+                          color: cfg.badgeColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          flexShrink: 0
+                        }}
+                      >
+                        {w.platform_type === 'zalo' ? (
+                          cfg.iconText
+                        ) : w.platform_type === 'facebook' ? (
+                          <FacebookOutlined />
+                        ) : w.platform_type === 'instagram' ? (
+                          <InstagramOutlined />
+                        ) : (
+                          <PhoneOutlined />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>
+                          {w.title}
+                        </div>
+                        {w.subtitle && (
+                          <div className="quick-contact-subtitle" style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {w.subtitle}
+                          </div>
+                        )}
+                      </div>
+                      <RightOutlined className="quick-contact-arrow" style={{ fontSize: 10, color: '#94A3B8', flexShrink: 0 }} />
+                    </a>
+                  );
+                })
+              ) : (
+                /* Fallback refined delicate buttons */
+                <>
                   <a
-                    key={w.id}
-                    href={w.action_link}
+                    href={zalo1Url}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setIsOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      background: style.bgColor,
-                      color: '#FFFFFF',
-                      borderRadius: 12,
-                      padding: '12px 14px',
-                      textDecoration: 'none',
-                      transition: 'transform 0.15s ease, opacity 0.15s ease',
-                      boxShadow: style.shadow
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.opacity = '0.95';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.transform = 'none';
-                      e.currentTarget.style.opacity = '1';
-                    }}
+                    className="quick-contact-item-link"
                   >
-                    <div
-                      style={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: 10,
-                        backgroundColor: '#FFFFFF',
-                        color: style.textColor,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: w.platform_type === 'zalo' ? 17 : 18,
-                        fontWeight: 900,
-                        flexShrink: 0
-                      }}
-                    >
-                      {w.platform_type === 'zalo' ? (
-                        style.iconText
-                      ) : w.platform_type === 'facebook' ? (
-                        <FacebookOutlined />
-                      ) : w.platform_type === 'instagram' ? (
-                        <InstagramOutlined />
-                      ) : (
-                        <PhoneOutlined />
-                      )}
+                    <div className="quick-contact-badge" style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#EBF5FF', color: '#0068FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                      Z1
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>
-                        {w.title}
-                      </div>
-                      {w.subtitle && (
-                        <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>
-                          {w.subtitle}
-                        </div>
-                      )}
+                      <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 1: {hotline1}</div>
+                      <div className="quick-contact-subtitle" style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 1 }}>Tư vấn mẫu hoa & Báo giá nhanh</div>
                     </div>
+                    <RightOutlined className="quick-contact-arrow" style={{ fontSize: 10, color: '#94A3B8', flexShrink: 0 }} />
                   </a>
-                );
-              })
-            ) : (
-              /* Fallback static buttons */
-              <>
+
+                  <a
+                    href={zalo2Url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    className="quick-contact-item-link"
+                  >
+                    <div className="quick-contact-badge" style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#EBF5FF', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                      Z2
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 2: {hotline2}</div>
+                      <div className="quick-contact-subtitle" style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 1 }}>Gửi ảnh hoa thực tế & Đặt theo mẫu</div>
+                    </div>
+                    <RightOutlined className="quick-contact-arrow" style={{ fontSize: 10, color: '#94A3B8', flexShrink: 0 }} />
+                  </a>
+                </>
+              )}
+            </div>
+
+            {/* Direct Calling Quick Bar */}
+            <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 8 }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, textAlign: 'center' }}>
+                HOẶC GỌI TRỰC TIẾP
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                 <a
-                  href={zalo1Url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    backgroundColor: '#0068FF',
-                    color: '#FFFFFF',
-                    borderRadius: 12,
-                    padding: '12px 14px',
-                    textDecoration: 'none',
-                    transition: 'transform 0.15s ease, background-color 0.15s ease',
-                    boxShadow: '0 4px 12px rgba(0, 104, 255, 0.28)'
-                  }}
+                  href={`tel:${cleanPhone1}`}
+                  className="quick-call-chip"
                 >
-                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#FFFFFF', color: '#0068FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, flexShrink: 0 }}>
-                    Z1
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>Chat Zalo 1: {hotline1}</div>
-                    <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>Tư vấn mẫu hoa & Báo giá nhanh</div>
-                  </div>
+                  <PhoneOutlined style={{ color: '#059669', fontSize: 11 }} />
+                  <span>{hotline1}</span>
                 </a>
 
                 <a
-                  href={zalo2Url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    backgroundColor: '#0284C7',
-                    color: '#FFFFFF',
-                    borderRadius: 12,
-                    padding: '12px 14px',
-                    textDecoration: 'none',
-                    transition: 'transform 0.15s ease, background-color 0.15s ease',
-                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.28)'
-                  }}
+                  href={`tel:${cleanPhone2}`}
+                  className="quick-call-chip"
                 >
-                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#FFFFFF', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, flexShrink: 0 }}>
-                    Z2
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>Chat Zalo 2: {hotline2}</div>
-                    <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>Gửi ảnh hoa thực tế & Đặt theo yêu cầu</div>
-                  </div>
+                  <PhoneOutlined style={{ color: '#0284C7', fontSize: 11 }} />
+                  <span>{hotline2}</span>
                 </a>
-              </>
-            )}
-          </div>
-
-          {/* Hotline Call Quick Bar */}
-          <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 12 }}>
-            <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, textAlign: 'center' }}>
-              HOẶC GỌI ĐIỆN TRỰC TIẾP
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <a
-                href={`tel:${cleanPhone1}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  backgroundColor: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
-                  color: '#1E293B',
-                  borderRadius: 8,
-                  padding: '8px 10px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <PhoneOutlined style={{ color: '#0068FF' }} />
-                <span>{hotline1}</span>
-              </a>
-
-              <a
-                href={`tel:${cleanPhone2}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  backgroundColor: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
-                  color: '#1E293B',
-                  borderRadius: 8,
-                  padding: '8px 10px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <PhoneOutlined style={{ color: '#0284C7' }} />
-                <span>{hotline2}</span>
-              </a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Main Trigger Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Tư vấn nhanh"
-        className="quick-contact-btn pulse-effect"
-        style={{
-          width: 58,
-          height: 58,
-          borderRadius: '50%',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: isOpen ? '#1E293B' : 'linear-gradient(135deg, #0068FF 0%, #004ecc 100%)',
-          color: '#FFFFFF',
-          fontSize: 24,
-          boxShadow: '0 8px 24px rgba(0, 104, 255, 0.42)',
-          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-          position: 'relative'
-        }}
-      >
-        {isOpen ? <CloseOutlined /> : <MessageOutlined />}
-        {!isOpen && (
-          <span
-            style={{
-              position: 'absolute',
-              top: -3,
-              right: -3,
-              width: 14,
-              height: 14,
-              backgroundColor: '#10B981',
-              borderRadius: '50%',
-              border: '2px solid #FFFFFF'
-            }}
-          />
         )}
-      </button>
-    </div>
+
+        {/* Main Floating Trigger Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Tư vấn nhanh"
+          className="quick-contact-fab"
+        >
+          {isOpen ? <CloseOutlined /> : <MessageOutlined />}
+          {!isOpen && (
+            <span
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: 11,
+                height: 11,
+                backgroundColor: '#10B981',
+                borderRadius: '50%',
+                border: '2px solid #FFFFFF'
+              }}
+            />
+          )}
+        </button>
+      </div>
+    </>
   );
 }
