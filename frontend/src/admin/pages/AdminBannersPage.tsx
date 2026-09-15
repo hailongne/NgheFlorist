@@ -203,10 +203,10 @@ export default function AdminBannersPage() {
           Chưa có banner nào. Hãy bấm <b>"Thêm Banner Mới"</b> để tạo banner đầu tiên.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
           {banners.map(b => (
             <div key={b.id} className="admin-card" style={{ padding: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ position: 'relative', height: '180px', borderRadius: '8px', overflow: 'hidden', marginBottom: '14px', backgroundColor: '#F1F5F9' }}>
+              <div style={{ position: 'relative', aspectRatio: '3 / 4', width: '100%', borderRadius: '8px', overflow: 'hidden', marginBottom: '14px', backgroundColor: '#F1F5F9' }}>
                 <ImageWithFallback src={b.image_url} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{
                   position: 'absolute',
@@ -294,7 +294,7 @@ export default function AdminBannersPage() {
 
                 {/* Image upload & preview */}
                 <div className="admin-form-group">
-                  <label className="admin-label">Ảnh Banner (Supabase Storage) *</label>
+                  <label className="admin-label">Ảnh Banner (Tỉ lệ chuẩn dọc 3:4, VD: 900x1200px) *</label>
                   
                   {/* Hidden input */}
                   <input
@@ -340,7 +340,7 @@ export default function AdminBannersPage() {
                   />
 
                   {imageUrl && (
-                    <div style={{ marginTop: 10, height: 140, borderRadius: 8, overflow: 'hidden', border: '1px solid #E2E8F0', position: 'relative' }}>
+                    <div style={{ marginTop: 10, aspectRatio: '3 / 4', maxWidth: '220px', margin: '10px auto 0', borderRadius: 8, overflow: 'hidden', border: '1px solid #E2E8F0', position: 'relative' }}>
                       <ImageWithFallback src={imageUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   )}

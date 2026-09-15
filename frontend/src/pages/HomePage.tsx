@@ -540,15 +540,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - HIỂN THỊ DƯỚI MẪU HOA NỔI BẬT */}
+      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - TỈ LỆ CHUẨN DỌC 3:4 */}
       {banners && banners.length > 0 && (
-        <section style={{ padding: '36px 0 24px', background: 'var(--color-white)' }}>
+        <section style={{ padding: '36px 0 28px', background: 'var(--color-white)' }}>
           <div className="container">
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: banners.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))',
-                gap: 20
+                gridTemplateColumns: banners.length === 1 
+                  ? 'minmax(280px, 420px)' 
+                  : 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: 24,
+                maxWidth: banners.length <= 2 ? '760px' : '1100px',
+                margin: '0 auto'
               }}
             >
               {banners.map((b) => (
@@ -558,13 +562,14 @@ export default function HomePage() {
                   className="homepage-campaign-banner"
                   style={{
                     position: 'relative',
+                    aspectRatio: '3 / 4',
+                    width: '100%',
                     borderRadius: 'var(--radius-lg, 16px)',
                     overflow: 'hidden',
                     textDecoration: 'none',
                     display: 'block',
-                    minHeight: '220px',
                     border: '1px solid var(--color-border)',
-                    boxShadow: '0 4px 16px rgba(38, 56, 61, 0.06)',
+                    boxShadow: '0 4px 16px rgba(38, 56, 61, 0.08)',
                     transition: 'all 0.35s ease'
                   }}
                 >
@@ -584,41 +589,41 @@ export default function HomePage() {
                     />
                   </div>
 
-                  {/* Soft Brand Tone Gradient Overlay */}
+                  {/* Soft Brand Tone Gradient Overlay from bottom */}
                   <div
                     className="banner-gradient-overlay"
                     style={{
                       position: 'absolute',
                       inset: 0,
-                      background: 'linear-gradient(90deg, rgba(16, 36, 41, 0.88) 0%, rgba(22, 48, 55, 0.70) 50%, rgba(93, 158, 175, 0.18) 82%, transparent 100%)',
+                      background: 'linear-gradient(to top, rgba(16, 36, 41, 0.92) 0%, rgba(22, 48, 55, 0.72) 48%, rgba(93, 158, 175, 0.12) 78%, transparent 100%)',
                       transition: 'background 0.35s ease'
                     }}
                   />
 
-                  {/* Content */}
+                  {/* Content pinned to bottom of 3:4 frame */}
                   <div
                     style={{
-                      position: 'relative',
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
                       zIndex: 2,
-                      padding: '28px 24px',
-                      maxWidth: '520px',
-                      height: '100%',
-                      minHeight: '220px',
+                      padding: '24px 20px',
                       display: 'flex',
                       flexDirection: 'column',
-                      justifyContent: 'center',
-                      gap: 10
+                      justifyContent: 'flex-end',
+                      gap: 8
                     }}
                   >
                     <h3
                       style={{
                         fontFamily: 'var(--font-heading, "Playfair Display", serif)',
-                        fontSize: 'clamp(1.15rem, 2vw, 1.4rem)',
+                        fontSize: 'clamp(1.1rem, 2.2vw, 1.35rem)',
                         fontWeight: 700,
                         color: '#FFFFFF',
                         margin: 0,
                         lineHeight: 1.3,
-                        textShadow: '0 1px 4px rgba(0, 0, 0, 0.5)'
+                        textShadow: '0 1px 4px rgba(0, 0, 0, 0.6)'
                       }}
                     >
                       {b.title}
@@ -626,7 +631,7 @@ export default function HomePage() {
                     {b.subtitle && (
                       <p
                         style={{
-                          fontSize: '0.86rem',
+                          fontSize: '0.84rem',
                           color: '#EAF6F9',
                           margin: 0,
                           lineHeight: 1.45,
@@ -637,7 +642,7 @@ export default function HomePage() {
                         {b.subtitle}
                       </p>
                     )}
-                    <div style={{ marginTop: 6 }}>
+                    <div style={{ marginTop: 4 }}>
                       <span
                         className="banner-cta-btn"
                         style={{
@@ -648,7 +653,7 @@ export default function HomePage() {
                           color: 'var(--color-text, #26383D)',
                           fontWeight: 700,
                           fontSize: '0.82rem',
-                          padding: '8px 18px',
+                          padding: '7px 16px',
                           borderRadius: 'var(--radius-full)',
                           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                           transition: 'all 0.25s ease'
