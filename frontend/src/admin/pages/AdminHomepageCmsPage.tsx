@@ -51,35 +51,7 @@ interface CommitmentItem {
   desc: string;
 }
 
-const MINIMAL_ELEGANT_ICONS = [
-  { icon: '⚘', label: 'Cành hoa thanh mảnh' },
-  { icon: '❀', label: 'Hoa nở 8 cánh' },
-  { icon: '✿', label: 'Đóa hoa tối giản' },
-  { icon: '◈', label: 'Kệ hoa hình thoi' },
-  { icon: '✦', label: 'Ngôi sao 4 cánh tinh hoa' },
-  { icon: '✧', label: 'Tia sáng dịu dàng' },
-  { icon: '⚜', label: 'Hoa Ly hoàng gia' },
-  { icon: '🪷', label: 'Hoa sen thanh tao' },
-  { icon: '🌿', label: 'Nhánh thảo mộc' },
-  { icon: '🌱', label: 'Mầm hoa tươi mát' },
-  { icon: '🍃', label: 'Lá bay tự nhiên' },
-  { icon: '♡', label: 'Trái tim thuần khiết' },
-  { icon: '✨', label: 'Tinh hoa lấp lánh' },
-  { icon: '⌂', label: 'Trang chủ tối giản' },
-  { icon: '◎', label: 'Vòng tròn tinh hoa' }
-];
 
-const BOTANICAL_LINE_ICONS = [
-  { icon: '⚘', label: 'Bó hoa tươi' },
-  { icon: '❀', label: 'Giỏ hoa' },
-  { icon: '◈', label: 'Kệ hoa sự kiện' },
-  { icon: '🪷', label: 'Lan hồ điệp' },
-  { icon: '♡', label: 'Hoa cưới thiết kế' },
-  { icon: '✦', label: 'Tất cả mẫu hoa' },
-  { icon: '✨', label: 'Cắm hoa yêu cầu' },
-  { icon: '🌿', label: 'Về thương hiệu' },
-  { icon: '⚜', label: 'Hoa nghệ thuật' }
-];
 
 export default function AdminHomepageCmsPage() {
   const { token } = useAdminAuth();
@@ -856,7 +828,7 @@ export default function AdminHomepageCmsPage() {
                 <AppstoreOutlined style={{ color: '#0284C7' }} /> Quản Lý Bộ Sưu Tập Nổi Bật (Showroom Collections)
               </h3>
               <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#64748B', lineHeight: 1.5 }}>
-                Chỉnh sửa hình ảnh, tên gọi, biểu tượng (icon), mô tả và đường dẫn của các danh mục hoa hiển thị tại mục "Bộ sưu tập nổi bật" trên trang chủ
+                Chỉnh sửa hình ảnh (tỉ lệ chuẩn dọc 3:4), tên gọi, mô tả và đường dẫn của các danh mục hoa hiển thị tại mục "Bộ sưu tập nổi bật" trên trang chủ
               </p>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -1007,99 +979,20 @@ export default function AdminHomepageCmsPage() {
                   />
                 </div>
 
-                {/* Title & Icon Inputs */}
-                <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr', gap: 10 }}>
-                  <div className="admin-form-group" style={{ margin: 0 }}>
-                    <label className="admin-label" style={{ fontSize: '0.78rem', marginBottom: 4 }}>
-                      Icon:
-                    </label>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      style={{ fontSize: '1.1rem', textAlign: 'center', padding: '6px 4px' }}
-                      value={col.icon}
-                      placeholder="⚘"
-                      onChange={(e) => handleUpdateCollection(index, 'icon', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="admin-form-group" style={{ margin: 0 }}>
-                    <label className="admin-label" style={{ fontSize: '0.78rem', marginBottom: 4 }}>
-                      Tên bộ sưu tập: *
-                    </label>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      style={{ fontSize: '0.84rem', fontWeight: 700, padding: '6px 10px' }}
-                      required
-                      value={col.title}
-                      placeholder="Ví dụ: Bó hoa tươi"
-                      onChange={(e) => handleUpdateCollection(index, 'title', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Quick icon suggestions (Minimalist Elegant & Vibrant Emoji) */}
-                <div style={{ background: '#F8FAFC', padding: '8px 10px', borderRadius: 8, border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {/* Row 1: Phong cách Tinh tế & Tối giản (Khuyên dùng) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--color-primary-dark)', marginRight: 2, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                      <span>✦</span> Tinh tế:
-                    </span>
-                    {MINIMAL_ELEGANT_ICONS.map(item => (
-                      <button
-                        key={item.icon}
-                        type="button"
-                        onClick={() => handleUpdateCollection(index, 'icon', item.icon)}
-                        title={`${item.label} (${item.icon})`}
-                        style={{
-                          border: '1px solid',
-                          background: col.icon === item.icon ? '#E6F4F4' : '#FFFFFF',
-                          borderColor: col.icon === item.icon ? 'var(--color-primary-dark)' : '#CBD5E1',
-                          color: col.icon === item.icon ? 'var(--color-primary-dark)' : '#334155',
-                          borderRadius: 6,
-                          padding: '3px 7px',
-                          cursor: 'pointer',
-                          fontSize: '0.92rem',
-                          lineHeight: 1,
-                          fontWeight: 600,
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {item.icon}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Row 2: Biểu tượng bộ sưu tập */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748B', marginRight: 2 }}>
-                      ⚘ Chủ đề:
-                    </span>
-                    {BOTANICAL_LINE_ICONS.map(item => (
-                      <button
-                        key={item.icon}
-                        type="button"
-                        onClick={() => handleUpdateCollection(index, 'icon', item.icon)}
-                        title={`${item.label} (${item.icon})`}
-                        style={{
-                          border: '1px solid',
-                          background: col.icon === item.icon ? '#E6F4F4' : '#FFFFFF',
-                          borderColor: col.icon === item.icon ? 'var(--color-primary-dark)' : '#E2E8F0',
-                          color: col.icon === item.icon ? 'var(--color-primary-dark)' : '#334155',
-                          borderRadius: 6,
-                          padding: '3px 7px',
-                          cursor: 'pointer',
-                          fontSize: '0.92rem',
-                          lineHeight: 1,
-                          fontWeight: 600,
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {item.icon}
-                      </button>
-                    ))}
-                  </div>
+                {/* Title Input */}
+                <div className="admin-form-group" style={{ margin: 0 }}>
+                  <label className="admin-label" style={{ fontSize: '0.78rem', marginBottom: 4 }}>
+                    Tên bộ sưu tập: *
+                  </label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    style={{ fontSize: '0.86rem', fontWeight: 700, padding: '7px 10px' }}
+                    required
+                    value={col.title}
+                    placeholder="Ví dụ: Bó hoa tươi"
+                    onChange={(e) => handleUpdateCollection(index, 'title', e.target.value)}
+                  />
                 </div>
 
                 {/* Description & Slug */}
