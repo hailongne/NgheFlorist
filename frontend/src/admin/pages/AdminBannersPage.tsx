@@ -186,7 +186,7 @@ export default function AdminBannersPage() {
     <div>
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Quản Lý Banners Khuyến Mãi (Homepage Banners)</h1>
+          <h1 className="admin-page-title">Quản Lý Banners Quảng Cáo (Homepage Banners)</h1>
           <div className="admin-page-subtitle">
             Các banner giới thiệu chiến dịch sự kiện, bộ sưu tập mùa yêu thương, khai trương tại trang chủ
           </div>

@@ -126,7 +126,7 @@ export default function AdminLayout() {
             onClick={() => setMobileOpen(false)}
           >
             <PictureOutlined className="nav-icon" />
-            <span>Banners Khuyến Mãi</span>
+            <span>Banners Quảng Cáo</span>
           </NavLink>
 
           <NavLink

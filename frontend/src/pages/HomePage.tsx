@@ -540,6 +540,132 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - HIỂN THỊ DƯỚI MẪU HOA NỔI BẬT */}
+      {banners && banners.length > 0 && (
+        <section style={{ padding: '36px 0 24px', background: 'var(--color-white)' }}>
+          <div className="container">
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: banners.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))',
+                gap: 20
+              }}
+            >
+              {banners.map((b) => (
+                <Link
+                  key={b.id}
+                  to={b.cta_url || '/flowers'}
+                  className="homepage-campaign-banner"
+                  style={{
+                    position: 'relative',
+                    borderRadius: 'var(--radius-lg, 16px)',
+                    overflow: 'hidden',
+                    textDecoration: 'none',
+                    display: 'block',
+                    minHeight: '220px',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: '0 4px 16px rgba(38, 56, 61, 0.06)',
+                    transition: 'all 0.35s ease'
+                  }}
+                >
+                  {/* Background Image */}
+                  <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
+                    <ImageWithFallback
+                      src={b.image_url}
+                      alt={b.title}
+                      fallbackSrc={BOTANICAL_FALLBACKS[0]}
+                      className="banner-bg-img"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.6s cubic-bezier(0.2, 0, 0.2, 1)'
+                      }}
+                    />
+                  </div>
+
+                  {/* Soft Brand Tone Gradient Overlay */}
+                  <div
+                    className="banner-gradient-overlay"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(90deg, rgba(16, 36, 41, 0.88) 0%, rgba(22, 48, 55, 0.70) 50%, rgba(93, 158, 175, 0.18) 82%, transparent 100%)',
+                      transition: 'background 0.35s ease'
+                    }}
+                  />
+
+                  {/* Content */}
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 2,
+                      padding: '28px 24px',
+                      maxWidth: '520px',
+                      height: '100%',
+                      minHeight: '220px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      gap: 10
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontFamily: 'var(--font-heading, "Playfair Display", serif)',
+                        fontSize: 'clamp(1.15rem, 2vw, 1.4rem)',
+                        fontWeight: 700,
+                        color: '#FFFFFF',
+                        margin: 0,
+                        lineHeight: 1.3,
+                        textShadow: '0 1px 4px rgba(0, 0, 0, 0.5)'
+                      }}
+                    >
+                      {b.title}
+                    </h3>
+                    {b.subtitle && (
+                      <p
+                        style={{
+                          fontSize: '0.86rem',
+                          color: '#EAF6F9',
+                          margin: 0,
+                          lineHeight: 1.45,
+                          opacity: 0.95,
+                          textShadow: '0 1px 3px rgba(0, 0, 0, 0.4)'
+                        }}
+                      >
+                        {b.subtitle}
+                      </p>
+                    )}
+                    <div style={{ marginTop: 6 }}>
+                      <span
+                        className="banner-cta-btn"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          background: '#FFFFFF',
+                          color: 'var(--color-text, #26383D)',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          padding: '8px 18px',
+                          borderRadius: 'var(--radius-full)',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                          transition: 'all 0.25s ease'
+                        }}
+                      >
+                        <span>{b.cta_text || 'Khám phá ngay'}</span>
+                        <ArrowRightOutlined style={{ fontSize: 11 }} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
 
       {/* 5. THEO NGÂN SÁCH - Ẩn trên mobile và tablet */}
       <section className="hide-mobile-tablet" style={{ padding: '36px 0', background: 'var(--color-background-soft)', borderTop: '1px solid var(--color-border)' }}>

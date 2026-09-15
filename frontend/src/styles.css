@@ -1999,3 +1999,26 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 1px 6px rgba(0, 0, 0, 0.35);
 }
 
+/* ==========================================================================
+   HOMEPAGE CAMPAIGN / ADVERTISEMENT BANNERS
+   ========================================================================== */
+.homepage-campaign-banner {
+  isolation: isolate;
+  background-color: var(--color-background-soft, #F7FBFC);
+}
+
+.homepage-campaign-banner:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(38, 56, 61, 0.14) !important;
+  border-color: var(--color-primary-dark, #5D9EAF) !important;
+}
+
+.homepage-campaign-banner:hover .banner-bg-img {
+  transform: scale(1.05);
+}
+
+.homepage-campaign-banner:hover .banner-cta-btn {
+  background: var(--color-primary-dark, #5D9EAF) !important;
+  color: #FFFFFF !important;
+  transform: translateX(3px);
+}
