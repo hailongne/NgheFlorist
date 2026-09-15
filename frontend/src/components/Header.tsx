@@ -52,48 +52,6 @@ interface MenuItem {
   sort_order: number;
 }
 
-export const DEFAULT_CATEGORY_TREE = [
-  {
-    id: 1,
-    name: 'Bó Hoa',
-    slug: 'bo-hoa',
-    product_count: 30,
-    children: [
-      { id: 11, name: '300k - 500k', slug: 'bo-hoa-300k-500k', product_count: 10 },
-      { id: 12, name: '500k - 1000k', slug: 'bo-hoa-500k-1000k', product_count: 5 },
-      { id: 13, name: '1000k - 1500k', slug: 'bo-hoa-1000k-1500k', product_count: 5 },
-      { id: 14, name: '1500k - 2000k', slug: 'bo-hoa-1500k-2000k', product_count: 5 },
-      { id: 15, name: '2000k trở lên', slug: 'bo-hoa-2000k-tro-len', product_count: 5 },
-    ]
-  },
-  {
-    id: 2,
-    name: 'Giỏ Hoa',
-    slug: 'gio-hoa',
-    product_count: 30,
-    children: [
-      { id: 21, name: '500k - 600k', slug: 'gio-hoa-500k-600k', product_count: 5 },
-      { id: 22, name: '600k - 800k', slug: 'gio-hoa-600k-800k', product_count: 5 },
-      { id: 23, name: '800k - 1000k', slug: 'gio-hoa-800k-1000k', product_count: 5 },
-      { id: 24, name: '1000k - 1500k', slug: 'gio-hoa-1000k-1500k', product_count: 5 },
-      { id: 25, name: '1500k - 2000k', slug: 'gio-hoa-1500k-2000k', product_count: 5 },
-      { id: 26, name: '2000k trở lên', slug: 'gio-hoa-2000k-tro-len', product_count: 5 },
-    ]
-  },
-  {
-    id: 3,
-    name: 'Kệ Hoa',
-    slug: 'ke-hoa',
-    product_count: 20,
-    children: [
-      { id: 31, name: '1000k - 1200k', slug: 'ke-hoa-1000k-1200k', product_count: 5 },
-      { id: 32, name: '1200k - 1500k', slug: 'ke-hoa-1200k-1500k', product_count: 5 },
-      { id: 33, name: '1500k - 2000k', slug: 'ke-hoa-1500k-2000k', product_count: 5 },
-      { id: 34, name: '2000k trở lên', slug: 'ke-hoa-2000k-tro-len', product_count: 5 },
-    ]
-  }
-];
-
 export default function Header() {
   const { openRequestModal } = useCustomerRequest();
   const navigate = useNavigate();
@@ -306,7 +264,7 @@ export default function Header() {
   ];
 
   const displayMenu = menuItems.length > 0 ? menuItems : defaultMenuItems;
-  const displayCategoryTree = categoryTree.length > 0 ? categoryTree : DEFAULT_CATEGORY_TREE;
+  const displayCategoryTree = categoryTree;
 
   // Danh mục hoa hiển thị trong Accordion trên Mobile Drawer, hỗ trợ icon tùy chỉnh từ CMS (chuẩn tối giản 2 màu)
   const flowerCollectionLinks = React.useMemo(() => {

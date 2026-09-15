@@ -134,8 +134,8 @@ export default function AdminLayout() {
             className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
             onClick={() => setMobileOpen(false)}
           >
-            <MenuOutlined className="nav-icon" />
-            <span>Menu & Chân Trang</span>
+            <FileTextOutlined className="nav-icon" />
+            <span>Chân Trang (Footer)</span>
           </NavLink>
 
           <NavLink
