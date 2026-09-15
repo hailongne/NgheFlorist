@@ -929,8 +929,8 @@ export default function AdminHomepageCmsPage() {
                 <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                   <div
                     style={{
-                      width: 96,
-                      height: 80,
+                      width: 75,
+                      height: 100,
                       borderRadius: 10,
                       overflow: 'hidden',
                       position: 'relative',
@@ -987,7 +987,7 @@ export default function AdminHomepageCmsPage() {
                       {uploadingCollectionIndex === index ? 'Đang tải...' : 'Tải ảnh mới lên'}
                     </button>
                     <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                      JPG, PNG, WEBP (Tỉ lệ chuẩn 4:3.5)
+                      JPG, PNG, WEBP (Tỉ lệ chuẩn khung hình 3:4)
                     </div>
                   </div>
                 </div>

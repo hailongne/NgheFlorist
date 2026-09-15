@@ -446,46 +446,35 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Grid 2 cols on mobile, 3 cols on tablet, 5 cols on desktop */}
+          {/* Grid 3:4 cards on desktop */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: 12
+              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+              gap: 16
             }}
           >
             {showroomCollections.map((col) => (
               <Link
                 key={col.slug}
                 to={`/category/${col.slug}`}
-                style={{
-                  background: 'var(--color-background-soft)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  overflow: 'hidden',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.25s ease'
-                }}
                 className="category-album-card"
               >
-                <div style={{ aspectRatio: '4 / 3.5', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
                   <ImageWithFallback
                     src={col.image}
                     alt={col.title}
                     fallbackSrc={BOTANICAL_FALLBACKS[1]}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    className="collection-card-img"
                   />
                 </div>
-                <div style={{ padding: '10px 12px' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.94rem', color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: 'var(--color-primary-dark)', fontSize: '1.05rem', display: 'inline-flex', alignItems: 'center' }}>{col.icon}</span>
-                    <span>{col.title}</span>
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', marginTop: 2 }}>
-                    {col.desc}
-                  </div>
+                <div className="collection-blur-layer" />
+                <div className="collection-gradient-layer" />
+                <div className="collection-card-content">
+                  <h3 className="collection-card-title">{col.title}</h3>
+                  {col.desc && (
+                    <p className="collection-card-desc">{col.desc}</p>
+                  )}
                 </div>
               </Link>
             ))}

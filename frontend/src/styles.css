@@ -1880,5 +1880,114 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ==========================================================================
+   SHOWROOM COLLECTION CARDS (3:4 Ratio & Brand Tone Blur Overlay)
+   ========================================================================== */
+.category-album-card {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md, 14px);
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  background-color: var(--color-background-soft, #F7FBFC);
+  border: 1px solid var(--color-border, #E4EEF1);
+  box-shadow: 0 4px 14px rgba(38, 56, 61, 0.07);
+  transition: transform 0.35s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+  isolation: isolate;
+}
 
+.category-album-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px rgba(38, 56, 61, 0.16);
+  border-color: var(--color-primary-dark, #5D9EAF);
+}
 
+.category-album-card .collection-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.category-album-card:hover .collection-card-img {
+  transform: scale(1.08);
+}
+
+/* Progressive backdrop blur fading upwards */
+.category-album-card .collection-blur-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.85) 30%, rgba(0, 0, 0, 0.3) 55%, transparent 75%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.85) 30%, rgba(0, 0, 0, 0.3) 55%, transparent 75%);
+  z-index: 1;
+}
+
+/* Brand tone gradient overlay (Deep botanical cyan/teal fading up) */
+.category-album-card .collection-gradient-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(18, 38, 43, 0.94) 0%,
+    rgba(28, 58, 66, 0.80) 30%,
+    rgba(52, 98, 110, 0.45) 58%,
+    rgba(93, 158, 175, 0.12) 78%,
+    transparent 100%
+  );
+  z-index: 2;
+  transition: background 0.35s ease;
+}
+
+.category-album-card:hover .collection-gradient-layer {
+  background: linear-gradient(
+    to top,
+    rgba(18, 38, 43, 0.97) 0%,
+    rgba(28, 58, 66, 0.86) 32%,
+    rgba(52, 98, 110, 0.52) 62%,
+    rgba(93, 158, 175, 0.18) 82%,
+    transparent 100%
+  );
+}
+
+/* Title & description overlay content */
+.category-album-card .collection-card-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px 14px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.category-album-card .collection-card-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 4px;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.category-album-card .collection-card-desc {
+  font-size: 0.78rem;
+  color: #EAF6F9;
+  margin: 0;
+  line-height: 1.35;
+  opacity: 0.92;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
