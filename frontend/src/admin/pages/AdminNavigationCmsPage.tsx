@@ -1,93 +1,123 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../AdminAuthContext';
 import { 
-  DeleteOutlined, 
-  MenuOutlined, 
   SaveOutlined, 
-  EditOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  GlobalOutlined,
-  MessageOutlined,
-  InstagramOutlined,
-  PhoneOutlined,
   CopyrightOutlined,
   EyeOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
+  FolderOutlined,
+  CheckCircleOutlined,
+  LockOutlined,
+  DatabaseOutlined,
+  ReloadOutlined,
+  ArrowRightOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons';
 
-interface MenuItem {
+interface CategoryNode {
   id: number;
-  label: string;
-  url: string;
-  icon?: string | null;
-  sort_order: number;
-  is_active: number;
+  name: string;
+  slug: string;
+  product_count: number;
+  children?: CategoryNode[];
 }
 
 interface FooterConfig {
   brand_desc: string;
-  facebook: string;
-  instagram: string;
-  zalo: string;
-  hotline?: string;
-  address?: string;
   copyright: string;
 }
 
+const DEFAULT_CATEGORY_TREE: CategoryNode[] = [
+  {
+    id: 1,
+    name: 'Bó Hoa',
+    slug: 'bo-hoa',
+    product_count: 30,
+    children: [
+      { id: 11, name: '300k - 500k', slug: 'bo-hoa-300k-500k', product_count: 10 },
+      { id: 12, name: '500k - 1000k', slug: 'bo-hoa-500k-1000k', product_count: 5 },
+      { id: 13, name: '1000k - 1500k', slug: 'bo-hoa-1000k-1500k', product_count: 5 },
+      { id: 14, name: '1500k - 2000k', slug: 'bo-hoa-1500k-2000k', product_count: 5 },
+      { id: 15, name: '2000k trở lên', slug: 'bo-hoa-2000k-tro-len', product_count: 5 },
+    ]
+  },
+  {
+    id: 2,
+    name: 'Giỏ Hoa',
+    slug: 'gio-hoa',
+    product_count: 30,
+    children: [
+      { id: 21, name: '500k - 600k', slug: 'gio-hoa-500k-600k', product_count: 5 },
+      { id: 22, name: '600k - 800k', slug: 'gio-hoa-600k-800k', product_count: 5 },
+      { id: 23, name: '800k - 1000k', slug: 'gio-hoa-800k-1000k', product_count: 5 },
+      { id: 24, name: '1000k - 1500k', slug: 'gio-hoa-1000k-1500k', product_count: 5 },
+      { id: 25, name: '1500k - 2000k', slug: 'gio-hoa-1500k-2000k', product_count: 5 },
+      { id: 26, name: '2000k trở lên', slug: 'gio-hoa-2000k-tro-len', product_count: 5 },
+    ]
+  },
+  {
+    id: 3,
+    name: 'Kệ Hoa',
+    slug: 'ke-hoa',
+    product_count: 20,
+    children: [
+      { id: 31, name: '1000k - 1200k', slug: 'ke-hoa-1000k-1200k', product_count: 5 },
+      { id: 32, name: '1200k - 1500k', slug: 'ke-hoa-1200k-1500k', product_count: 5 },
+      { id: 33, name: '1500k - 2000k', slug: 'ke-hoa-1500k-2000k', product_count: 5 },
+      { id: 34, name: '2000k trở lên', slug: 'ke-hoa-2000k-tro-len', product_count: 5 },
+    ]
+  }
+];
+
 export default function AdminNavigationCmsPage() {
   const { token } = useAdminAuth();
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categoryTree, setCategoryTree] = useState<CategoryNode[]>([]);
+  const [hasDbCategories, setHasDbCategories] = useState(false);
   const [footerConfig, setFooterConfig] = useState<FooterConfig>({
-    brand_desc: '',
-    facebook: '',
-    instagram: '',
-    zalo: '',
-    hotline: '0862 926 866',
-    address: 'Toàn quốc & TP. Hồ Chí Minh',
+    brand_desc: 'Nghệ Florist mang đến những tác phẩm hoa tươi nghệ thuật, tinh tế và tràn đầy cảm xúc. Từng đóa hoa được nâng niu tỉ mỉ từ khâu chọn hoa đến khi trao tận tay người nhận.',
     copyright: '© 2026 Nghệ Florist. Tất cả các quyền được bảo lưu.'
   });
 
-  const [activeTab, setActiveTab] = useState<'both' | 'menu' | 'footer'>('both');
+  const [activeTab, setActiveTab] = useState<'both' | 'sidebar' | 'footer'>('both');
   const [loading, setLoading] = useState(true);
   const [savingFooter, setSavingFooter] = useState(false);
   const [footerToast, setFooterToast] = useState('');
 
-  // Add form state
-  const [newLabel, setNewLabel] = useState('');
-  const [newUrl, setNewUrl] = useState('');
-  const [newIcon, setNewIcon] = useState('');
-  const [newSortOrder, setNewSortOrder] = useState<number>(1);
-
-  // Edit inline state
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editLabel, setEditLabel] = useState('');
-  const [editUrl, setEditUrl] = useState('');
-  const [editIcon, setEditIcon] = useState('');
-  const [editSortOrder, setEditSortOrder] = useState(1);
-
   const fetchNavData = async () => {
     try {
       setLoading(true);
-      const [mRes, sRes] = await Promise.all([
-        fetch('/api/admin/menu', { headers: { Authorization: `Bearer ${token}` } }),
+      const [catRes, sRes] = await Promise.all([
+        fetch('/api/categories'),
         fetch('/api/admin/settings', { headers: { Authorization: `Bearer ${token}` } })
       ]);
-      if (mRes.ok) {
-        const mData = await mRes.json();
-        setMenuItems(mData);
-        setNewSortOrder(mData.length + 1);
+
+      if (catRes.ok) {
+        const catData = await catRes.json();
+        if (catData.tree && Array.isArray(catData.tree) && catData.tree.length > 0) {
+          setCategoryTree(catData.tree);
+          setHasDbCategories(true);
+        } else {
+          setCategoryTree(DEFAULT_CATEGORY_TREE);
+          setHasDbCategories(false);
+        }
+      } else {
+        setCategoryTree(DEFAULT_CATEGORY_TREE);
       }
+
       if (sRes.ok) {
         const s = await sRes.json();
         if (s.footerConfig) {
-          setFooterConfig(prev => ({ ...prev, ...s.footerConfig }));
+          setFooterConfig(prev => ({ 
+            ...prev, 
+            brand_desc: s.footerConfig.brand_desc || prev.brand_desc,
+            copyright: s.footerConfig.copyright || prev.copyright
+          }));
         }
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error fetching navigation data:', err);
+      setCategoryTree(DEFAULT_CATEGORY_TREE);
     } finally {
       setLoading(false);
     }
@@ -96,137 +126,6 @@ export default function AdminNavigationCmsPage() {
   useEffect(() => {
     fetchNavData();
   }, [token]);
-
-  const handleAddMenuItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newLabel.trim() || !newUrl.trim()) return;
-
-    try {
-      const res = await fetch('/api/admin/menu', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          label: newLabel.trim(), 
-          url: newUrl.trim(), 
-          icon: newIcon.trim() || null,
-          sort_order: Number(newSortOrder) || (menuItems.length + 1),
-          is_active: 1
-        })
-      });
-
-      if (res.ok) {
-        setNewLabel('');
-        setNewUrl('');
-        setNewIcon('');
-        fetchNavData();
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Lỗi thêm menu');
-      }
-    } catch (err) {
-      alert('Lỗi kết nối máy chủ');
-    }
-  };
-
-  const handleStartEdit = (m: MenuItem) => {
-    setEditingId(m.id);
-    setEditLabel(m.label);
-    setEditUrl(m.url);
-    setEditIcon(m.icon || '');
-    setEditSortOrder(m.sort_order);
-  };
-
-  const handleSaveEdit = async (id: number) => {
-    if (!editLabel.trim() || !editUrl.trim()) return;
-    try {
-      const res = await fetch(`/api/admin/menu/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          label: editLabel.trim(),
-          url: editUrl.trim(),
-          icon: editIcon.trim() || null,
-          sort_order: Number(editSortOrder)
-        })
-      });
-
-      if (res.ok) {
-        setEditingId(null);
-        fetchNavData();
-      } else {
-        alert('Lỗi cập nhật menu');
-      }
-    } catch (err) {
-      alert('Lỗi kết nối');
-    }
-  };
-
-  const handleToggleActive = async (m: MenuItem) => {
-    try {
-      const newActive = m.is_active ? 0 : 1;
-      const res = await fetch(`/api/admin/menu/${m.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ is_active: newActive })
-      });
-      if (res.ok) fetchNavData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleReorder = async (m: MenuItem, direction: 'up' | 'down') => {
-    const currentIndex = menuItems.findIndex(item => item.id === m.id);
-    if (currentIndex === -1) return;
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= menuItems.length) return;
-
-    const targetItem = menuItems[targetIndex];
-    try {
-      await Promise.all([
-        fetch(`/api/admin/menu/${m.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ sort_order: targetItem.sort_order })
-        }),
-        fetch(`/api/admin/menu/${targetItem.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ sort_order: m.sort_order })
-        })
-      ]);
-      fetchNavData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDeleteMenuItem = async (id: number) => {
-    if (!confirm('Bạn có chắc muốn xóa mục menu này khỏi thanh điều hướng?')) return;
-    try {
-      const res = await fetch(`/api/admin/menu/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) fetchNavData();
-    } catch (err) {
-      alert('Lỗi xóa menu');
-    }
-  };
-
-  const handleApplyPreset = (label: string, url: string) => {
-    setNewLabel(label);
-    setNewUrl(url);
-  };
 
   const handleSaveFooter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,13 +138,19 @@ export default function AdminNavigationCmsPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ footerConfig })
+        body: JSON.stringify({ 
+          footerConfig: {
+            brand_desc: footerConfig.brand_desc.trim(),
+            copyright: footerConfig.copyright.trim()
+          } 
+        })
       });
+
       if (res.ok) {
         setFooterToast('✓ Đã lưu cấu hình chân trang thành công!');
         setTimeout(() => setFooterToast(''), 4000);
       } else {
-        alert('Lỗi lưu chân trang');
+        alert('Lỗi lưu cấu hình chân trang');
       }
     } catch (err) {
       alert('Lỗi kết nối máy chủ');
@@ -254,17 +159,19 @@ export default function AdminNavigationCmsPage() {
     }
   };
 
+  const displayCategoryTree = categoryTree.length > 0 ? categoryTree : DEFAULT_CATEGORY_TREE;
+
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ maxWidth: 1400, margin: '0 auto', paddingBottom: 40 }}>
       {/* Header & View Mode Switcher */}
-      <div className="admin-page-header" style={{ marginBottom: 20, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+      <div className="admin-page-header" style={{ marginBottom: 24, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
         <div>
           <h1 className="admin-page-title" style={{ fontSize: '1.45rem', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <MenuOutlined style={{ color: 'var(--admin-primary)' }} />
-            Quản Lý Menu Header & Chân Trang Footer
+            <FolderOutlined style={{ color: 'var(--admin-primary)' }} />
+            Quản Lý Menu Sidebar & Chân Trang Footer
           </h1>
           <div className="admin-page-subtitle">
-            Tùy biến liên kết thanh điều hướng chính và thông tin thương hiệu, hotline, mạng xã hội ở chân trang
+            Cấu trúc danh mục menu sidebar 2 tầng lấy từ cơ sở dữ liệu và tùy biến thông tin thương hiệu, bản quyền chân trang
           </div>
         </div>
 
@@ -293,24 +200,24 @@ export default function AdminNavigationCmsPage() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('menu')}
+            onClick={() => setActiveTab('sidebar')}
             style={{
               padding: '6px 14px',
               borderRadius: 8,
               border: 'none',
-              background: activeTab === 'menu' ? '#fff' : 'transparent',
-              color: activeTab === 'menu' ? 'var(--admin-primary-dark)' : 'var(--admin-text-secondary)',
+              background: activeTab === 'sidebar' ? '#fff' : 'transparent',
+              color: activeTab === 'sidebar' ? 'var(--admin-primary-dark)' : 'var(--admin-text-secondary)',
               fontWeight: 600,
               fontSize: '0.84rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              boxShadow: activeTab === 'menu' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              boxShadow: activeTab === 'sidebar' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
               transition: 'all 0.2s'
             }}
           >
-            <MenuOutlined /> Menu Header ({menuItems.length})
+            <FolderOutlined /> Menu Sidebar ({displayCategoryTree.length})
           </button>
           <button
             type="button"
@@ -331,7 +238,7 @@ export default function AdminNavigationCmsPage() {
               transition: 'all 0.2s'
             }}
           >
-            <GlobalOutlined /> Chân trang Footer
+            <EyeOutlined /> Chân trang Footer
           </button>
         </div>
       </div>
@@ -340,414 +247,185 @@ export default function AdminNavigationCmsPage() {
       <div 
         style={{ 
           display: 'grid', 
-          gridTemplateColumns: activeTab === 'both' ? 'repeat(auto-fit, minmax(460px, 1fr))' : '1fr', 
+          gridTemplateColumns: activeTab === 'both' ? 'minmax(380px, 480px) 1fr' : '1fr', 
           gap: 24,
           alignItems: 'start'
         }}
       >
         {/* ======================================================== */}
-        {/* COLUMN 1: HEADER MENU NAVIGATION */}
+        {/* COLUMN 1: SIDEBAR CATEGORIES TREE (MATCHING IMAGE 2) */}
         {/* ======================================================== */}
-        {(activeTab === 'both' || activeTab === 'menu') && (
+        {(activeTab === 'both' || activeTab === 'sidebar') && (
           <div className="admin-card" style={{ padding: 24, boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--admin-text)' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--admin-primary)' }} />
-                Menu Điều Hướng Chính (Header)
+                Cấu Trúc Menu Sidebar (Danh Mục Hoa)
               </h3>
-              <span className="admin-badge badge-info">{menuItems.length} liên kết</span>
+              <span className={`admin-badge ${hasDbCategories ? 'badge-success' : 'badge-info'}`}>
+                {hasDbCategories ? 'Database Live' : 'Dữ liệu mẫu'}
+              </span>
             </div>
 
             <p style={{ fontSize: '0.84rem', color: 'var(--admin-text-secondary)', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Các mục hiển thị trên thanh menu đầu trang website. Kéo xếp theo thứ tự ưu tiên từ trái sang phải.
+              Sidebar của khách hàng hiển thị cây danh mục 2 tầng lấy trực tiếp từ Database. Đã loại bỏ các mục điều hướng thừa (Trang chủ, Về Nghệ...) giúp giao diện tập trung mua hàng.
             </p>
 
-            {/* Menu Items Table */}
-            <div className="admin-table-container" style={{ marginBottom: 20 }}>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: 54, textAlign: 'center' }}>Thứ tự</th>
-                    <th style={{ width: 60, textAlign: 'center' }}>Icon</th>
-                    <th style={{ minWidth: 130 }}>Tên hiển thị</th>
-                    <th style={{ minWidth: 150 }}>Đường dẫn (URL)</th>
-                    <th style={{ width: 90, textAlign: 'center' }}>Trạng thái</th>
-                    <th style={{ width: 110, textAlign: 'right' }}>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {menuItems.map((m, idx) => {
-                    const isEditing = editingId === m.id;
-                    return (
-                      <tr key={m.id} style={{ background: isEditing ? '#F0F9FF' : undefined }}>
-                        {/* Sort Order */}
-                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              className="admin-input"
-                              style={{ width: 44, padding: '4px 6px', textAlign: 'center' }}
-                              value={editSortOrder}
-                              onChange={e => setEditSortOrder(Number(e.target.value))}
-                            />
-                          ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-                              <span style={{ fontWeight: 700, fontSize: '0.85rem', width: 18 }}>{m.sort_order}</span>
-                              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <button
-                                  type="button"
-                                  disabled={idx === 0}
-                                  onClick={() => handleReorder(m, 'up')}
-                                  style={{ border: 'none', background: 'none', cursor: idx === 0 ? 'not-allowed' : 'pointer', opacity: idx === 0 ? 0.3 : 0.7, padding: 1, fontSize: 10 }}
-                                  title="Di chuyển lên"
-                                >
-                                  <ArrowUpOutlined />
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={idx === menuItems.length - 1}
-                                  onClick={() => handleReorder(m, 'down')}
-                                  style={{ border: 'none', background: 'none', cursor: idx === menuItems.length - 1 ? 'not-allowed' : 'pointer', opacity: idx === menuItems.length - 1 ? 0.3 : 0.7, padding: 1, fontSize: 10 }}
-                                  title="Di chuyển xuống"
-                                >
-                                  <ArrowDownOutlined />
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Icon */}
-                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              className="admin-input"
-                              style={{ width: 44, padding: '4px 6px', textAlign: 'center', fontSize: '1.1rem' }}
-                              value={editIcon}
-                              placeholder="Icon"
-                              title="Nhập emoji hoặc biểu tượng"
-                              onChange={e => setEditIcon(e.target.value)}
-                            />
-                          ) : (
-                            <span style={{ fontSize: '1.25rem', display: 'inline-block' }} title={m.icon ? `Icon: ${m.icon}` : 'Chưa có icon'}>
-                              {m.icon || <span style={{ color: '#CBD5E1', fontSize: '13px' }}>-</span>}
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Label */}
-                        <td>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              className="admin-input"
-                              value={editLabel}
-                              onChange={e => setEditLabel(e.target.value)}
-                              style={{ padding: '6px 10px', fontSize: '0.88rem' }}
-                            />
-                          ) : (
-                            <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{m.label}</div>
-                          )}
-                        </td>
-
-                        {/* URL */}
-                        <td>
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              className="admin-input"
-                              value={editUrl}
-                              onChange={e => setEditUrl(e.target.value)}
-                              style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                            />
-                          ) : (
-                            <code style={{ background: '#F1F5F9', padding: '2px 8px', borderRadius: 4, fontSize: '0.82rem', color: '#0369A1' }}>
-                              {m.url}
-                            </code>
-                          )}
-                        </td>
-
-                        {/* Status */}
-                        <td style={{ textAlign: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleActive(m)}
-                            style={{
-                              border: 'none',
-                              background: 'transparent',
-                              cursor: 'pointer',
-                              padding: '4px 8px',
-                              borderRadius: 12,
-                              fontSize: '0.78rem',
-                              fontWeight: 600,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 4
-                            }}
-                            className={m.is_active ? 'admin-badge badge-success' : 'admin-badge badge-danger'}
-                            title="Bấm để bật/tắt hiển thị"
-                          >
-                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: m.is_active ? '#16A34A' : '#DC2626' }} />
-                            {m.is_active ? 'Hiện' : 'Ẩn'}
-                          </button>
-                        </td>
-
-                        {/* Actions */}
-                        <td style={{ textAlign: 'right' }}>
-                          {isEditing ? (
-                            <div style={{ display: 'inline-flex', gap: 6 }}>
-                              <button
-                                type="button"
-                                onClick={() => handleSaveEdit(m.id)}
-                                className="admin-btn admin-btn-primary"
-                                style={{ padding: '4px 10px', fontSize: '12px' }}
-                              >
-                                <CheckOutlined /> Lưu
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingId(null)}
-                                className="admin-btn admin-btn-outline"
-                                style={{ padding: '4px 8px', fontSize: '12px' }}
-                              >
-                                <CloseOutlined />
-                              </button>
-                            </div>
-                          ) : (
-                            <div style={{ display: 'inline-flex', gap: 6 }}>
-                              <button
-                                type="button"
-                                onClick={() => handleStartEdit(m)}
-                                className="admin-btn admin-btn-outline"
-                                style={{ padding: '4px 8px', fontSize: '12px' }}
-                                title="Chỉnh sửa mục này"
-                              >
-                                <EditOutlined />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteMenuItem(m.id)}
-                                className="admin-btn admin-btn-outline"
-                                style={{ padding: '4px 8px', fontSize: '12px', color: '#DC2626', borderColor: '#FECACA' }}
-                                title="Xóa mục này"
-                              >
-                                <DeleteOutlined />
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Link to Categories Management in Database */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+              <Link 
+                to="/admin/categories" 
+                className="admin-btn admin-btn-primary" 
+                style={{ fontSize: '0.86rem', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              >
+                <DatabaseOutlined /> Quản Lý Danh Mục (Database) <ArrowRightOutlined />
+              </Link>
+              <button 
+                type="button" 
+                onClick={fetchNavData} 
+                className="admin-btn admin-btn-outline" 
+                style={{ fontSize: '0.86rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                title="Tải lại danh mục từ cơ sở dữ liệu"
+              >
+                <ReloadOutlined spin={loading} /> Làm mới
+              </button>
             </div>
 
-            {/* Quick Presets */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--admin-text-secondary)', fontWeight: 700, marginBottom: 8 }}>
-                Gợi ý thêm nhanh mục phổ biến:
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Tất cả hoa', '/flowers', '✦')}
-                  style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ✦ Tất cả hoa
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Bó hoa tươi', '/category/bo-hoa', '⚘')}
-                  style={{ background: '#FDF4FF', border: '1px solid #F5D0FE', color: '#A21CAF', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ⚘ Bó hoa
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Giỏ hoa tươi', '/category/gio-hoa', '❀')}
-                  style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', color: '#047857', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ❀ Giỏ hoa
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Kệ hoa sự kiện', '/category/ke-hoa', '◈')}
-                  style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1D4ED8', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ◈ Kệ hoa
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Lan hồ điệp', '/category/lan-ho-diep', '🪷')}
-                  style={{ background: '#FFF1F2', border: '1px solid #FECDD3', color: '#BE123C', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  🪷 Lan hồ điệp
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Hoa cưới thiết kế', '/category/hoa-cuoi', '♡')}
-                  style={{ background: '#FDF2F8', border: '1px solid #FBCFE8', color: '#BE185D', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ♡ Hoa cưới
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Cắm hoa theo yêu cầu', '/custom-order', '✨')}
-                  style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#15803D', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ✨ Thiết kế riêng
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Về Nghệ Florist', '/about', '🌿')}
-                  style={{ background: '#FAF5FF', border: '1px solid #E9D5FF', color: '#7E22CE', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  🌿 Về chúng tôi
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Chính sách giao hàng', '/policy', '◎')}
-                  style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#B45309', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  ◎ Chính sách
-                </button>
-              </div>
-            </div>
-
-            {/* Add Menu Item Form */}
-            <form 
-              onSubmit={handleAddMenuItem} 
+            {/* Visual Sidebar Tree Card (Styled exactly like Image 2) */}
+            <div 
               style={{ 
-                padding: '18px', 
-                backgroundColor: '#F7FBFC', 
-                borderRadius: '10px', 
-                border: '1.5px dashed #CBD5E1' 
+                background: '#FFFFFF', 
+                border: '1.5px solid #E2E8F0', 
+                borderRadius: 14, 
+                padding: '24px 20px', 
+                boxShadow: '0 4px 14px rgba(0,0,0,0.03)'
               }}
             >
-              <div style={{ fontSize: '0.92rem', fontWeight: 700, marginBottom: 12, color: 'var(--admin-text)' }}>
-                + Thêm mục menu mới
+              <div style={{ 
+                fontSize: '1.2rem', 
+                fontWeight: 700, 
+                color: '#1E293B', 
+                marginBottom: 16,
+                letterSpacing: -0.2
+              }}>
+                Danh mục hoa
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gap: 12, marginBottom: 12 }}>
-                <div>
-                  <label className="admin-label">Icon</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="VD: ⚘"
-                    style={{ textAlign: 'center', fontSize: '1.15rem', padding: '7px 4px' }}
-                    value={newIcon}
-                    onChange={(e) => setNewIcon(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="admin-label">Tên hiển thị trên Menu *</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    required
-                    placeholder="VD: Hoa Tươi Thiết Kế"
-                    value={newLabel}
-                    onChange={(e) => setNewLabel(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="admin-label">Đường dẫn URL *</label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    required
-                    placeholder="VD: /category/bo-hoa hoặc /flowers"
-                    value={newUrl}
-                    onChange={(e) => setNewUrl(e.target.value)}
-                  />
-                </div>
+              {/* Tất cả mẫu hoa */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  background: '#E6F4F8',
+                  color: '#0E7490',
+                  fontWeight: 700,
+                  fontSize: '0.96rem',
+                  marginBottom: 16
+                }}
+              >
+                <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>📁</span>
+                <span>Tất cả mẫu hoa</span>
               </div>
 
-              {/* Quick Icon Selector Buttons */}
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: '11.5px', color: '#64748B', fontWeight: 600, marginBottom: 6 }}>
-                  Gợi ý chọn nhanh biểu tượng tối giản (Icon):
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {[
-                    { icon: '⚘', name: 'Bó hoa' },
-                    { icon: '❀', name: 'Giỏ hoa' },
-                    { icon: '◈', name: 'Kệ hoa' },
-                    { icon: '🪷', name: 'Lan hồ điệp' },
-                    { icon: '♡', name: 'Hoa cưới' },
-                    { icon: '✦', name: 'Tất cả' },
-                    { icon: '✨', name: 'Thiết kế' },
-                    { icon: '🌿', name: 'Về Nghệ' },
-                    { icon: '⌂', name: 'Trang chủ' },
-                    { icon: '◎', name: 'Tra cứu' },
-                    { icon: '⚜', name: 'Hoàng gia' },
-                    { icon: '✿', name: 'Hoa cổ điển' }
-                  ].map(item => (
-                    <button
-                      key={item.icon}
-                      type="button"
-                      onClick={() => setNewIcon(item.icon)}
+              {/* Category Tree 2 tầng */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {displayCategoryTree.map((cat) => (
+                  <div key={cat.id || cat.slug} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {/* Parent Category */}
+                    <div
                       style={{
-                        display: 'inline-flex',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: 5,
-                        padding: '4px 9px',
+                        justifyContent: 'space-between',
+                        padding: '6px 8px',
                         borderRadius: 6,
-                        border: newIcon === item.icon ? '1.5px solid #0284C7' : '1px solid #CBD5E1',
-                        background: newIcon === item.icon ? '#E0F2FE' : '#FFFFFF',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: 600
+                        color: '#1E293B'
                       }}
                     >
-                      <span style={{ fontSize: '14px', color: '#0F172A' }}>{item.icon}</span>
-                      <span>{item.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: '0.98rem' }}>
+                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📁</span>
+                        <span>{cat.name}</span>
+                      </div>
+                      <span style={{
+                        background: '#F1F5F9',
+                        color: '#64748B',
+                        borderRadius: 12,
+                        padding: '2px 10px',
+                        fontSize: '0.82rem',
+                        fontWeight: 600
+                      }}>
+                        {cat.product_count}
+                      </span>
+                    </div>
 
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ width: 120 }}>
-                  <label className="admin-label">Thứ tự (STT)</label>
-                  <input
-                    type="number"
-                    className="admin-input"
-                    value={newSortOrder}
-                    onChange={(e) => setNewSortOrder(Number(e.target.value))}
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
-                  className="admin-btn admin-btn-primary"
-                  style={{ padding: '10px 24px', fontWeight: 700 }}
-                >
-                  Thêm Vào Menu
-                </button>
+                    {/* Subcategories (Price Ranges) */}
+                    {cat.children && cat.children.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 18 }}>
+                        {cat.children.map((sub) => (
+                          <div
+                            key={sub.id || sub.slug}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '5px 8px',
+                              borderRadius: 6,
+                              color: '#475569',
+                              fontSize: '0.9rem',
+                              fontWeight: 500
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ color: '#94A3B8', fontWeight: 600 }}>↳</span>
+                              <span>{sub.name}</span>
+                            </div>
+                            <span style={{
+                              background: '#F1F5F9',
+                              color: '#64748B',
+                              borderRadius: 10,
+                              padding: '1px 8px',
+                              fontSize: '0.78rem',
+                              fontWeight: 600
+                            }}>
+                              {sub.product_count}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            </form>
+            </div>
+
+            {/* Note box */}
+            <div style={{ marginTop: 18, padding: '12px 14px', background: '#F8FAFC', borderRadius: 8, border: '1px solid #E2E8F0', fontSize: '0.82rem', color: '#64748B', display: 'flex', gap: 8 }}>
+              <InfoCircleOutlined style={{ color: '#0284C7', marginTop: 2 }} />
+              <div>
+                Dữ liệu danh mục và số lượng hoa được tự động cập nhật khi bạn thêm hoặc chỉnh sửa danh mục/sản phẩm trong hệ thống.
+              </div>
+            </div>
           </div>
         )}
 
         {/* ======================================================== */}
-        {/* COLUMN 2: FOOTER CONFIGURATION */}
+        {/* COLUMN 2: FOOTER CONFIGURATION & EXACT LIVE PREVIEW */}
         {/* ======================================================== */}
         {(activeTab === 'both' || activeTab === 'footer') && (
           <div className="admin-card" style={{ padding: 24, boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--admin-text)' }}>
-                <GlobalOutlined style={{ color: 'var(--admin-primary)' }} />
+                <EyeOutlined style={{ color: 'var(--admin-primary)' }} />
                 Cấu Hình Chân Trang (Footer)
               </h3>
               <span className="admin-badge badge-info">CMS Chân Trang</span>
             </div>
 
             <p style={{ fontSize: '0.84rem', color: 'var(--admin-text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>
-              Nội dung chân website bao gồm câu chuyện thương hiệu, đường dẫn kênh tư vấn (Zalo 1, Zalo 2) và thông tin bản quyền.
+              Tùy biến các phần cho phép chỉnh sửa (Lời giới thiệu & Bản quyền). Các cột tiêu chuẩn khác được khóa theo thiết kế showroom hoa và không cần phần liên hệ vì đã có nút liên hệ ghim trên toàn trang web.
             </p>
 
             {footerToast && (
@@ -756,16 +434,19 @@ export default function AdminNavigationCmsPage() {
               </div>
             )}
 
-            <form onSubmit={handleSaveFooter}>
+            {/* Form chỉnh sửa các trường được phép */}
+            <form onSubmit={handleSaveFooter} style={{ marginBottom: 28 }}>
               {/* Brand description */}
               <div className="admin-form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <label className="admin-label" style={{ margin: 0 }}>Lời giới thiệu thương hiệu ở chân trang</label>
+                  <label className="admin-label" style={{ margin: 0, fontWeight: 700 }}>
+                    Lời giới thiệu thương hiệu ở chân trang <span style={{ color: '#16A34A', fontSize: '0.8rem', fontWeight: 600 }}>(Chỉnh sửa được)</span>
+                  </label>
                   <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>{footerConfig.brand_desc?.length || 0} ký tự</span>
                 </div>
                 <textarea
                   className="admin-textarea"
-                  rows={4}
+                  rows={3}
                   placeholder="Nghệ Florist mang đến những tác phẩm hoa tươi nghệ thuật, tinh tế và tràn đầy cảm xúc..."
                   value={footerConfig.brand_desc}
                   onChange={(e) => setFooterConfig({ ...footerConfig, brand_desc: e.target.value })}
@@ -773,107 +454,195 @@ export default function AdminNavigationCmsPage() {
                 />
               </div>
 
-              {/* Social Channels */}
-              <div style={{ background: '#F8FAFC', padding: 16, borderRadius: 10, border: '1px solid #E2E8F0', marginBottom: 18 }}>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--admin-text)', marginBottom: 12 }}>
-                  Kênh Chuyển Đổi & Tư Vấn Khách Hàng
-                </div>
-
-                <div className="admin-form-group" style={{ marginBottom: 12 }}>
-                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: '#0068FF', fontWeight: 700 }}>Zalo</span> Tư vấn báo giá (Primary)
-                  </label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="https://zalo.me/0862926866"
-                    value={footerConfig.zalo}
-                    onChange={(e) => setFooterConfig({ ...footerConfig, zalo: e.target.value })}
-                  />
-                </div>
-
-                <div className="admin-form-group" style={{ marginBottom: 12 }}>
-                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <MessageOutlined style={{ color: '#0284C7' }} /> Kênh Zalo Hotline 2 (0862 926 866)
-                  </label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="https://zalo.me/0862926866"
-                    value={footerConfig.facebook}
-                    onChange={(e) => setFooterConfig({ ...footerConfig, facebook: e.target.value })}
-                  />
-                </div>
-
-                <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <InstagramOutlined style={{ color: '#E1306C' }} /> Kênh Instagram
-                  </label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="https://instagram.com/ngheflorist"
-                    value={footerConfig.instagram}
-                    onChange={(e) => setFooterConfig({ ...footerConfig, instagram: e.target.value })}
-                  />
-                </div>
+              {/* Copyright */}
+              <div className="admin-form-group" style={{ marginBottom: 18 }}>
+                <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                  <CopyrightOutlined /> Dòng bản quyền (Copyright) <span style={{ color: '#16A34A', fontSize: '0.8rem', fontWeight: 600 }}>(Chỉnh sửa được)</span>
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  placeholder="© 2026 Nghệ Florist. Tất cả các quyền được bảo lưu."
+                  value={footerConfig.copyright}
+                  onChange={(e) => setFooterConfig({ ...footerConfig, copyright: e.target.value })}
+                />
               </div>
 
-              {/* Hotline & Copyright */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 18 }}>
-                <div>
-                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <PhoneOutlined style={{ color: '#16A34A' }} /> Hotline tư vấn
-                  </label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="0862 926 866"
-                    value={footerConfig.hotline || ''}
-                    onChange={(e) => setFooterConfig({ ...footerConfig, hotline: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <CopyrightOutlined /> Dòng bản quyền (Copyright)
-                  </label>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="© 2026 Nghệ Florist. Tất cả các quyền được bảo lưu."
-                    value={footerConfig.copyright}
-                    onChange={(e) => setFooterConfig({ ...footerConfig, copyright: e.target.value })}
-                  />
-                </div>
-              </div>
-
+              {/* Save Button */}
               <button 
                 type="submit" 
                 disabled={savingFooter} 
                 className="admin-btn admin-btn-primary" 
-                style={{ width: '100%', justifyContent: 'center', padding: '12px 20px', fontSize: '0.95rem', fontWeight: 700 }}
+                style={{ padding: '10px 24px', fontSize: '0.92rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8 }}
               >
                 <SaveOutlined /> {savingFooter ? 'Đang lưu cấu hình...' : 'Lưu Cấu Hình Chân Trang'}
               </button>
             </form>
 
-            {/* Mini Footer Preview */}
-            <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid #E2E8F0' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: '#64748B', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <EyeOutlined /> Xem trước chân trang (Preview):
+            {/* Các phần mặc định không cho chỉnh sửa (Read-only / Locked info cards) */}
+            <div style={{ marginBottom: 28, background: '#F8FAFC', padding: 18, borderRadius: 12, border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#334155', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <LockOutlined style={{ color: '#64748B' }} /> Các phần mặc định hệ thống (Không cho chỉnh sửa):
               </div>
-              <div style={{ background: '#26383D', color: '#E2E8F0', padding: 18, borderRadius: 10, fontSize: '0.82rem', lineHeight: 1.6 }}>
-                <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', marginBottom: 6 }}>NGHỆ FLORIST</div>
-                <div style={{ color: '#94A3B8', marginBottom: 12 }}>
-                  {footerConfig.brand_desc || 'Mô tả tiệm hoa nghệ thuật...'}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                <div style={{ background: '#FFFFFF', padding: 12, borderRadius: 8, border: '1px solid #CBD5E1' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#1E293B', marginBottom: 4 }}>
+                    Cột "Khám phá"
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748B', lineHeight: 1.5 }}>
+                    5 liên kết điều hướng: Trang chủ, Tất cả sản phẩm, Cắm hoa theo yêu cầu, Về chúng tôi, Chính sách & bảo hành.
+                  </div>
+                  <span className="admin-badge badge-warning" style={{ marginTop: 6, fontSize: '0.7rem' }}>Mặc định cố định</span>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, color: '#BAE6FD', fontWeight: 600 }}>
-                  <span>✦ Zalo: {footerConfig.zalo || 'https://zalo.me/...'}</span>
-                  <span>✦ Hotline: {footerConfig.hotline || '0862 926 866'}</span>
+
+                <div style={{ background: '#FFFFFF', padding: 12, borderRadius: 8, border: '1px solid #CBD5E1' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#1E293B', marginBottom: 4 }}>
+                    Cột "Danh mục hoa"
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748B', lineHeight: 1.5 }}>
+                    Tự động đồng bộ từ cơ sở dữ liệu: Bó hoa, Giỏ hoa, Kệ hoa, Lan hồ điệp...
+                  </div>
+                  <span className="admin-badge badge-success" style={{ marginTop: 6, fontSize: '0.7rem' }}>Tự động Database</span>
                 </div>
-                <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)', color: '#64748B', fontSize: '0.75rem' }}>
-                  {footerConfig.copyright || '© 2026 Nghệ Florist.'}
+
+                <div style={{ background: '#FFFFFF', padding: 12, borderRadius: 8, border: '1px solid #CBD5E1' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.84rem', color: '#1E293B', marginBottom: 4 }}>
+                    Cột "Cam kết dịch vụ"
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748B', lineHeight: 1.5 }}>
+                    3 cam kết vàng: Gửi ảnh duyệt trước khi giao, Hoa nhập tươi mới rạng sáng, Tặng kèm thiệp & banner cao cấp.
+                  </div>
+                  <span className="admin-badge badge-warning" style={{ marginTop: 6, fontSize: '0.7rem' }}>Mặc định cố định</span>
+                </div>
+              </div>
+            </div>
+
+            {/* LIVE FOOTER PREVIEW - 100% MATCHING CLIENT WEB FOOTER */}
+            <div>
+              <div style={{ fontSize: '0.84rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: '#64748B', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <EyeOutlined /> Xem trước chân trang thực tế (Live Footer Preview):
+              </div>
+
+              <div 
+                style={{ 
+                  background: '#26383D', 
+                  color: '#CBD5E1', 
+                  padding: '36px 28px 20px', 
+                  borderRadius: 14, 
+                  fontSize: '0.85rem', 
+                  lineHeight: 1.65,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+                }}
+              >
+                {/* 4-Column Grid matching desktop site-footer */}
+                <div 
+                  style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    gap: 28,
+                    marginBottom: 32
+                  }}
+                >
+                  {/* Col 1: Brand Info */}
+                  <div>
+                    <div style={{ marginBottom: 16 }}>
+                      <img 
+                        src="/images/logoNgheFlorist-dark.png" 
+                        alt="Nghệ Florist" 
+                        style={{ height: 46, width: 'auto', objectFit: 'contain' }} 
+                      />
+                    </div>
+                    <p style={{ margin: 0, color: '#94A3B8', fontSize: '0.86rem', lineHeight: 1.6 }}>
+                      {footerConfig.brand_desc || 'Mô tả tiệm hoa tươi nghệ thuật...'}
+                    </p>
+                  </div>
+
+                  {/* Col 2: Khám phá */}
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.96rem', marginBottom: 14 }}>
+                      Khám phá
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, color: '#94A3B8', fontSize: '0.85rem' }}>
+                      <span style={{ cursor: 'pointer' }}>Trang chủ</span>
+                      <span style={{ cursor: 'pointer' }}>Tất cả sản phẩm</span>
+                      <span style={{ cursor: 'pointer' }}>Cắm hoa theo yêu cầu</span>
+                      <span style={{ cursor: 'pointer' }}>Về chúng tôi</span>
+                      <span style={{ cursor: 'pointer' }}>Chính sách & bảo hành</span>
+                    </div>
+                  </div>
+
+                  {/* Col 3: Danh mục hoa */}
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.96rem', marginBottom: 14 }}>
+                      Danh mục hoa
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, color: '#94A3B8', fontSize: '0.85rem' }}>
+                      <span style={{ cursor: 'pointer' }}>Bó hoa tươi</span>
+                      <span style={{ cursor: 'pointer' }}>Giỏ hoa tươi</span>
+                      <span style={{ cursor: 'pointer' }}>Hoa cưới cô dâu</span>
+                      <span style={{ cursor: 'pointer' }}>Kệ hoa khai trương</span>
+                      <span style={{ cursor: 'pointer' }}>Lan hồ điệp</span>
+                    </div>
+                  </div>
+
+                  {/* Col 4: Cam kết của chúng tôi */}
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.96rem', marginBottom: 14 }}>
+                      Cam kết của chúng tôi
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, color: '#94A3B8', fontSize: '0.82rem', marginBottom: 16 }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <CheckCircleOutlined style={{ color: '#46B8B3', marginTop: 3 }} />
+                        <span>Luôn chụp ảnh thành phẩm gửi khách hàng duyệt trước khi giao.</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <CheckCircleOutlined style={{ color: '#46B8B3', marginTop: 3 }} />
+                        <span>Hoa nhập khẩu tươi mới rạng sáng mỗi ngày.</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <CheckCircleOutlined style={{ color: '#46B8B3', marginTop: 3 }} />
+                        <span>Tặng kèm thiệp thiết kế & banner cao cấp theo yêu cầu.</span>
+                      </div>
+                    </div>
+                    <div 
+                      style={{ 
+                        display: 'inline-block',
+                        width: '100%', 
+                        textAlign: 'center', 
+                        padding: '8px 12px', 
+                        border: '1px solid rgba(255,255,255,0.3)', 
+                        borderRadius: 6, 
+                        color: '#FFFFFF',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Đặt cắm hoa theo mẫu riêng
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer bottom bar */}
+                <div 
+                  style={{ 
+                    borderTop: '1px solid rgba(255,255,255,0.1)', 
+                    paddingTop: 16, 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    gap: 12,
+                    fontSize: '0.78rem', 
+                    color: '#64748B' 
+                  }}
+                >
+                  <div>
+                    {footerConfig.copyright || '© 2026 Nghệ Florist. Tất cả các quyền được bảo lưu.'}
+                  </div>
+                  <div>
+                    Digital Showroom Hoa Tươi Nghệ Thuật — Nghệ Florist
+                  </div>
                 </div>
               </div>
             </div>

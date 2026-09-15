@@ -52,6 +52,48 @@ interface MenuItem {
   sort_order: number;
 }
 
+export const DEFAULT_CATEGORY_TREE = [
+  {
+    id: 1,
+    name: 'Bó Hoa',
+    slug: 'bo-hoa',
+    product_count: 30,
+    children: [
+      { id: 11, name: '300k - 500k', slug: 'bo-hoa-300k-500k', product_count: 10 },
+      { id: 12, name: '500k - 1000k', slug: 'bo-hoa-500k-1000k', product_count: 5 },
+      { id: 13, name: '1000k - 1500k', slug: 'bo-hoa-1000k-1500k', product_count: 5 },
+      { id: 14, name: '1500k - 2000k', slug: 'bo-hoa-1500k-2000k', product_count: 5 },
+      { id: 15, name: '2000k trở lên', slug: 'bo-hoa-2000k-tro-len', product_count: 5 },
+    ]
+  },
+  {
+    id: 2,
+    name: 'Giỏ Hoa',
+    slug: 'gio-hoa',
+    product_count: 30,
+    children: [
+      { id: 21, name: '500k - 600k', slug: 'gio-hoa-500k-600k', product_count: 5 },
+      { id: 22, name: '600k - 800k', slug: 'gio-hoa-600k-800k', product_count: 5 },
+      { id: 23, name: '800k - 1000k', slug: 'gio-hoa-800k-1000k', product_count: 5 },
+      { id: 24, name: '1000k - 1500k', slug: 'gio-hoa-1000k-1500k', product_count: 5 },
+      { id: 25, name: '1500k - 2000k', slug: 'gio-hoa-1500k-2000k', product_count: 5 },
+      { id: 26, name: '2000k trở lên', slug: 'gio-hoa-2000k-tro-len', product_count: 5 },
+    ]
+  },
+  {
+    id: 3,
+    name: 'Kệ Hoa',
+    slug: 'ke-hoa',
+    product_count: 20,
+    children: [
+      { id: 31, name: '1000k - 1200k', slug: 'ke-hoa-1000k-1200k', product_count: 5 },
+      { id: 32, name: '1200k - 1500k', slug: 'ke-hoa-1200k-1500k', product_count: 5 },
+      { id: 33, name: '1500k - 2000k', slug: 'ke-hoa-1500k-2000k', product_count: 5 },
+      { id: 34, name: '2000k trở lên', slug: 'ke-hoa-2000k-tro-len', product_count: 5 },
+    ]
+  }
+];
+
 export default function Header() {
   const { openRequestModal } = useCustomerRequest();
   const navigate = useNavigate();
@@ -73,6 +115,7 @@ export default function Header() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showZaloDropdown, setShowZaloDropdown] = useState(false);
   const [contactWidgets, setContactWidgets] = useState<HeaderContactWidget[]>([]);
+  const [categoryTree, setCategoryTree] = useState<any[]>([]);
 
   // Admin Auth context & local fallback
   const { user: adminUser, isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAdminAuth();
@@ -181,6 +224,18 @@ export default function Header() {
       .catch(err => console.warn('Header contact widgets fetch fallback:', err));
   }, []);
 
+  // Fetch dynamic categories tree for sidebar
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(r => (r.ok ? r.json() : {}))
+      .then(data => {
+        if (data.tree && Array.isArray(data.tree) && data.tree.length > 0) {
+          setCategoryTree(data.tree);
+        }
+      })
+      .catch(err => console.warn('Header categories fetch fallback:', err));
+  }, []);
+
   const activeContactWidgets = React.useMemo(() => {
     return contactWidgets
       .filter(w => Boolean(w.is_active))
@@ -251,6 +306,7 @@ export default function Header() {
   ];
 
   const displayMenu = menuItems.length > 0 ? menuItems : defaultMenuItems;
+  const displayCategoryTree = categoryTree.length > 0 ? categoryTree : DEFAULT_CATEGORY_TREE;
 
   // Danh mục hoa hiển thị trong Accordion trên Mobile Drawer, hỗ trợ icon tùy chỉnh từ CMS (chuẩn tối giản 2 màu)
   const flowerCollectionLinks = React.useMemo(() => {
@@ -1272,98 +1328,122 @@ export default function Header() {
                 </button>
               </div>
 
-              {/* Drawer Navigation Links */}
-              <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 12px', flexGrow: 1, overflowY: 'auto' }}>
-                <Link
-                  to="/"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="mobile-nav-link"
-                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                >
-                  {menuItems.find(m => m.url === '/')?.icon && (
-                    <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center' }}>
-                      {menuItems.find(m => m.url === '/')?.icon}
-                    </span>
-                  )}
-                  <span>Trang chủ</span>
-                </Link>
-
-                {/* Bộ sưu tập Accordion */}
-                <div style={{ margin: '4px 0', borderBottom: '1px solid var(--color-border)', paddingBottom: 6 }}>
-                  <div
-                    onClick={() => setIsCollectionsExpanded(!isCollectionsExpanded)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '12px 14px',
-                      color: 'var(--color-text)',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: '0.96rem'
-                    }}
-                  >
-                    <span>Bộ sưu tập hoa</span>
-                    {isCollectionsExpanded ? <UpOutlined style={{ fontSize: 12, color: '#94A3B8' }} /> : <DownOutlined style={{ fontSize: 12, color: '#94A3B8' }} />}
-                  </div>
-
-                  {isCollectionsExpanded && (
-                    <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      {flowerCollectionLinks.map((item) => (
-                        <Link
-                          key={item.id || item.url}
-                          to={item.url}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          style={{
-                            padding: '9px 14px',
-                            fontSize: '0.92rem',
-                            color: item.url === '/flowers' ? 'var(--color-primary-dark)' : 'var(--color-text)',
-                            fontWeight: item.url === '/flowers' ? 600 : 500,
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10
-                          }}
-                        >
-                          {item.icon && (
-                            <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              {item.icon}
-                            </span>
-                          )}
-                          <span>{item.label}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+              {/* Drawer Navigation: Danh mục hoa (Ảnh 2) */}
+              <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 14px', flexGrow: 1, overflowY: 'auto' }}>
+                <div style={{ 
+                  fontSize: '1.2rem', 
+                  fontWeight: 700, 
+                  color: '#1E293B', 
+                  marginBottom: 14,
+                  letterSpacing: -0.2
+                }}>
+                  Danh mục hoa
                 </div>
 
+                {/* Tất cả mẫu hoa */}
                 <Link
-                  to="/about"
+                  to="/flowers"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="mobile-nav-link"
-                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    background: location.pathname === '/flowers' && !location.search ? '#E0F2FE' : '#F0F9FF',
+                    color: '#0369A1',
+                    fontWeight: 700,
+                    fontSize: '0.95rem',
+                    textDecoration: 'none',
+                    marginBottom: 16,
+                    transition: 'all 0.15s ease'
+                  }}
                 >
-                  {menuItems.find(m => m.url === '/about')?.icon && (
-                    <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center' }}>
-                      {menuItems.find(m => m.url === '/about')?.icon}
-                    </span>
-                  )}
-                  <span>Về Nghệ</span>
+                  <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>📁</span>
+                  <span>Tất cả mẫu hoa</span>
                 </Link>
 
-                <Link
-                  to="/policy"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="mobile-nav-link"
-                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                >
-                  {menuItems.find(m => m.url === '/policy')?.icon && (
-                    <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center' }}>
-                      {menuItems.find(m => m.url === '/policy')?.icon}
-                    </span>
-                  )}
-                  <span>Liên hệ</span>
-                </Link>
+                {/* Category Tree 2 tầng */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {displayCategoryTree.map((cat: any) => (
+                    <div key={cat.id || cat.slug} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {/* Parent Category Header */}
+                      <Link
+                        to={`/flowers?category=${cat.slug || cat.id}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '6px 8px',
+                          borderRadius: 6,
+                          textDecoration: 'none',
+                          color: '#1E293B',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: '0.98rem' }}>
+                          <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📁</span>
+                          <span>{cat.name}</span>
+                        </div>
+                        {cat.product_count > 0 && (
+                          <span style={{
+                            background: '#F1F5F9',
+                            color: '#64748B',
+                            borderRadius: 12,
+                            padding: '2px 10px',
+                            fontSize: '0.82rem',
+                            fontWeight: 600
+                          }}>
+                            {cat.product_count}
+                          </span>
+                        )}
+                      </Link>
+
+                      {/* Subcategories (Price Ranges or sub-items) */}
+                      {cat.children && cat.children.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingLeft: 16 }}>
+                          {cat.children.map((sub: any) => (
+                            <Link
+                              key={sub.id || sub.slug}
+                              to={`/flowers?category=${sub.slug || sub.id}`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '5px 8px',
+                                borderRadius: 6,
+                                textDecoration: 'none',
+                                color: '#475569',
+                                fontSize: '0.9rem',
+                                fontWeight: 500,
+                                transition: 'background 0.15s'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ color: '#94A3B8', fontWeight: 600 }}>↳</span>
+                                <span>{sub.name}</span>
+                              </div>
+                              {sub.product_count > 0 && (
+                                <span style={{
+                                  background: '#F1F5F9',
+                                  color: '#64748B',
+                                  borderRadius: 10,
+                                  padding: '1px 8px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600
+                                }}>
+                                  {sub.product_count}
+                                </span>
+                              )}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
                 {/* Primary CTA Buttons in Drawer: Thiết kế riêng & 2 Zalo 1-click */}
                 <div style={{ marginTop: 20, padding: '0 4px', display: 'flex', flexDirection: 'column', gap: 10 }}>
