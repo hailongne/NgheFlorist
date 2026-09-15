@@ -540,7 +540,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - TỈ LỆ CHUẨN DỌC 3:4 */}
+      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - TỈ LỆ CHUẨN NGANG 5:4 */}
       {banners && banners.length > 0 && (
         <section style={{ padding: '36px 0 28px', background: 'var(--color-white)' }}>
           <div className="container">
@@ -548,10 +548,10 @@ export default function HomePage() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: banners.length === 1 
-                  ? 'minmax(280px, 420px)' 
-                  : 'repeat(auto-fit, minmax(260px, 1fr))',
+                  ? 'minmax(320px, 640px)' 
+                  : 'repeat(auto-fit, minmax(320px, 1fr))',
                 gap: 24,
-                maxWidth: banners.length <= 2 ? '760px' : '1100px',
+                maxWidth: '1200px',
                 margin: '0 auto'
               }}
             >
@@ -562,7 +562,7 @@ export default function HomePage() {
                   className="homepage-campaign-banner"
                   style={{
                     position: 'relative',
-                    aspectRatio: '3 / 4',
+                    aspectRatio: '5 / 4',
                     width: '100%',
                     borderRadius: 'var(--radius-lg, 16px)',
                     overflow: 'hidden',
