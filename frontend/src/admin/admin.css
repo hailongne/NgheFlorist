@@ -195,24 +195,50 @@
 .admin-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.2s ease;
   text-decoration: none;
+  line-height: 1.4;
 }
 
 .admin-btn-primary {
-  background: var(--admin-primary);
-  color: #fff;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 3px 12px rgba(2, 132, 199, 0.28);
 }
 
 .admin-btn-primary:hover {
-  background: var(--admin-primary-hover);
+  box-shadow: 0 5px 16px rgba(2, 132, 199, 0.38);
+  transform: translateY(-1px);
+}
+
+.admin-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #CBD5E1;
+  transition: all 0.2s ease;
+}
+
+.admin-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .admin-btn-outline {
@@ -227,8 +253,10 @@
 }
 
 .admin-btn-danger {
-  background: var(--admin-danger);
+  background: #ef4444;
   color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
 }
 
 .admin-content {

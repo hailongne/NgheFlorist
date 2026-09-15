@@ -158,7 +158,7 @@ app.get('/api/content/homepage', async (_req: Request, res: Response) => {
 app.get('/api/content/menu', async (_req: Request, res: Response) => {
   try {
     const [items] = await pool.query<RowDataPacket[]>(`
-      SELECT id, label, url, sort_order 
+      SELECT id, label, url, icon, sort_order 
       FROM menu_items 
       WHERE is_active = 1 
       ORDER BY sort_order ASC
@@ -182,6 +182,22 @@ app.get('/api/content/settings', async (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     res.status(500).json({ error: 'Lỗi tải cấu hình website' });
+  }
+});
+
+// Public Contact Widgets API for Storefront popup
+app.get('/api/contact-widgets', async (_req: Request, res: Response) => {
+  try {
+    const [widgets] = await pool.query<RowDataPacket[]>(`
+      SELECT id, platform_type, title, subtitle, action_link, sort_order, is_active
+      FROM contact_widgets
+      WHERE is_active = 1
+      ORDER BY sort_order ASC, id ASC
+    `);
+    res.json(widgets);
+  } catch (err: any) {
+    console.error('Error fetching contact widgets:', err);
+    res.status(500).json({ error: 'Lỗi tải danh sách nút tư vấn' });
   }
 });
 

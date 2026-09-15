@@ -104,37 +104,37 @@ export default function CustomOrderPage() {
     {
       value: 'Bó hoa',
       label: 'Bó hoa',
-      icon: '💐',
+      icon: '⚘',
       minPrice: 'Từ 300k'
     },
     {
       value: 'Giỏ hoa',
       label: 'Giỏ hoa',
-      icon: '🧺',
+      icon: '❀',
       minPrice: 'Từ 600k'
     },
     {
       value: 'Kệ hoa',
       label: 'Kệ hoa',
-      icon: '🏵️',
+      icon: '◈',
       minPrice: 'Từ 1.2tr'
     },
     {
       value: 'Hoa Cưới',
       label: 'Hoa Cưới',
-      icon: '👰',
+      icon: '♡',
       minPrice: 'Từ 500k'
     },
     {
       value: 'Kệ Tang',
       label: 'Kệ Tang',
-      icon: '🕊️',
+      icon: '⚜',
       minPrice: 'Từ 800k'
     },
     {
       value: 'Khác',
       label: 'Khác',
-      icon: '✨',
+      icon: '✦',
       minPrice: 'Tùy ý'
     }
   ];

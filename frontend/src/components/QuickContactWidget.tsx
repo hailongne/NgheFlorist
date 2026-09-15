@@ -1,6 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PhoneOutlined, MessageOutlined, CloseOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import {
+  PhoneOutlined,
+  MessageOutlined,
+  CloseOutlined,
+  ThunderboltOutlined,
+  FacebookOutlined,
+  InstagramOutlined
+} from '@ant-design/icons';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+
+export type PlatformType = 'zalo' | 'facebook' | 'instagram' | 'phone';
+
+export interface ContactWidgetItem {
+  id: number;
+  platform_type: PlatformType;
+  title: string;
+  subtitle: string | null;
+  action_link: string;
+  sort_order: number;
+  is_active: number | boolean;
+}
 
 interface QuickContactWidgetProps {
   hotline1?: string;
@@ -20,8 +39,29 @@ export default function QuickContactWidget({
   const hotline2 = propHotline2 || siteSettings.hotline2 || '0329 806 866';
   const zalo1Url = propZalo1Url || siteSettings.zaloUrl1 || 'https://zalo.me/0862926866';
   const zalo2Url = propZalo2Url || siteSettings.zaloUrl2 || 'https://zalo.me/0329806866';
+
   const [isOpen, setIsOpen] = useState(false);
+  const [widgets, setWidgets] = useState<ContactWidgetItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const widgetRef = useRef<HTMLDivElement>(null);
+
+  // Fetch dynamic contact widgets from API
+  useEffect(() => {
+    fetch('/api/contact-widgets')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load contact widgets');
+        return res.json();
+      })
+      .then((data: ContactWidgetItem[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setWidgets(data);
+        }
+      })
+      .catch(err => {
+        console.warn('Using fallback contact widgets:', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   // Close when clicking outside
   useEffect(() => {
@@ -38,6 +78,43 @@ export default function QuickContactWidget({
 
   const cleanPhone1 = hotline1.replace(/\s+/g, '');
   const cleanPhone2 = hotline2.replace(/\s+/g, '');
+
+  const getPlatformStyle = (type: PlatformType, idx: number) => {
+    switch (type) {
+      case 'zalo':
+        return {
+          bgColor: idx % 2 === 0 ? '#0068FF' : '#0284C7',
+          hoverBg: idx % 2 === 0 ? '#0053cc' : '#0369A1',
+          shadow: idx % 2 === 0 ? '0 4px 12px rgba(0, 104, 255, 0.28)' : '0 4px 12px rgba(2, 132, 199, 0.28)',
+          iconText: `Z${idx + 1}`,
+          textColor: idx % 2 === 0 ? '#0068FF' : '#0284C7'
+        };
+      case 'facebook':
+        return {
+          bgColor: '#0084FF',
+          hoverBg: '#006ed6',
+          shadow: '0 4px 12px rgba(0, 132, 255, 0.28)',
+          iconText: 'FB',
+          textColor: '#0084FF'
+        };
+      case 'instagram':
+        return {
+          bgColor: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+          hoverBg: 'linear-gradient(45deg, #e08423 0%, #d6582c 25%, #cc1733 50%, #bc1356 75%, #ac0878 100%)',
+          shadow: '0 4px 12px rgba(225, 48, 108, 0.28)',
+          iconText: 'IG',
+          textColor: '#E1306C'
+        };
+      case 'phone':
+        return {
+          bgColor: '#10B981',
+          hoverBg: '#059669',
+          shadow: '0 4px 12px rgba(16, 185, 129, 0.28)',
+          iconText: 'TEL',
+          textColor: '#059669'
+        };
+    }
+  };
 
   return (
     <div
@@ -61,9 +138,9 @@ export default function QuickContactWidget({
             marginBottom: 12,
             backgroundColor: '#FFFFFF',
             borderRadius: 16,
-            boxShadow: '0 12px 36px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(0, 104, 255, 0.12)',
+            boxShadow: '0 14px 40px rgba(15, 23, 42, 0.2), 0 4px 14px rgba(0, 104, 255, 0.12)',
             border: '1px solid rgba(226, 232, 240, 0.9)',
-            width: 'min(330px, calc(100vw - 32px))',
+            width: 'min(340px, calc(100vw - 32px))',
             padding: '18px 16px',
             animation: 'fadeInUp 0.25s ease-out'
           }}
@@ -87,10 +164,10 @@ export default function QuickContactWidget({
               </div>
               <div>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1E293B', lineHeight: 1.2 }}>
-                  TƯ VẤN NHANH QUA ZALO
+                  KẾT NỐI TƯ VẤN NHANH
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 600 }}>
-                  ● 1 chạm kết nối ngay (Không cần điền form)
+                  ● 1 chạm phản hồi ngay qua Florist
                 </div>
               </div>
             </div>
@@ -116,121 +193,141 @@ export default function QuickContactWidget({
           </div>
 
           <div style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: 14, lineHeight: 1.45 }}>
-            Chọn 1 trong 2 hotline Zalo để chat trực tiếp với Florist của Nghệ Florist:
+            Chọn kênh liên hệ thuận tiện nhất để nhận tư vấn & duyệt ảnh hoa:
           </div>
 
-          {/* 2 Zalo Primary Action Buttons */}
+          {/* Dynamic Buttons (or Fallback) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
-            {/* Zalo 1 Button */}
-            <a
-              href={zalo1Url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                backgroundColor: '#0068FF',
-                color: '#FFFFFF',
-                borderRadius: 12,
-                padding: '12px 14px',
-                textDecoration: 'none',
-                transition: 'transform 0.15s ease, background-color 0.15s ease',
-                boxShadow: '0 4px 12px rgba(0, 104, 255, 0.28)'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = '#0053cc';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = '#0068FF';
-                e.currentTarget.style.transform = 'none';
-              }}
-            >
-              <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 10,
-                  backgroundColor: '#FFFFFF',
-                  color: '#0068FF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  flexShrink: 0
-                }}
-              >
-                Z1
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>
-                  Chat Zalo 1: {hotline1}
-                </div>
-                <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>
-                  Tư vấn mẫu hoa & Báo giá nhanh
-                </div>
-              </div>
-            </a>
+            {widgets.length > 0 ? (
+              widgets.map((w, idx) => {
+                const style = getPlatformStyle(w.platform_type, idx);
+                return (
+                  <a
+                    key={w.id}
+                    href={w.action_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      background: style.bgColor,
+                      color: '#FFFFFF',
+                      borderRadius: 12,
+                      padding: '12px 14px',
+                      textDecoration: 'none',
+                      transition: 'transform 0.15s ease, opacity 0.15s ease',
+                      boxShadow: style.shadow
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.opacity = '0.95';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: 10,
+                        backgroundColor: '#FFFFFF',
+                        color: style.textColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: w.platform_type === 'zalo' ? 17 : 18,
+                        fontWeight: 900,
+                        flexShrink: 0
+                      }}
+                    >
+                      {w.platform_type === 'zalo' ? (
+                        style.iconText
+                      ) : w.platform_type === 'facebook' ? (
+                        <FacebookOutlined />
+                      ) : w.platform_type === 'instagram' ? (
+                        <InstagramOutlined />
+                      ) : (
+                        <PhoneOutlined />
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>
+                        {w.title}
+                      </div>
+                      {w.subtitle && (
+                        <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>
+                          {w.subtitle}
+                        </div>
+                      )}
+                    </div>
+                  </a>
+                );
+              })
+            ) : (
+              /* Fallback static buttons */
+              <>
+                <a
+                  href={zalo1Url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    backgroundColor: '#0068FF',
+                    color: '#FFFFFF',
+                    borderRadius: 12,
+                    padding: '12px 14px',
+                    textDecoration: 'none',
+                    transition: 'transform 0.15s ease, background-color 0.15s ease',
+                    boxShadow: '0 4px 12px rgba(0, 104, 255, 0.28)'
+                  }}
+                >
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#FFFFFF', color: '#0068FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, flexShrink: 0 }}>
+                    Z1
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>Chat Zalo 1: {hotline1}</div>
+                    <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>Tư vấn mẫu hoa & Báo giá nhanh</div>
+                  </div>
+                </a>
 
-            {/* Zalo 2 Button */}
-            <a
-              href={zalo2Url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                backgroundColor: '#0284C7',
-                color: '#FFFFFF',
-                borderRadius: 12,
-                padding: '12px 14px',
-                textDecoration: 'none',
-                transition: 'transform 0.15s ease, background-color 0.15s ease',
-                boxShadow: '0 4px 12px rgba(2, 132, 199, 0.28)'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = '#0369A1';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = '#0284C7';
-                e.currentTarget.style.transform = 'none';
-              }}
-            >
-              <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 10,
-                  backgroundColor: '#FFFFFF',
-                  color: '#0284C7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  flexShrink: 0
-                }}
-              >
-                Z2
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>
-                  Chat Zalo 2: {hotline2}
-                </div>
-                <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>
-                  Tư vấn sự kiện & Thiết kế riêng
-                </div>
-              </div>
-            </a>
+                <a
+                  href={zalo2Url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    backgroundColor: '#0284C7',
+                    color: '#FFFFFF',
+                    borderRadius: 12,
+                    padding: '12px 14px',
+                    textDecoration: 'none',
+                    transition: 'transform 0.15s ease, background-color 0.15s ease',
+                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.28)'
+                  }}
+                >
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#FFFFFF', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 900, flexShrink: 0 }}>
+                    Z2
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.94rem', fontWeight: 800, lineHeight: 1.2 }}>Chat Zalo 2: {hotline2}</div>
+                    <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: 2 }}>Gửi ảnh hoa thực tế & Đặt theo yêu cầu</div>
+                  </div>
+                </a>
+              </>
+            )}
           </div>
 
-          {/* 2 Hotline Call Buttons */}
+          {/* Hotline Call Quick Bar */}
           <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 12 }}>
             <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8, textAlign: 'center' }}>
               HOẶC GỌI ĐIỆN TRỰC TIẾP
@@ -252,14 +349,6 @@ export default function QuickContactWidget({
                   fontWeight: 700,
                   textDecoration: 'none',
                   transition: 'all 0.15s'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = '#F1F5F9';
-                  e.currentTarget.style.borderColor = '#CBD5E1';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#F8FAFC';
-                  e.currentTarget.style.borderColor = '#E2E8F0';
                 }}
               >
                 <PhoneOutlined style={{ color: '#0068FF' }} />
@@ -283,14 +372,6 @@ export default function QuickContactWidget({
                   textDecoration: 'none',
                   transition: 'all 0.15s'
                 }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = '#F1F5F9';
-                  e.currentTarget.style.borderColor = '#CBD5E1';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#F8FAFC';
-                  e.currentTarget.style.borderColor = '#E2E8F0';
-                }}
               >
                 <PhoneOutlined style={{ color: '#0284C7' }} />
                 <span>{hotline2}</span>
@@ -300,133 +381,44 @@ export default function QuickContactWidget({
         </div>
       )}
 
-      {/* Floating Action Trigger Button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Helper Chip for Desktop/Tablet */}
+      {/* Main Trigger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Tư vấn nhanh"
+        className="quick-contact-btn pulse-effect"
+        style={{
+          width: 58,
+          height: 58,
+          borderRadius: '50%',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: isOpen ? '#1E293B' : 'linear-gradient(135deg, #0068FF 0%, #004ecc 100%)',
+          color: '#FFFFFF',
+          fontSize: 24,
+          boxShadow: '0 8px 24px rgba(0, 104, 255, 0.42)',
+          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          position: 'relative'
+        }}
+      >
+        {isOpen ? <CloseOutlined /> : <MessageOutlined />}
         {!isOpen && (
-          <div
-            className="quick-contact-pill desktop-only-action"
-            onClick={() => setIsOpen(true)}
+          <span
             style={{
-              backgroundColor: '#FFFFFF',
-              color: '#0068FF',
-              padding: '8px 16px',
-              borderRadius: '9999px',
-              fontSize: '0.86rem',
-              fontWeight: 700,
-              boxShadow: '0 4px 16px rgba(0, 104, 255, 0.18)',
-              border: '1px solid rgba(0, 104, 255, 0.15)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
+              position: 'absolute',
+              top: -3,
+              right: -3,
+              width: 14,
+              height: 14,
+              backgroundColor: '#10B981',
+              borderRadius: '50%',
+              border: '2px solid #FFFFFF'
             }}
-          >
-            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981', display: 'inline-block' }} />
-            <span>Chat Zalo tư vấn ngay</span>
-          </div>
+          />
         )}
-
-        {/* Main Floating Button */}
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Tư vấn Zalo"
-          className="quick-contact-fab"
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            backgroundColor: '#0068FF',
-            color: '#FFFFFF',
-            border: 'none',
-            boxShadow: '0 6px 20px rgba(0, 104, 255, 0.42)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s',
-            outline: 'none'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = 'scale(1.08)';
-            e.currentTarget.style.backgroundColor = '#0053cc';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.backgroundColor = '#0068FF';
-          }}
-        >
-          {/* Pulsing ring animation */}
-          {!isOpen && (
-            <span
-              style={{
-                position: 'absolute',
-                top: -4,
-                left: -4,
-                right: -4,
-                bottom: -4,
-                borderRadius: '50%',
-                border: '2px solid #0068FF',
-                opacity: 0.75,
-                animation: 'pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                pointerEvents: 'none'
-              }}
-            />
-          )}
-
-          {isOpen ? (
-            <CloseOutlined style={{ fontSize: 22 }} />
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: -0.5, lineHeight: 1 }}>Zalo</span>
-              <MessageOutlined style={{ fontSize: 18, marginTop: 2 }} />
-            </div>
-          )}
-        </button>
-      </div>
-
-      <style>{`
-        @keyframes pulseRing {
-          0% {
-            transform: scale(0.95);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.3);
-            opacity: 0;
-          }
-          100% {
-            transform: scale(1.3);
-            opacity: 0;
-          }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        /* Responsive positioning for Mobile and Tablet */
-        @media (max-width: 768px) {
-          .quick-contact-widget-root {
-            bottom: 84px !important;
-            right: 16px !important;
-          }
-          .quick-contact-fab {
-            width: 50px !important;
-            height: 50px !important;
-          }
-        }
-      `}</style>
+      </button>
     </div>
   );
 }

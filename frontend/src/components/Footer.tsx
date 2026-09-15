@@ -155,18 +155,18 @@ export default function Footer() {
               Hotline 1: <a href={`tel:${hotline1.replace(/\s+/g, '')}`} style={{ fontWeight: 700, color: 'var(--color-text)' }}>{hotline1}</a> • Hotline 2: <a href={`tel:${hotline2.replace(/\s+/g, '')}`} style={{ fontWeight: 700, color: 'var(--color-text)' }}>{hotline2}</a>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap', width: '100%', maxWidth: 360 }}>
-              <a 
-                href={zaloUrl1} 
-                target="_blank" 
+              <a
+                href={zaloUrl1}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary btn-sm"
                 style={{ flex: '1 1 140px', borderRadius: 'var(--radius-full)', padding: '9px 12px', fontSize: '0.82rem', textAlign: 'center', textDecoration: 'none' }}
               >
                 💬 Zalo 1 ({hotline1})
               </a>
-              <a 
-                href={zaloUrl2} 
-                target="_blank" 
+              <a
+                href={zaloUrl2}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-soft btn-sm"
                 style={{ flex: '1 1 140px', borderRadius: 'var(--radius-full)', padding: '9px 12px', fontSize: '0.82rem', textAlign: 'center', textDecoration: 'none' }}

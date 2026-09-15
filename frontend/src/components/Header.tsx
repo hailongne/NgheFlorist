@@ -15,12 +15,25 @@ import {
   UpOutlined,
   ArrowLeftOutlined,
   CrownOutlined,
-  DashboardOutlined
+  DashboardOutlined,
+  PhoneOutlined,
+  FacebookOutlined,
+  InstagramOutlined
 } from '@ant-design/icons';
 import { useCustomerRequest } from '../context/RequestContext';
 import { useAdminAuth } from '../admin/AdminAuthContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
+
+interface HeaderContactWidget {
+  id: number;
+  platform_type: 'zalo' | 'facebook' | 'instagram' | 'phone' | string;
+  title: string;
+  subtitle?: string | null;
+  action_link: string;
+  sort_order: number;
+  is_active: number | boolean;
+}
 
 interface SearchResult {
   id: number;
@@ -35,6 +48,7 @@ interface MenuItem {
   id: number;
   label: string;
   url: string;
+  icon?: string | null;
   sort_order: number;
 }
 
@@ -58,6 +72,7 @@ export default function Header() {
   const [customerUser, setCustomerUser] = useState<{ id: number; username: string; email: string; full_name?: string } | null>(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showZaloDropdown, setShowZaloDropdown] = useState(false);
+  const [contactWidgets, setContactWidgets] = useState<HeaderContactWidget[]>([]);
 
   // Admin Auth context & local fallback
   const { user: adminUser, isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAdminAuth();
@@ -154,6 +169,24 @@ export default function Header() {
       .catch(console.error);
   }, []);
 
+  // Fetch dynamic contact widgets from admin
+  useEffect(() => {
+    fetch('/api/contact-widgets')
+      .then(r => (r.ok ? r.json() : []))
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setContactWidgets(data);
+        }
+      })
+      .catch(err => console.warn('Header contact widgets fetch fallback:', err));
+  }, []);
+
+  const activeContactWidgets = React.useMemo(() => {
+    return contactWidgets
+      .filter(w => Boolean(w.is_active))
+      .sort((a, b) => Number(a.sort_order) - Number(b.sort_order));
+  }, [contactWidgets]);
+
   // Debounced search
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -218,6 +251,48 @@ export default function Header() {
   ];
 
   const displayMenu = menuItems.length > 0 ? menuItems : defaultMenuItems;
+
+  // Danh mục hoa hiển thị trong Accordion trên Mobile Drawer, hỗ trợ icon tùy chỉnh từ CMS (chuẩn tối giản 2 màu)
+  const flowerCollectionLinks = React.useMemo(() => {
+    const fromMenu = menuItems.filter(m => 
+      m.url.includes('/category/') || m.url === '/flowers' || m.url.includes('/flowers')
+    );
+
+    if (fromMenu.length > 0) {
+      return fromMenu.map(m => {
+        let icon = m.icon;
+        if (!icon) {
+          const lower = (m.label + ' ' + m.url).toLowerCase();
+          if (lower.includes('bo-hoa') || lower.includes('bó hoa')) icon = '⚘';
+          else if (lower.includes('gio-hoa') || lower.includes('giỏ hoa')) icon = '❀';
+          else if (lower.includes('ke-hoa') || lower.includes('kệ hoa')) icon = '◈';
+          else if (lower.includes('lan-ho-diep') || lower.includes('lan hồ điệp')) icon = '🪷';
+          else if (lower.includes('hoa-cuoi') || lower.includes('hoa cưới')) icon = '♡';
+          else if (lower.includes('flowers') || lower.includes('tất cả')) icon = '✦';
+          else icon = '❀';
+        }
+        // Chuẩn hóa icon tối giản, loại bỏ hoàn toàn emoji màu hoạt hình
+        if (icon === '💐' || icon === '🌹' || icon === '🌷') icon = '⚘';
+        else if (icon === '🧺') icon = '❀';
+        else if (icon === '🏵️' || icon === '🏵') icon = '◈';
+        else if (icon === '🪴') icon = '🪷';
+        else if (icon === '🎀' || icon === '👰' || icon === '💍') icon = '♡';
+        else if (icon === '🌸') icon = '❀';
+        else if (icon === '🔍') icon = '◎';
+        return { ...m, icon };
+      });
+    }
+
+    // Danh sách mặc định chuẩn biểu tượng tối giản
+    return [
+      { id: 'def-1', label: 'Tất cả mẫu hoa', url: '/flowers', icon: '✦' },
+      { id: 'def-2', label: 'Bó hoa tươi', url: '/category/bo-hoa', icon: '⚘' },
+      { id: 'def-3', label: 'Giỏ hoa', url: '/category/gio-hoa', icon: '❀' },
+      { id: 'def-4', label: 'Kệ hoa sự kiện', url: '/category/ke-hoa', icon: '◈' },
+      { id: 'def-5', label: 'Lan hồ điệp', url: '/category/lan-ho-diep', icon: '🪷' },
+      { id: 'def-6', label: 'Hoa cưới thiết kế', url: '/category/hoa-cuoi', icon: '♡' }
+    ];
+  }, [menuItems]);
 
   return (
     <>
@@ -447,12 +522,12 @@ export default function Header() {
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {[
-                      '🌸 Bó hoa hồng',
-                      '🧺 Giỏ hoa khai trương',
-                      '🪴 Lan hồ điệp cao cấp',
-                      '🎨 Tone pastel',
-                      '🎂 Hoa sinh nhật',
-                      '💐 Hoa chúc mừng'
+                      '⚘ Bó hoa tươi',
+                      '❀ Giỏ hoa khai trương',
+                      '🪷 Lan hồ điệp cao cấp',
+                      '✦ Hoa thiết kế riêng',
+                      '◈ Kệ hoa sự kiện',
+                      '♡ Hoa cưới cầm tay'
                     ].map((tag, idx) => {
                       const cleanKeyword = tag.replace(/^[^\w\s\u00C0-\u1EF9]+/, '').trim();
                       return (
@@ -485,10 +560,10 @@ export default function Header() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
                     {[
-                      { name: 'Lan Hồ Điệp', slug: 'lan-ho-diep', emoji: '🪴' },
-                      { name: 'Bó Hoa Tươi', slug: 'bo-hoa', emoji: '💐' },
-                      { name: 'Giỏ Hoa Sang Trọng', slug: 'gio-hoa', emoji: '🧺' },
-                      { name: 'Hoa Cưới & Sự Kiện', slug: 'hoa-cuoi', emoji: '💍' },
+                      { name: 'Lan Hồ Điệp', slug: 'lan-ho-diep', emoji: '🪷' },
+                      { name: 'Bó Hoa Tươi', slug: 'bo-hoa', emoji: '⚘' },
+                      { name: 'Giỏ Hoa Sang Trọng', slug: 'gio-hoa', emoji: '❀' },
+                      { name: 'Hoa Cưới & Sự Kiện', slug: 'hoa-cuoi', emoji: '♡' },
                     ].map(cat => (
                       <div
                         key={cat.slug}
@@ -696,24 +771,24 @@ export default function Header() {
               <GiftOutlined /> Thiết kế riêng
             </button>
 
-            {/* Direct Zalo 1-Click Consultation Dropdown */}
+            {/* Direct 1-Click Consultation Dropdown (Lấy theo Admin Contact Widgets) */}
             <div ref={zaloDropdownRef} style={{ position: 'relative' }}>
               <button 
                 onClick={() => setShowZaloDropdown(!showZaloDropdown)}
                 className="btn btn-primary btn-sm"
                 style={{ 
                   borderRadius: 'var(--radius-full)', 
-                  padding: '8px 20px',
+                  padding: '8px 18px',
                   fontSize: '0.86rem',
                   fontWeight: 700,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 6,
-                  boxShadow: '0 2px 8px rgba(42, 117, 211, 0.25)',
+                  gap: 7,
+                  boxShadow: '0 3px 12px rgba(42, 117, 211, 0.28)',
                   whiteSpace: 'nowrap',
                   cursor: 'pointer'
                 }}
-                title="Tư vấn Zalo ngay (Không cần điền form)"
+                title="Tư vấn nhanh trực tiếp (Không cần điền form)"
               >
                 <MessageOutlined /> Tư vấn Zalo
               </button>
@@ -724,71 +799,144 @@ export default function Header() {
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     right: 0,
-                    width: 290,
+                    width: 320,
                     backgroundColor: '#FFFFFF',
-                    borderRadius: 14,
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 104, 255, 0.12)',
+                    borderRadius: 16,
+                    boxShadow: '0 12px 36px rgba(15, 23, 42, 0.18), 0 2px 10px rgba(0, 104, 255, 0.12)',
                     border: '1px solid #E2E8F0',
-                    padding: 14,
-                    zIndex: 1000
+                    padding: 16,
+                    zIndex: 1000,
+                    animation: 'fadeIn 0.15s ease'
                   }}
                 >
-                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1E293B', marginBottom: 2 }}>
-                    TƯ VẤN NHANH QUA ZALO
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1E293B', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      TƯ VẤN NHANH TRỰC TIẾP
+                    </div>
+                    {activeContactWidgets.length > 0 && (
+                      <span style={{ fontSize: '0.7rem', backgroundColor: '#ECFDF5', color: '#059669', fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>
+                        {activeContactWidgets.length} kênh hỗ trợ
+                      </span>
+                    )}
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 600, marginBottom: 10 }}>
-                    ● 1 chạm sang Zalo (Không cần điền form)
+                  <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 600, marginBottom: 12 }}>
+                    ● 1 chạm kết nối ngay (Không cần điền form)
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <a
-                      href={zaloUrl1}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setShowZaloDropdown(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        backgroundColor: '#0068FF',
-                        color: '#FFFFFF',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        textDecoration: 'none',
-                        fontSize: '0.86rem',
-                        fontWeight: 700
-                      }}
-                    >
-                      <MessageOutlined style={{ fontSize: 16 }} />
-                      <div>
-                        <div>Zalo 1: {hotline1}</div>
-                        <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText1 || 'Báo giá & chọn mẫu nhanh'}</div>
-                      </div>
-                    </a>
 
-                    <a
-                      href={zaloUrl2}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setShowZaloDropdown(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        backgroundColor: '#0284C7',
-                        color: '#FFFFFF',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        textDecoration: 'none',
-                        fontSize: '0.86rem',
-                        fontWeight: 700
-                      }}
-                    >
-                      <MessageOutlined style={{ fontSize: 16 }} />
-                      <div>
-                        <div>Zalo 2: {hotline2}</div>
-                        <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText2 || 'Sự kiện & thiết kế riêng'}</div>
-                      </div>
-                    </a>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 400, overflowY: 'auto' }}>
+                    {activeContactWidgets.length > 0 ? (
+                      activeContactWidgets.map((w, idx) => {
+                        const isZalo = w.platform_type === 'zalo';
+                        const isPhone = w.platform_type === 'phone';
+                        const isFb = w.platform_type === 'facebook';
+                        const isInsta = w.platform_type === 'instagram';
+                        
+                        const bg = isZalo 
+                          ? (idx % 2 === 0 ? '#0068FF' : '#0284C7')
+                          : isPhone ? '#10B981'
+                          : isFb ? '#0084FF'
+                          : isInsta ? 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)'
+                          : '#0F172A';
+
+                        return (
+                          <a
+                            key={w.id}
+                            href={w.action_link}
+                            target={isPhone ? '_self' : '_blank'}
+                            rel="noopener noreferrer"
+                            onClick={() => setShowZaloDropdown(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 10,
+                              background: bg,
+                              color: '#FFFFFF',
+                              borderRadius: 12,
+                              padding: '10px 14px',
+                              textDecoration: 'none',
+                              boxShadow: '0 3px 10px rgba(0, 0, 0, 0.08)',
+                              transition: 'transform 0.15s ease'
+                            }}
+                          >
+                            <div style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 8,
+                              backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 16,
+                              flexShrink: 0
+                            }}>
+                              {isZalo ? 'Z' : isPhone ? <PhoneOutlined /> : isFb ? <FacebookOutlined /> : isInsta ? <InstagramOutlined /> : <MessageOutlined />}
+                            </div>
+                            <div style={{ flexGrow: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '0.86rem', fontWeight: 700, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {w.title}
+                              </div>
+                              {w.subtitle && (
+                                <div style={{ fontSize: '0.72rem', opacity: 0.92, fontWeight: 400, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {w.subtitle}
+                                </div>
+                              )}
+                            </div>
+                          </a>
+                        );
+                      })
+                    ) : (
+                      <>
+                        <a
+                          href={zaloUrl1}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setShowZaloDropdown(false)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            backgroundColor: '#0068FF',
+                            color: '#FFFFFF',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            textDecoration: 'none',
+                            fontSize: '0.86rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          <MessageOutlined style={{ fontSize: 16 }} />
+                          <div>
+                            <div>Zalo 1: {hotline1}</div>
+                            <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText1 || 'Báo giá & chọn mẫu nhanh'}</div>
+                          </div>
+                        </a>
+
+                        <a
+                          href={zaloUrl2}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setShowZaloDropdown(false)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            backgroundColor: '#0284C7',
+                            color: '#FFFFFF',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            textDecoration: 'none',
+                            fontSize: '0.86rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          <MessageOutlined style={{ fontSize: 16 }} />
+                          <div>
+                            <div>Zalo 2: {hotline2}</div>
+                            <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText2 || 'Sự kiện & thiết kế riêng'}</div>
+                          </div>
+                        </a>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -1130,8 +1278,14 @@ export default function Header() {
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="mobile-nav-link"
+                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                 >
-                  Trang chủ
+                  {menuItems.find(m => m.url === '/')?.icon && (
+                    <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center' }}>
+                      {menuItems.find(m => m.url === '/')?.icon}
+                    </span>
+                  )}
+                  <span>Trang chủ</span>
                 </Link>
 
                 {/* Bộ sưu tập Accordion */}
@@ -1155,48 +1309,30 @@ export default function Header() {
 
                   {isCollectionsExpanded && (
                     <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <Link
-                        to="/flowers"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-primary-dark)', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-                      >
-                        ✦ Tất cả mẫu hoa
-                      </Link>
-                      <Link
-                        to="/category/bo-hoa"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-                      >
-                        💐 Bó hoa
-                      </Link>
-                      <Link
-                        to="/category/gio-hoa"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-                      >
-                        🧺 Giỏ hoa
-                      </Link>
-                      <Link
-                        to="/category/ke-hoa"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-                      >
-                        🏵️ Kệ hoa
-                      </Link>
-                      <Link
-                        to="/category/lan-ho-diep"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-                      >
-                        🪴 Lan hồ điệp
-                      </Link>
-                      <Link
-                        to="/category/hoa-cuoi"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        style={{ padding: '9px 14px', fontSize: '0.92rem', color: 'var(--color-text)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
-                      >
-                        👰 Hoa cưới
-                      </Link>
+                      {flowerCollectionLinks.map((item) => (
+                        <Link
+                          key={item.id || item.url}
+                          to={item.url}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          style={{
+                            padding: '9px 14px',
+                            fontSize: '0.92rem',
+                            color: item.url === '/flowers' ? 'var(--color-primary-dark)' : 'var(--color-text)',
+                            fontWeight: item.url === '/flowers' ? 600 : 500,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10
+                          }}
+                        >
+                          {item.icon && (
+                            <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {item.icon}
+                            </span>
+                          )}
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1205,16 +1341,28 @@ export default function Header() {
                   to="/about"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="mobile-nav-link"
+                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                 >
-                  Về Nghệ
+                  {menuItems.find(m => m.url === '/about')?.icon && (
+                    <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center' }}>
+                      {menuItems.find(m => m.url === '/about')?.icon}
+                    </span>
+                  )}
+                  <span>Về Nghệ</span>
                 </Link>
 
                 <Link
                   to="/policy"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="mobile-nav-link"
+                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                 >
-                  Liên hệ
+                  {menuItems.find(m => m.url === '/policy')?.icon && (
+                    <span style={{ fontSize: '1.1rem', width: 22, textAlign: 'center' }}>
+                      {menuItems.find(m => m.url === '/policy')?.icon}
+                    </span>
+                  )}
+                  <span>Liên hệ</span>
                 </Link>
 
                 {/* Primary CTA Buttons in Drawer: Thiết kế riêng & 2 Zalo 1-click */}
@@ -1241,54 +1389,119 @@ export default function Header() {
                   </button>
 
                   <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 700, textAlign: 'center', marginTop: 4 }}>
-                    ● 1 chạm chat Zalo tư vấn ngay (Không cần điền form)
+                    ● 1 chạm kết nối tư vấn ngay (Không cần điền form)
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <a
-                      href={zaloUrl1}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="btn btn-primary"
-                      style={{ 
-                        padding: '10px 8px', 
-                        borderRadius: 'var(--radius-full)', 
-                        fontWeight: 700, 
-                        fontSize: '0.82rem',
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        gap: 6,
-                        textDecoration: 'none',
-                        boxShadow: '0 3px 12px rgba(42, 117, 211, 0.25)',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      <MessageOutlined /> Zalo 1: {hotline1}
-                    </a>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {activeContactWidgets.length > 0 ? (
+                      activeContactWidgets.map((w, idx) => {
+                        const isZalo = w.platform_type === 'zalo';
+                        const isPhone = w.platform_type === 'phone';
+                        const isFb = w.platform_type === 'facebook';
+                        const isInsta = w.platform_type === 'instagram';
+                        
+                        const bg = isZalo 
+                          ? (idx % 2 === 0 ? '#0068FF' : '#0284C7')
+                          : isPhone ? '#10B981'
+                          : isFb ? '#0084FF'
+                          : isInsta ? 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)'
+                          : '#0F172A';
 
-                    <a
-                      href={zaloUrl2}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="btn btn-soft"
-                      style={{ 
-                        padding: '10px 8px', 
-                        borderRadius: 'var(--radius-full)', 
-                        fontWeight: 700, 
-                        fontSize: '0.82rem',
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        gap: 6,
-                        textDecoration: 'none',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      <MessageOutlined /> Zalo 2: {hotline2}
-                    </a>
+                        return (
+                          <a
+                            key={w.id}
+                            href={w.action_link}
+                            target={isPhone ? '_self' : '_blank'}
+                            rel="noopener noreferrer"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 10,
+                              background: bg,
+                              color: '#FFFFFF',
+                              borderRadius: 12,
+                              padding: '10px 14px',
+                              textDecoration: 'none',
+                              fontSize: '0.84rem',
+                              fontWeight: 700,
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                            }}
+                          >
+                            <div style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 6,
+                              backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 14,
+                              flexShrink: 0
+                            }}>
+                              {isZalo ? 'Z' : isPhone ? <PhoneOutlined /> : isFb ? <FacebookOutlined /> : isInsta ? <InstagramOutlined /> : <MessageOutlined />}
+                            </div>
+                            <div style={{ flexGrow: 1, minWidth: 0 }}>
+                              <div style={{ lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {w.title}
+                              </div>
+                              {w.subtitle && (
+                                <div style={{ fontSize: '0.7rem', opacity: 0.9, fontWeight: 400, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {w.subtitle}
+                                </div>
+                              )}
+                            </div>
+                          </a>
+                        );
+                      })
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <a
+                          href={zaloUrl1}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="btn btn-primary"
+                          style={{ 
+                            padding: '10px 8px', 
+                            borderRadius: 'var(--radius-full)', 
+                            fontWeight: 700, 
+                            fontSize: '0.82rem',
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: 6,
+                            textDecoration: 'none',
+                            boxShadow: '0 3px 12px rgba(42, 117, 211, 0.25)',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <MessageOutlined /> Zalo 1: {hotline1}
+                        </a>
+
+                        <a
+                          href={zaloUrl2}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="btn btn-soft"
+                          style={{ 
+                            padding: '10px 8px', 
+                            borderRadius: 'var(--radius-full)', 
+                            fontWeight: 700, 
+                            fontSize: '0.82rem',
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: 6,
+                            textDecoration: 'none',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <MessageOutlined /> Zalo 2: {hotline2}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
 

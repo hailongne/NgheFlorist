@@ -31,6 +31,7 @@ import AdminPagesCmsPage from './admin/pages/AdminPagesCmsPage';
 import AdminMediaPage from './admin/pages/AdminMediaPage';
 import AdminSettingsPage from './admin/pages/AdminSettingsPage';
 import AdminAuditLogsPage from './admin/pages/AdminAuditLogsPage';
+import AdminContactWidgetsPage from './admin/pages/AdminContactWidgetsPage';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="requests" replace />} />
               <Route path="requests" element={<AdminCustomerRequestsPage />} />
+              <Route path="contact-widgets" element={<AdminContactWidgetsPage />} />
               <Route path="dashboard" element={<Navigate to="/admin/requests" replace />} />
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="products/category/:id" element={<AdminProductsPage />} />

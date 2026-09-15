@@ -9,12 +9,16 @@ import {
   AppstoreOutlined,
   PlusOutlined,
   DeleteOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  CopyOutlined,
+  DesktopOutlined,
+  TabletOutlined,
+  MobileOutlined
 } from '@ant-design/icons';
 import ImageWithFallback, { BOTANICAL_FALLBACKS } from '../../components/ImageWithFallback';
 import { DEFAULT_SHOWROOM_COLLECTIONS, ShowroomCollectionItem } from '../../pages/HomePage';
 
-interface HeroData {
+export interface HeroDeviceConfig {
   badge: string;
   title: string;
   subtitle: string;
@@ -23,6 +27,12 @@ interface HeroData {
   cta_secondary_text: string;
   cta_secondary_url: string;
   hero_image: string;
+}
+
+export interface MultiDeviceHeroData {
+  desktop: HeroDeviceConfig;
+  tablet: HeroDeviceConfig;
+  mobile: HeroDeviceConfig;
 }
 
 interface CustomDesignData {
@@ -45,31 +55,30 @@ const MINIMAL_ELEGANT_ICONS = [
   { icon: '⚘', label: 'Cành hoa thanh mảnh' },
   { icon: '❀', label: 'Hoa nở 8 cánh' },
   { icon: '✿', label: 'Đóa hoa tối giản' },
+  { icon: '◈', label: 'Kệ hoa hình thoi' },
   { icon: '✦', label: 'Ngôi sao 4 cánh tinh hoa' },
   { icon: '✧', label: 'Tia sáng dịu dàng' },
-  { icon: '⚜', label: 'Hoa Ly hoàng gia (Fleur-de-lis)' },
+  { icon: '⚜', label: 'Hoa Ly hoàng gia' },
   { icon: '🪷', label: 'Hoa sen thanh tao' },
   { icon: '🌿', label: 'Nhánh thảo mộc' },
   { icon: '🌱', label: 'Mầm hoa tươi mát' },
-  { icon: '🍃', label: 'Lá trà tự nhiên' },
-  { icon: '🪶', label: 'Lông vũ nghệ thuật' },
-  { icon: '🕊️', label: 'Bồ câu trắng bình an' },
-  { icon: '🎀', label: 'Nơ lụa trang nhã' },
-  { icon: '🤍', label: 'Trái tim thuần khiết' },
-  { icon: '🥂', label: 'Ly mừng sự kiện' },
+  { icon: '🍃', label: 'Lá bay tự nhiên' },
+  { icon: '♡', label: 'Trái tim thuần khiết' },
   { icon: '✨', label: 'Tinh hoa lấp lánh' },
+  { icon: '⌂', label: 'Trang chủ tối giản' },
+  { icon: '◎', label: 'Vòng tròn tinh hoa' }
 ];
 
-const VIBRANT_EMOJI_ICONS = [
-  { icon: '💐', label: 'Bó hoa tươi' },
-  { icon: '🧺', label: 'Giỏ hoa' },
-  { icon: '🏵️', label: 'Kệ hoa sự kiện' },
-  { icon: '🪴', label: 'Chậu hoa / Lan' },
-  { icon: '👰', label: 'Hoa cưới cô dâu' },
-  { icon: '🌹', label: 'Hoa hồng' },
-  { icon: '🌸', label: 'Hoa anh đào' },
-  { icon: '🌻', label: 'Hướng dương' },
-  { icon: '🎁', label: 'Hộp quà' },
+const BOTANICAL_LINE_ICONS = [
+  { icon: '⚘', label: 'Bó hoa tươi' },
+  { icon: '❀', label: 'Giỏ hoa' },
+  { icon: '◈', label: 'Kệ hoa sự kiện' },
+  { icon: '🪷', label: 'Lan hồ điệp' },
+  { icon: '♡', label: 'Hoa cưới thiết kế' },
+  { icon: '✦', label: 'Tất cả mẫu hoa' },
+  { icon: '✨', label: 'Cắm hoa yêu cầu' },
+  { icon: '🌿', label: 'Về thương hiệu' },
+  { icon: '⚜', label: 'Hoa nghệ thuật' }
 ];
 
 export default function AdminHomepageCmsPage() {
@@ -81,16 +90,41 @@ export default function AdminHomepageCmsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const customDesignFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Hero state
-  const [hero, setHero] = useState<HeroData>({
-    badge: 'TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
-    title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
-    subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
-    cta_primary_text: 'Xem bộ sưu tập hoa',
-    cta_primary_url: '/flowers',
-    cta_secondary_text: 'Cắm hoa theo yêu cầu',
-    cta_secondary_url: '/custom-order',
-    hero_image: ''
+  // Active tab for 3 devices
+  const [activeHeroTab, setActiveHeroTab] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+
+  // Multi-device Hero state
+  const [hero, setHero] = useState<MultiDeviceHeroData>({
+    desktop: {
+      badge: '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+      title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+      subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
+      cta_primary_text: 'Xem bộ sưu tập hoa',
+      cta_primary_url: '/flowers',
+      cta_secondary_text: 'Cắm hoa theo yêu cầu',
+      cta_secondary_url: '/custom-order',
+      hero_image: ''
+    },
+    tablet: {
+      badge: '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+      title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+      subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp ảnh duyệt trước khi giao.',
+      cta_primary_text: 'Xem bộ sưu tập hoa',
+      cta_primary_url: '/flowers',
+      cta_secondary_text: 'Cắm hoa theo yêu cầu',
+      cta_secondary_url: '/custom-order',
+      hero_image: ''
+    },
+    mobile: {
+      badge: '✦ NGHỆ FLORIST SHOWROOM',
+      title: 'Hoa Tươi Thiết Kế Theo Yêu Cầu',
+      subtitle: 'Gửi ảnh thành phẩm thực tế duyệt trước khi giao tận nơi.',
+      cta_primary_text: 'Xem mẫu hoa',
+      cta_primary_url: '/flowers',
+      cta_secondary_text: 'Cắm theo yêu cầu',
+      cta_secondary_url: '/custom-order',
+      hero_image: ''
+    }
   });
 
   // Custom Design Banner state (Section 6)
@@ -118,7 +152,41 @@ export default function AdminHomepageCmsPage() {
       const res = await fetch('/api/content/homepage');
       if (res.ok) {
         const data = await res.json();
-        if (data.hero) setHero(data.hero);
+        if (data.hero) {
+          const d = data.hero;
+          setHero({
+            desktop: d.desktop ? { ...d.desktop, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' } : {
+              badge: d.badge || '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+              title: d.title || 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+              subtitle: d.subtitle || '',
+              cta_primary_text: d.cta_primary_text || 'Xem bộ sưu tập hoa',
+              cta_primary_url: '/flowers',
+              cta_secondary_text: d.cta_secondary_text || 'Cắm hoa theo yêu cầu',
+              cta_secondary_url: '/custom-order',
+              hero_image: d.hero_image || ''
+            },
+            tablet: d.tablet ? { ...d.tablet, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' } : {
+              badge: d.badge || '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+              title: d.title || 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+              subtitle: d.subtitle || '',
+              cta_primary_text: d.cta_primary_text || 'Xem bộ sưu tập hoa',
+              cta_primary_url: '/flowers',
+              cta_secondary_text: d.cta_secondary_text || 'Cắm hoa theo yêu cầu',
+              cta_secondary_url: '/custom-order',
+              hero_image: d.hero_image || ''
+            },
+            mobile: d.mobile ? { ...d.mobile, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' } : {
+              badge: d.badge || '✦ NGHỆ FLORIST SHOWROOM',
+              title: d.title || 'Hoa Tươi Thiết Kế Theo Yêu Cầu',
+              subtitle: d.subtitle || '',
+              cta_primary_text: d.cta_primary_text || 'Xem mẫu hoa',
+              cta_primary_url: '/flowers',
+              cta_secondary_text: d.cta_secondary_text || 'Cắm theo yêu cầu',
+              cta_secondary_url: '/custom-order',
+              hero_image: d.hero_image || ''
+            }
+          });
+        }
         if (data.customDesign) setCustomDesign(data.customDesign);
         if (data.commitments && data.commitments.length > 0) setCommitments(data.commitments);
         if (data.collections && Array.isArray(data.collections) && data.collections.length > 0) {
@@ -136,14 +204,27 @@ export default function AdminHomepageCmsPage() {
     fetchHomepageData();
   }, []);
 
+  const handleCopyFromDesktop = (target: 'tablet' | 'mobile') => {
+    setHero(prev => ({
+      ...prev,
+      [target]: {
+        ...prev.desktop,
+        hero_image: prev[target].hero_image || prev.desktop.hero_image
+      }
+    }));
+    alert(`Đã sao chép nội dung văn bản từ Desktop sang ${target === 'tablet' ? 'Tablet' : 'Mobile'}!`);
+  };
+
   const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       const payloadHero = {
-        ...hero,
-        cta_primary_url: '/flowers',
-        cta_secondary_url: '/custom-order'
+        desktop: { ...hero.desktop, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
+        tablet: { ...hero.tablet, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
+        mobile: { ...hero.mobile, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
+        // Fallback root fields for backward compatibility
+        ...hero.desktop
       };
 
       const res = await fetch('/api/admin/content/homepage', {
@@ -313,7 +394,13 @@ export default function AdminHomepageCmsPage() {
 
       const data = await res.json();
       if (res.ok && data.file?.url) {
-        setHero(prev => ({ ...prev, hero_image: data.file.url }));
+        setHero(prev => ({
+          ...prev,
+          [activeHeroTab]: {
+            ...prev[activeHeroTab],
+            hero_image: data.file.url
+          }
+        }));
       } else {
         // Fallback upload endpoint
         const fbRes = await fetch('/api/customer-requests/upload-attachment', {
@@ -323,7 +410,13 @@ export default function AdminHomepageCmsPage() {
         const fbData = await fbRes.json();
         const fbUrl = fbData.fileUrl || fbData.url;
         if (fbRes.ok && fbUrl) {
-          setHero(prev => ({ ...prev, hero_image: fbUrl }));
+          setHero(prev => ({
+            ...prev,
+            [activeHeroTab]: {
+              ...prev[activeHeroTab],
+              hero_image: fbUrl
+            }
+          }));
         } else {
           throw new Error(data.error || 'Lỗi tải ảnh lên máy chủ');
         }
@@ -392,23 +485,117 @@ export default function AdminHomepageCmsPage() {
     return <div style={{ padding: '40px', textAlign: 'center', color: '#5D9EAF' }}>Đang tải cấu hình trang chủ...</div>;
   }
 
+  const currentDeviceHero = hero[activeHeroTab];
+
   return (
     <div>
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">Quản Trị Trang Chủ (Homepage CMS)</h1>
           <div className="admin-page-subtitle">
-            Chỉnh sửa Banner chính (Hero), slogan, nút bấm và 5 cam kết thương hiệu hiển thị ngoài trang chủ
+            Chỉnh sửa Banner chính (Hero) phân tách theo PC / Tablet / Mobile, slogan và các cam kết hiển thị ngoài trang chủ
           </div>
         </div>
       </div>
 
       <form onSubmit={handleSaveAll}>
-        {/* Section 1: Hero Banner */}
+        {/* Section 1: Multi-Device Hero Banner */}
         <div className="admin-card">
-          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#26383D', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <PictureOutlined style={{ color: '#5D9EAF' }} /> Banner Chính (Hero Section)
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: 12 }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#26383D', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <PictureOutlined style={{ color: '#5D9EAF' }} /> Banner Chính (Hero Section) — Phân Tách Thiết Bị
+            </h3>
+            {activeHeroTab !== 'desktop' && (
+              <button
+                type="button"
+                onClick={() => handleCopyFromDesktop(activeHeroTab)}
+                className="admin-btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '6px 12px' }}
+                title="Sao chép tiêu đề, mô tả và nút bấm từ Desktop sang"
+              >
+                <CopyOutlined />
+                Sao chép dữ liệu từ PC sang {activeHeroTab === 'tablet' ? 'Tablet' : 'Mobile'}
+              </button>
+            )}
+          </div>
+
+          {/* 3 Tabs Header: PC, Tablet, Mobile */}
+          <div style={{ display: 'flex', gap: 8, borderBottom: '2px solid #E2E8F0', marginBottom: 20, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setActiveHeroTab('desktop')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 18px',
+                fontWeight: 700,
+                fontSize: 14,
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                borderBottom: activeHeroTab === 'desktop' ? '3px solid #5D9EAF' : '3px solid transparent',
+                color: activeHeroTab === 'desktop' ? '#5D9EAF' : '#64748B',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <DesktopOutlined />
+              <span>[ 💻 PC / Desktop ]</span>
+              <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, backgroundColor: activeHeroTab === 'desktop' ? '#E4EEF1' : '#F1F5F9', color: '#475569' }}>
+                Tỉ lệ ngang 16:9
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveHeroTab('tablet')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 18px',
+                fontWeight: 700,
+                fontSize: 14,
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                borderBottom: activeHeroTab === 'tablet' ? '3px solid #5D9EAF' : '3px solid transparent',
+                color: activeHeroTab === 'tablet' ? '#5D9EAF' : '#64748B',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <TabletOutlined />
+              <span>[ 📟 Tablet ]</span>
+              <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, backgroundColor: activeHeroTab === 'tablet' ? '#E4EEF1' : '#F1F5F9', color: '#475569' }}>
+                Tỉ lệ 4:3
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveHeroTab('mobile')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 18px',
+                fontWeight: 700,
+                fontSize: 14,
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                borderBottom: activeHeroTab === 'mobile' ? '3px solid #5D9EAF' : '3px solid transparent',
+                color: activeHeroTab === 'mobile' ? '#5D9EAF' : '#64748B',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <MobileOutlined />
+              <span>[ 📱 Mobile ]</span>
+              <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, backgroundColor: activeHeroTab === 'mobile' ? '#E4EEF1' : '#F1F5F9', color: '#475569' }}>
+                Tỉ lệ dọc 4:5
+              </span>
+            </button>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '28px', alignItems: 'start' }}>
             <div>
@@ -417,8 +604,14 @@ export default function AdminHomepageCmsPage() {
                 <input
                   type="text"
                   className="admin-input"
-                  value={hero.badge}
-                  onChange={(e) => setHero({ ...hero, badge: e.target.value })}
+                  value={currentDeviceHero.badge}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setHero(prev => ({
+                      ...prev,
+                      [activeHeroTab]: { ...prev[activeHeroTab], badge: val }
+                    }));
+                  }}
                 />
               </div>
 
@@ -428,8 +621,14 @@ export default function AdminHomepageCmsPage() {
                   type="text"
                   className="admin-input"
                   required
-                  value={hero.title}
-                  onChange={(e) => setHero({ ...hero, title: e.target.value })}
+                  value={currentDeviceHero.title}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setHero(prev => ({
+                      ...prev,
+                      [activeHeroTab]: { ...prev[activeHeroTab], title: val }
+                    }));
+                  }}
                 />
               </div>
 
@@ -438,8 +637,14 @@ export default function AdminHomepageCmsPage() {
                 <textarea
                   className="admin-textarea"
                   rows={2}
-                  value={hero.subtitle}
-                  onChange={(e) => setHero({ ...hero, subtitle: e.target.value })}
+                  value={currentDeviceHero.subtitle}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setHero(prev => ({
+                      ...prev,
+                      [activeHeroTab]: { ...prev[activeHeroTab], subtitle: val }
+                    }));
+                  }}
                 />
               </div>
 
@@ -449,9 +654,15 @@ export default function AdminHomepageCmsPage() {
                   <input
                     type="text"
                     className="admin-input"
-                    value={hero.cta_primary_text}
+                    value={currentDeviceHero.cta_primary_text}
                     placeholder="Ví dụ: Xem bộ sưu tập hoa"
-                    onChange={(e) => setHero({ ...hero, cta_primary_text: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setHero(prev => ({
+                        ...prev,
+                        [activeHeroTab]: { ...prev[activeHeroTab], cta_primary_text: val }
+                      }));
+                    }}
                   />
                 </div>
                 <div className="admin-form-group">
@@ -462,7 +673,7 @@ export default function AdminHomepageCmsPage() {
                   <input
                     type="text"
                     className="admin-input"
-                    value={hero.cta_primary_url || '/flowers'}
+                    value={currentDeviceHero.cta_primary_url || '/flowers'}
                     readOnly
                     disabled
                     style={{ backgroundColor: '#F1F5F9', color: '#64748B', cursor: 'not-allowed' }}
@@ -477,9 +688,15 @@ export default function AdminHomepageCmsPage() {
                   <input
                     type="text"
                     className="admin-input"
-                    value={hero.cta_secondary_text}
+                    value={currentDeviceHero.cta_secondary_text}
                     placeholder="Ví dụ: Cắm hoa theo yêu cầu"
-                    onChange={(e) => setHero({ ...hero, cta_secondary_text: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setHero(prev => ({
+                        ...prev,
+                        [activeHeroTab]: { ...prev[activeHeroTab], cta_secondary_text: val }
+                      }));
+                    }}
                   />
                 </div>
                 <div className="admin-form-group">
@@ -490,7 +707,7 @@ export default function AdminHomepageCmsPage() {
                   <input
                     type="text"
                     className="admin-input"
-                    value={hero.cta_secondary_url || '/custom-order'}
+                    value={currentDeviceHero.cta_secondary_url || '/custom-order'}
                     readOnly
                     disabled
                     style={{ backgroundColor: '#F1F5F9', color: '#64748B', cursor: 'not-allowed' }}
@@ -500,14 +717,16 @@ export default function AdminHomepageCmsPage() {
               </div>
             </div>
 
-            {/* Right Column: Hero Image Upload & Storefront-Accurate 4:4.5 Aspect Ratio Preview */}
+            {/* Right Column: Hero Image Upload with Dynamic Device Proportioned Frame */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <label className="admin-label" style={{ margin: 0, fontWeight: 700, color: '#26383D' }}>
-                  Hình Ảnh Banner (Hero)
+                  Hình Ảnh Banner ({activeHeroTab.toUpperCase()})
                 </label>
                 <span style={{ fontSize: '12px', color: '#64748B', background: '#F1F5F9', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>
-                  Tỉ lệ chuẩn: 4:4.5
+                  {activeHeroTab === 'desktop' && 'Tỉ lệ chuẩn: 16:9 (hoặc 4:4.5)'}
+                  {activeHeroTab === 'tablet' && 'Tỉ lệ chuẩn: 4:3 (hoặc 1:1)'}
+                  {activeHeroTab === 'mobile' && 'Tỉ lệ chuẩn: 4:5 (hoặc 4:3)'}
                 </span>
               </div>
 
@@ -520,38 +739,41 @@ export default function AdminHomepageCmsPage() {
                 onChange={handleUploadImage}
               />
 
-              {/* Exact Storefront-Proportioned Frame (aspectRatio 4/4.5) */}
+              {/* Device Proportioned Preview Frame */}
               <div
                 style={{
                   position: 'relative',
                   width: '100%',
-                  maxWidth: '300px',
+                  maxWidth: activeHeroTab === 'desktop' ? '460px' : activeHeroTab === 'tablet' ? '360px' : '280px',
                   margin: '0 auto',
-                  aspectRatio: '4/4.5',
-                  borderRadius: '18px',
+                  aspectRatio: activeHeroTab === 'desktop' ? '16 / 9' : activeHeroTab === 'tablet' ? '4 / 3' : '4 / 5',
+                  borderRadius: '16px',
                   overflow: 'hidden',
-                  border: '8px solid #FFFFFF',
+                  border: '6px solid #FFFFFF',
                   boxShadow: '0 12px 30px rgba(38, 56, 61, 0.14)',
                   backgroundColor: '#F7FBFC',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease'
                 }}
                 onClick={() => fileInputRef.current?.click()}
-                title="Bấm vào để chọn ảnh mới tải lên"
+                title="Bấm vào để chọn ảnh mới tải lên cho thiết bị này"
               >
-                {hero.hero_image ? (
+                {currentDeviceHero.hero_image ? (
                   <ImageWithFallback
-                    key={hero.hero_image}
-                    src={hero.hero_image}
-                    alt="Hero preview"
+                    key={currentDeviceHero.hero_image}
+                    src={currentDeviceHero.hero_image}
+                    alt={`Hero ${activeHeroTab} preview`}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 ) : (
                   <div style={{ textAlign: 'center', padding: '24px 16px', color: '#64748B' }}>
                     <UploadOutlined style={{ fontSize: 40, color: '#5D9EAF', marginBottom: 12 }} />
-                    <div style={{ fontWeight: 700, fontSize: '14px', color: '#0F172A' }}>Tải ảnh banner lên</div>
+                    <div style={{ fontWeight: 700, fontSize: '14px', color: '#0F172A' }}>
+                      Tải ảnh cho {activeHeroTab.toUpperCase()}
+                    </div>
                     <div style={{ fontSize: '12px', marginTop: 4 }}>Bấm vào để chọn ảnh từ máy tính</div>
                   </div>
                 )}
@@ -562,52 +784,56 @@ export default function AdminHomepageCmsPage() {
                     style={{
                       position: 'absolute',
                       inset: 0,
-                      background: 'rgba(255, 255, 255, 0.88)',
-                      backdropFilter: 'blur(4px)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: 12,
-                      color: '#0284C7',
-                      fontWeight: 700,
+                      color: '#5D9EAF',
+                      fontWeight: 600,
                       fontSize: '14px',
-                      zIndex: 10
+                      backdropFilter: 'blur(2px)'
                     }}
                   >
-                    <LoadingOutlined style={{ fontSize: 32 }} spin />
-                    Đang tải ảnh lên...
+                    <LoadingOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                    <span>Đang tải ảnh lên...</span>
                   </div>
                 )}
               </div>
 
-              {/* Upload Action Button */}
-              <div style={{ marginTop: 14, textAlign: 'center' }}>
+              {/* Action under image preview */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12, gap: 10 }}>
                 <button
                   type="button"
+                  className="admin-btn-secondary"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="btn btn-outline"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '10px 20px',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    borderRadius: '8px',
-                    borderColor: '#5D9EAF',
-                    color: '#5D9EAF',
-                    backgroundColor: '#FFFFFF',
-                    cursor: uploading ? 'not-allowed' : 'pointer'
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}
                 >
-                  <UploadOutlined style={{ fontSize: 16 }} />
-                  {hero.hero_image ? 'Tải ảnh khác thay thế' : 'Chọn tệp ảnh tải lên'}
+                  <UploadOutlined /> Thay đổi ảnh {activeHeroTab.toUpperCase()}
                 </button>
-                <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: 6 }}>
-                  Hỗ trợ JPG, PNG, WEBP (Tối đa 10MB) • Hiển thị đúng kích thước như ngoài trang chủ
-                </div>
+                {currentDeviceHero.hero_image && (
+                  <button
+                    type="button"
+                    style={{
+                      border: '1px solid #FECACA',
+                      backgroundColor: '#FEF2F2',
+                      color: '#DC2626',
+                      padding: '6px 12px',
+                      borderRadius: 6,
+                      fontSize: 13,
+                      cursor: 'pointer'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setHero(prev => ({
+                        ...prev,
+                        [activeHeroTab]: { ...prev[activeHeroTab], hero_image: '' }
+                      }));
+                    }}
+                  >
+                    Xóa ảnh
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -792,7 +1018,7 @@ export default function AdminHomepageCmsPage() {
                       className="admin-input"
                       style={{ fontSize: '1.1rem', textAlign: 'center', padding: '6px 4px' }}
                       value={col.icon}
-                      placeholder="💐"
+                      placeholder="⚘"
                       onChange={(e) => handleUpdateCollection(index, 'icon', e.target.value)}
                     />
                   </div>
@@ -845,12 +1071,12 @@ export default function AdminHomepageCmsPage() {
                     ))}
                   </div>
 
-                  {/* Row 2: Emoji truyền thống */}
+                  {/* Row 2: Biểu tượng bộ sưu tập */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748B', marginRight: 2 }}>
-                      💐 Emoji:
+                      ⚘ Chủ đề:
                     </span>
-                    {VIBRANT_EMOJI_ICONS.map(item => (
+                    {BOTANICAL_LINE_ICONS.map(item => (
                       <button
                         key={item.icon}
                         type="button"
@@ -860,11 +1086,13 @@ export default function AdminHomepageCmsPage() {
                           border: '1px solid',
                           background: col.icon === item.icon ? '#E6F4F4' : '#FFFFFF',
                           borderColor: col.icon === item.icon ? 'var(--color-primary-dark)' : '#E2E8F0',
+                          color: col.icon === item.icon ? 'var(--color-primary-dark)' : '#334155',
                           borderRadius: 6,
-                          padding: '2px 6px',
+                          padding: '3px 7px',
                           cursor: 'pointer',
-                          fontSize: '0.85rem',
+                          fontSize: '0.92rem',
                           lineHeight: 1,
+                          fontWeight: 600,
                           transition: 'all 0.15s ease'
                         }}
                       >

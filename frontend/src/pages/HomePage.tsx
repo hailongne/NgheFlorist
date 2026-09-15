@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRightOutlined, CameraOutlined, StarOutlined, SmileOutlined, GiftOutlined } from '@ant-design/icons';
 import Features from '../components/Features';
 import ProductCard from '../components/ProductCard';
 import ImageWithFallback, { BOTANICAL_FALLBACKS } from '../components/ImageWithFallback';
+import useDeviceDetect from '../hooks/useDeviceDetect';
 
 interface CategoryItem {
   id: number;
@@ -54,22 +55,70 @@ export const DEFAULT_SHOWROOM_COLLECTIONS: ShowroomCollectionItem[] = [
   { title: 'Hoa cưới cô dâu', slug: 'hoa-cuoi', icon: '🎀', image: '/images/hoa-cuoi-cam-tay.webp', desc: 'Tinh khôi ngày hạnh phúc' }
 ];
 
+interface HeroDeviceConfig {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  cta_primary_text?: string;
+  cta_primary_url?: string;
+  cta_secondary_text?: string;
+  cta_secondary_url?: string;
+  hero_image?: string;
+}
+
+interface MultiDeviceHeroState {
+  desktop?: HeroDeviceConfig;
+  tablet?: HeroDeviceConfig;
+  mobile?: HeroDeviceConfig;
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  cta_primary_text?: string;
+  cta_primary_url?: string;
+  cta_secondary_text?: string;
+  cta_secondary_url?: string;
+  hero_image?: string;
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
+  const { isMobile, isTablet, isDesktop } = useDeviceDetect();
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Dynamic CMS Data
-  const [hero, setHero] = useState({
-    badge: '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
-    title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
-    subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
-    cta_primary_text: 'Xem bộ sưu tập hoa',
-    cta_primary_url: '/flowers',
-    cta_secondary_text: 'Cắm hoa theo yêu cầu',
-    cta_secondary_url: '/custom-order',
-    hero_image: ''
+  // Dynamic CMS Data with Multi-Device support
+  const [hero, setHero] = useState<MultiDeviceHeroState>({
+    desktop: {
+      badge: '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+      title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+      subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
+      cta_primary_text: 'Xem bộ sưu tập hoa',
+      cta_primary_url: '/flowers',
+      cta_secondary_text: 'Cắm hoa theo yêu cầu',
+      cta_secondary_url: '/custom-order',
+      hero_image: ''
+    },
+    tablet: {
+      badge: '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+      title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+      subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
+      cta_primary_text: 'Xem bộ sưu tập hoa',
+      cta_primary_url: '/flowers',
+      cta_secondary_text: 'Cắm hoa theo yêu cầu',
+      cta_secondary_url: '/custom-order',
+      hero_image: ''
+    },
+    mobile: {
+      badge: '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+      title: 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+      subtitle: 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
+      cta_primary_text: 'Xem bộ sưu tập hoa',
+      cta_primary_url: '/flowers',
+      cta_secondary_text: 'Cắm hoa theo yêu cầu',
+      cta_secondary_url: '/custom-order',
+      hero_image: ''
+    }
   });
   const [banners, setBanners] = useState<BannerItem[]>([]);
   const [customDesign, setCustomDesign] = useState({
@@ -127,195 +176,262 @@ export default function HomePage() {
     { label: 'Trên 2.000.000 ₫', sub: 'Thiết kế VIP & Khai trương lớn', min: 2000000, max: '' }
   ];
 
+  // Memoize active hero configuration based on detected device
+  const currentHero = useMemo(() => {
+    const defaultData: HeroDeviceConfig = {
+      badge: hero.badge || '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST',
+      title: hero.title || 'Trao gửi yêu thương bằng những đóa hoa thật đẹp',
+      subtitle: hero.subtitle || 'Hoa tươi thiết kế cao cấp theo yêu cầu – Chụp và gửi ảnh duyệt thành phẩm trước khi giao hàng tận nơi.',
+      cta_primary_text: hero.cta_primary_text || 'Xem bộ sưu tập hoa',
+      cta_primary_url: hero.cta_primary_url || '/flowers',
+      cta_secondary_text: hero.cta_secondary_text || 'Cắm hoa theo yêu cầu',
+      cta_secondary_url: hero.cta_secondary_url || '/custom-order',
+      hero_image: hero.hero_image || ''
+    };
+
+    const desktopData = { ...defaultData, ...(hero.desktop || {}) };
+    if (!desktopData.hero_image && hero.hero_image) {
+      desktopData.hero_image = hero.hero_image;
+    }
+
+    if (isMobile) {
+      const mobileData = { ...desktopData, ...(hero.mobile || {}) };
+      if (!mobileData.hero_image) {
+        mobileData.hero_image = desktopData.hero_image || hero.hero_image || '/images/hero-mobile.webp';
+      }
+      return mobileData;
+    }
+
+    if (isTablet) {
+      const tabletData = { ...desktopData, ...(hero.tablet || {}) };
+      if (!tabletData.hero_image) {
+        tabletData.hero_image = desktopData.hero_image || hero.hero_image || '';
+      }
+      return tabletData;
+    }
+
+    return desktopData;
+  }, [hero, isMobile, isTablet]);
+
   return (
     <div className="homepage-showroom">
-      {/* 1. HERO SECTION (SPEC #5: OCCUPIES MOST OF FIRST SCREEN ON MOBILE) */}
-      {/* Mobile-Only Hero (<768px) */}
-      {/* 1. HERO SECTION - KÍCH THƯỚC ẢNH 4:3 CHUẨN SHOWROOM TRÊN MOBILE */}
-      <section
-        className="mobile-only-element"
-        style={{
-          padding: '14px 14px 22px',
-          background: 'var(--color-background-soft)',
-          borderBottom: '1px solid var(--color-border)'
-        }}
-      >
-        {/* Khung ảnh tỉ lệ 4:3 trọn vẹn, không bị phóng to cắt xén hoa */}
-        <div
+      {/* 1. HERO SECTION - MOBILE (<768px) - ẢNH DỌC 4:5 */}
+      {isMobile && (
+        <section
           style={{
-            position: 'relative',
-            width: '100%',
-            aspectRatio: '4 / 3',
-            borderRadius: 'var(--radius-md)',
-            overflow: 'hidden',
-            boxShadow: 'var(--shadow-md)',
-            marginBottom: 16,
-            background: '#EAF6F9'
+            padding: '14px 14px 22px',
+            background: 'var(--color-background-soft)',
+            borderBottom: '1px solid var(--color-border)'
           }}
         >
-          <ImageWithFallback
-            src={hero.hero_image || '/images/hero-mobile.webp'}
-            alt="Nghệ Florist"
-            fallbackSrc={BOTANICAL_FALLBACKS[0]}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-        </div>
-
-        {/* Thông điệp & CTA dưới ảnh - Tránh đè chữ che lấp hoa */}
-        <div style={{ padding: '0 4px' }}>
-          <h1
-            style={{
-              fontSize: '1.65rem',
-              color: 'var(--color-text)',
-              lineHeight: 1.3,
-              marginBottom: 8,
-              fontFamily: 'var(--font-heading)',
-              fontWeight: 700
-            }}
-          >
-            {hero.title}
-          </h1>
-
-          <p
-            style={{
-              fontSize: '0.92rem',
-              color: 'var(--color-text-secondary)',
-              lineHeight: 1.6,
-              marginBottom: 16
-            }}
-          >
-            {hero.subtitle}
-          </p>
-
-          {/* Nút bấm xem bộ sưu tập chính */}
-          <Link
-            to={hero.cta_primary_url || '/flowers'}
-            className="btn btn-primary"
-            style={{
-              width: '100%',
-              padding: '13px 20px',
-              fontSize: '0.96rem',
-              fontWeight: 700,
-              borderRadius: 'var(--radius-full)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              minHeight: 46,
-              boxShadow: '0 4px 14px rgba(42, 117, 211, 0.22)'
-            }}
-          >
-            <span>{hero.cta_primary_text || 'Xem bộ sưu tập hoa'}</span>
-            <ArrowRightOutlined />
-          </Link>
-        </div>
-      </section>
-
-      {/* Desktop & Tablet Hero (>=769px) */}
-      <section
-        className="desktop-only-action"
-        style={{
-          background: 'linear-gradient(135deg, #F5FAFC 0%, #FFFFFF 60%, #EAF6F9 100%)',
-          padding: '56px 0 72px',
-          borderBottom: '1px solid var(--color-border)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <div className="container">
+          {/* Khung ảnh tỉ lệ 4:5 trọn vẹn, tối ưu màn hình di động */}
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 40,
-              alignItems: 'center'
+              position: 'relative',
+              width: '100%',
+              maxWidth: '380px',
+              margin: '0 auto 16px',
+              aspectRatio: '4 / 5',
+              borderRadius: 'var(--radius-md)',
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-md)',
+              background: '#EAF6F9'
             }}
           >
-            {/* Left Content */}
-            <div style={{ maxWidth: 580 }}>
+            <ImageWithFallback
+              src={currentHero.hero_image || '/images/hero-mobile.webp'}
+              alt={currentHero.title || 'Nghệ Florist'}
+              fallbackSrc={BOTANICAL_FALLBACKS[0]}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+
+          {/* Thông điệp & CTA dưới ảnh */}
+          <div style={{ padding: '0 4px', textAlign: 'center' }}>
+            {currentHero.badge && (
               <div
                 className="badge badge-pastel"
-                style={{ marginBottom: 16, padding: '6px 14px', fontSize: '0.82rem' }}
+                style={{ marginBottom: 10, display: 'inline-block', fontSize: '0.78rem' }}
               >
-                {hero.badge || '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST'}
+                {currentHero.badge}
               </div>
-              <h1
-                style={{
-                  fontSize: 'clamp(2.2rem, 3.8vw, 3.2rem)',
-                  color: 'var(--color-text)',
-                  lineHeight: 1.25,
-                  marginBottom: 18
-                }}
-              >
-                {hero.title}
-              </h1>
-              <p
-                style={{
-                  fontSize: '1.1rem',
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: 28,
-                  lineHeight: 1.7
-                }}
-              >
-                {hero.subtitle}
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
-                <Link to={hero.cta_primary_url || '/flowers'} className="btn btn-primary" style={{ padding: '13px 30px' }}>
-                  {hero.cta_primary_text || 'Xem bộ sưu tập hoa'} <ArrowRightOutlined />
-                </Link>
-                <Link to={hero.cta_secondary_url || '/custom-order'} className="btn btn-outline" style={{ padding: '13px 26px' }}>
-                  {hero.cta_secondary_text || 'Cắm hoa theo yêu cầu'}
-                </Link>
-              </div>
+            )}
+            <h1
+              style={{
+                fontSize: '1.65rem',
+                color: 'var(--color-text)',
+                lineHeight: 1.3,
+                marginBottom: 8,
+                fontFamily: 'var(--font-heading)',
+                fontWeight: 700
+              }}
+            >
+              {currentHero.title}
+            </h1>
 
-              {/* Quick Trust Badges */}
-              <div
+            <p
+              style={{
+                fontSize: '0.92rem',
+                color: 'var(--color-text-secondary)',
+                lineHeight: 1.6,
+                marginBottom: 16
+              }}
+            >
+              {currentHero.subtitle}
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Link
+                to={currentHero.cta_primary_url || '/flowers'}
+                className="btn btn-primary"
                 style={{
+                  width: '100%',
+                  padding: '13px 20px',
+                  fontSize: '0.96rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-full)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 24,
-                  marginTop: 32,
-                  paddingTop: 20,
-                  borderTop: '1px solid var(--color-border)',
-                  fontSize: '0.88rem',
-                  color: 'var(--color-text-secondary)'
+                  justifyContent: 'center',
+                  gap: 8,
+                  minHeight: 46,
+                  boxShadow: '0 4px 14px rgba(42, 117, 211, 0.22)'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <CameraOutlined style={{ color: 'var(--color-primary-dark)', fontSize: 18 }} />
-                  <span>Ảnh thật gửi duyệt 100%</span>
+                <span>{currentHero.cta_primary_text || 'Xem bộ sưu tập hoa'}</span>
+                <ArrowRightOutlined />
+              </Link>
+              {currentHero.cta_secondary_text && (
+                <Link
+                  to={currentHero.cta_secondary_url || '/custom-order'}
+                  className="btn btn-outline"
+                  style={{
+                    width: '100%',
+                    padding: '11px 20px',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    borderRadius: 'var(--radius-full)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 42
+                  }}
+                >
+                  {currentHero.cta_secondary_text}
+                </Link>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 1. HERO SECTION - TABLET (768px - 1024px, ẢNH 4:3) & DESKTOP (>1024px, ẢNH 16:9) */}
+      {!isMobile && (
+        <section
+          style={{
+            background: 'linear-gradient(135deg, #F5FAFC 0%, #FFFFFF 60%, #EAF6F9 100%)',
+            padding: isTablet ? '40px 0 52px' : '56px 0 72px',
+            borderBottom: '1px solid var(--color-border)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <div className="container">
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: isTablet ? '1.1fr 0.9fr' : '1.1fr 1fr',
+                gap: isTablet ? 24 : 40,
+                alignItems: 'center'
+              }}
+            >
+              {/* Left Content */}
+              <div style={{ maxWidth: 580 }}>
+                <div
+                  className="badge badge-pastel"
+                  style={{ marginBottom: 16, padding: '6px 14px', fontSize: '0.82rem' }}
+                >
+                  {currentHero.badge || '✦ TIỆM HOA THIẾT KẾ NGHỆ FLORIST'}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <StarOutlined style={{ color: 'var(--color-primary-dark)', fontSize: 18 }} />
-                  <span>Hoa nhập mới mỗi ngày</span>
+                <h1
+                  style={{
+                    fontSize: isTablet ? '2rem' : 'clamp(2.2rem, 3.8vw, 3.2rem)',
+                    color: 'var(--color-text)',
+                    lineHeight: 1.25,
+                    marginBottom: 18
+                  }}
+                >
+                  {currentHero.title}
+                </h1>
+                <p
+                  style={{
+                    fontSize: isTablet ? '1rem' : '1.1rem',
+                    color: 'var(--color-text-secondary)',
+                    marginBottom: 28,
+                    lineHeight: 1.7
+                  }}
+                >
+                  {currentHero.subtitle}
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+                  <Link to={currentHero.cta_primary_url || '/flowers'} className="btn btn-primary" style={{ padding: '13px 30px' }}>
+                    {currentHero.cta_primary_text || 'Xem bộ sưu tập hoa'} <ArrowRightOutlined />
+                  </Link>
+                  <Link to={currentHero.cta_secondary_url || '/custom-order'} className="btn btn-outline" style={{ padding: '13px 26px' }}>
+                    {currentHero.cta_secondary_text || 'Cắm hoa theo yêu cầu'}
+                  </Link>
+                </div>
+
+                {/* Quick Trust Badges */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 24,
+                    marginTop: 32,
+                    paddingTop: 20,
+                    borderTop: '1px solid var(--color-border)',
+                    fontSize: '0.88rem',
+                    color: 'var(--color-text-secondary)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CameraOutlined style={{ color: 'var(--color-primary-dark)', fontSize: 18 }} />
+                    <span>Ảnh thật gửi duyệt 100%</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <StarOutlined style={{ color: 'var(--color-primary-dark)', fontSize: 18 }} />
+                    <span>Hoa nhập mới mỗi ngày</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Botanical Imagery */}
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'relative',
-                  borderRadius: 'var(--radius-lg)',
-                  overflow: 'hidden',
-                  boxShadow: 'var(--shadow-lg)',
-                  border: '6px solid var(--color-white)',
-                  background: 'var(--color-white)',
-                  aspectRatio: '4 / 4.6'
-                }}
-              >
-                <ImageWithFallback
-                  src={hero.hero_image}
-                  alt="Nghệ Florist"
-                  fallbackSrc={BOTANICAL_FALLBACKS[0]}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+              {/* Right Hero Imagery: Tablet (4:3) / Desktop (16:9) */}
+              <div style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    position: 'relative',
+                    borderRadius: 'var(--radius-lg)',
+                    overflow: 'hidden',
+                    boxShadow: 'var(--shadow-lg)',
+                    border: '6px solid var(--color-white)',
+                    background: 'var(--color-white)',
+                    aspectRatio: isTablet ? '4 / 3' : '16 / 9',
+                    maxHeight: isTablet ? '380px' : '480px'
+                  }}
+                >
+                  <ImageWithFallback
+                    src={currentHero.hero_image}
+                    alt={currentHero.title || 'Nghệ Florist'}
+                    fallbackSrc={BOTANICAL_FALLBACKS[0]}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 2. BỘ SƯU TẬP NỔI BẬT (COLLECTIONS - SPEC #4) - Ẩn trên mobile và tablet */}
       <section className="hide-mobile-tablet" style={{ padding: '40px 0 24px', background: 'var(--color-white)' }}>
@@ -453,12 +569,12 @@ export default function HomePage() {
             }}
           >
             {[
-              { title: 'Sinh nhật', tag: 'birthday', icon: '🎂', desc: 'Ngọt ngào, rạng rỡ' },
-              { title: 'Tặng người yêu', tag: 'romantic', icon: '💖', desc: 'Lãng mạn, sâu lắng' },
-              { title: 'Khai trương', tag: 'opening', icon: '🏆', desc: 'Phát tài phát lộc' },
-              { title: 'Kỷ niệm', tag: 'anniversary', icon: '✨', desc: 'Khoảnh khắc thiêng liêng' },
-              { title: 'Chia buồn', tag: 'sympathy', icon: '🕊️', desc: 'Trang trọng, thành kính' },
-              { title: 'Hoa cưới cầm tay', tag: 'wedding', icon: '👰', desc: 'Tinh khôi, thanh nhã' }
+              { title: 'Sinh nhật', tag: 'birthday', icon: '⚘', desc: 'Ngọt ngào, rạng rỡ' },
+              { title: 'Tặng người yêu', tag: 'romantic', icon: '♡', desc: 'Lãng mạn, sâu lắng' },
+              { title: 'Khai trương', tag: 'opening', icon: '◈', desc: 'Phát tài phát lộc' },
+              { title: 'Kỷ niệm', tag: 'anniversary', icon: '✦', desc: 'Khoảnh khắc thiêng liêng' },
+              { title: 'Chia buồn', tag: 'sympathy', icon: '⚜', desc: 'Trang trọng, thành kính' },
+              { title: 'Hoa cưới cầm tay', tag: 'wedding', icon: '🪷', desc: 'Tinh khôi, thanh nhã' }
             ].map(item => (
               <Link
                 key={item.tag}
@@ -467,7 +583,7 @@ export default function HomePage() {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  padding: '16px 12px',
+                  padding: '18px 12px',
                   background: 'var(--color-background-soft)',
                   border: '1px solid var(--color-border)',
                   borderRadius: 'var(--radius-md)',
@@ -476,7 +592,22 @@ export default function HomePage() {
                   textAlign: 'center'
                 }}
               >
-                <div style={{ fontSize: '2rem', marginBottom: 8 }}>{item.icon}</div>
+                <div style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: '50%',
+                  backgroundColor: '#FFFFFF',
+                  border: '1.5px solid var(--color-border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.35rem',
+                  color: 'var(--color-primary-dark)',
+                  marginBottom: 10,
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)'
+                }}>
+                  {item.icon}
+                </div>
                 <div style={{ fontWeight: 700, fontSize: '0.94rem', color: 'var(--color-text)', marginBottom: 2 }}>
                   {item.title}
                 </div>

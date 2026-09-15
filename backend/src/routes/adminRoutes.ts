@@ -1127,14 +1127,14 @@ router.get('/menu', requirePermission('manage_cms'), async (_req: Request, res: 
 
 router.post('/menu', requirePermission('manage_cms'), async (req: Request, res: Response) => {
   try {
-    const { label, url, sort_order = 0, is_active = 1 } = req.body;
+    const { label, url, icon, sort_order = 0, is_active = 1 } = req.body;
     if (!label || !url) return res.status(400).json({ error: 'Tiêu đề và đường dẫn menu là bắt buộc' });
 
     const [resInsert] = await pool.query<ResultSetHeader>(`
-      INSERT INTO menu_items (label, url, sort_order, is_active) VALUES (?, ?, ?, ?)
-    `, [label.trim(), url.trim(), sort_order, is_active ? 1 : 0]);
+      INSERT INTO menu_items (label, url, icon, sort_order, is_active) VALUES (?, ?, ?, ?, ?)
+    `, [label.trim(), url.trim(), icon ? String(icon).trim() : null, sort_order, is_active ? 1 : 0]);
 
-    await logAudit(req, 'CREATE', 'menu_item', resInsert.insertId, { label, url });
+    await logAudit(req, 'CREATE', 'menu_item', resInsert.insertId, { label, url, icon });
     res.status(201).json({ success: true, message: 'Thêm mục menu thành công' });
   } catch (err: any) {
     res.status(500).json({ error: 'Lỗi tạo menu' });
@@ -1144,18 +1144,19 @@ router.post('/menu', requirePermission('manage_cms'), async (req: Request, res: 
 router.patch('/menu/:id', requirePermission('manage_cms'), async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    const { label, url, sort_order, is_active } = req.body;
+    const { label, url, icon, sort_order, is_active } = req.body;
     const updates: string[] = [];
     const params: any[] = [];
     if (label !== undefined) { updates.push('label = ?'); params.push(label.trim()); }
     if (url !== undefined) { updates.push('url = ?'); params.push(url.trim()); }
+    if (icon !== undefined) { updates.push('icon = ?'); params.push(icon ? String(icon).trim() : null); }
     if (sort_order !== undefined) { updates.push('sort_order = ?'); params.push(Number(sort_order)); }
     if (is_active !== undefined) { updates.push('is_active = ?'); params.push(is_active ? 1 : 0); }
 
     if (updates.length > 0) {
       params.push(id);
       await pool.query(`UPDATE menu_items SET ${updates.join(', ')} WHERE id = ?`, params);
-      await logAudit(req, 'UPDATE', 'menu_item', id, { label, url });
+      await logAudit(req, 'UPDATE', 'menu_item', id, { label, url, icon });
     }
     res.json({ success: true, message: 'Cập nhật mục menu thành công' });
   } catch (err: any) {
@@ -1322,4 +1323,121 @@ router.get('/audit-logs', requirePermission('view_audit_logs'), async (req: Requ
   }
 });
 
+// ==========================================
+// 12. CONTACT WIDGETS MANAGEMENT (NÚT TƯ VẤN)
+// ==========================================
+router.get('/contact-widgets', requirePermission('manage_settings'), async (_req: Request, res: Response) => {
+  try {
+    const [widgets] = await pool.query<RowDataPacket[]>(`
+      SELECT id, platform_type, title, subtitle, action_link, sort_order, is_active, created_at, updated_at
+      FROM contact_widgets
+      ORDER BY sort_order ASC, id ASC
+    `);
+    res.json(widgets);
+  } catch (err: any) {
+    console.error('Error fetching admin contact widgets:', err);
+    res.status(500).json({ error: 'Lỗi tải danh sách nút tư vấn' });
+  }
+});
+
+router.post('/contact-widgets', requirePermission('manage_settings'), async (req: Request, res: Response) => {
+  try {
+    const { platform_type, title, subtitle, action_link, sort_order, is_active } = req.body;
+
+    if (!platform_type || !title || !action_link) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ: Nền tảng, Tiêu đề và Link hành động' });
+    }
+
+    const validPlatforms = ['zalo', 'facebook', 'instagram', 'phone'];
+    if (!validPlatforms.includes(platform_type)) {
+      return res.status(400).json({ error: 'Nền tảng không hợp lệ (hỗ trợ zalo, facebook, instagram, phone)' });
+    }
+
+    const [result] = await pool.query<ResultSetHeader>(`
+      INSERT INTO contact_widgets (platform_type, title, subtitle, action_link, sort_order, is_active)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [
+      platform_type,
+      String(title).trim(),
+      subtitle ? String(subtitle).trim() : null,
+      String(action_link).trim(),
+      Number(sort_order) || 0,
+      is_active !== undefined ? (is_active ? 1 : 0) : 1
+    ]);
+
+    await logAudit(req, 'CREATE', 'contact_widget', result.insertId, { title, platform_type });
+
+    res.status(201).json({
+      success: true,
+      message: 'Thêm nút tư vấn thành công',
+      id: result.insertId
+    });
+  } catch (err: any) {
+    console.error('Error creating contact widget:', err);
+    res.status(500).json({ error: 'Lỗi thêm nút tư vấn' });
+  }
+});
+
+router.put('/contact-widgets/:id', requirePermission('manage_settings'), async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const { platform_type, title, subtitle, action_link, sort_order, is_active } = req.body;
+
+    if (!platform_type || !title || !action_link) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ: Nền tảng, Tiêu đề và Link hành động' });
+    }
+
+    const validPlatforms = ['zalo', 'facebook', 'instagram', 'phone'];
+    if (!validPlatforms.includes(platform_type)) {
+      return res.status(400).json({ error: 'Nền tảng không hợp lệ' });
+    }
+
+    await pool.query(`
+      UPDATE contact_widgets
+      SET platform_type = ?, title = ?, subtitle = ?, action_link = ?, sort_order = ?, is_active = ?
+      WHERE id = ?
+    `, [
+      platform_type,
+      String(title).trim(),
+      subtitle ? String(subtitle).trim() : null,
+      String(action_link).trim(),
+      Number(sort_order) || 0,
+      is_active ? 1 : 0,
+      id
+    ]);
+
+    await logAudit(req, 'UPDATE', 'contact_widget', id, { title, platform_type });
+
+    res.json({ success: true, message: 'Cập nhật nút tư vấn thành công' });
+  } catch (err: any) {
+    console.error('Error updating contact widget:', err);
+    res.status(500).json({ error: 'Lỗi cập nhật nút tư vấn' });
+  }
+});
+
+router.delete('/contact-widgets/:id', requirePermission('manage_settings'), async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    await pool.query('DELETE FROM contact_widgets WHERE id = ?', [id]);
+    await logAudit(req, 'DELETE', 'contact_widget', id);
+    res.json({ success: true, message: 'Xóa nút tư vấn thành công' });
+  } catch (err: any) {
+    console.error('Error deleting contact widget:', err);
+    res.status(500).json({ error: 'Lỗi xóa nút tư vấn' });
+  }
+});
+
+router.patch('/contact-widgets/:id/toggle', requirePermission('manage_settings'), async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    await pool.query('UPDATE contact_widgets SET is_active = NOT is_active WHERE id = ?', [id]);
+    await logAudit(req, 'UPDATE', 'contact_widget', id, { action: 'toggle_active' });
+    res.json({ success: true, message: 'Cập nhật trạng thái thành công' });
+  } catch (err: any) {
+    console.error('Error toggling contact widget:', err);
+    res.status(500).json({ error: 'Lỗi thay đổi trạng thái nút' });
+  }
+});
+
 export default router;
+

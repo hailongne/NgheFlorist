@@ -80,6 +80,15 @@ export default function AdminLayout() {
             <span>Yêu Cầu Khách Hàng</span>
           </NavLink>
 
+          <NavLink
+            to="/admin/contact-widgets"
+            className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+          >
+            <MessageOutlined className="nav-icon" />
+            <span>Quản Lý Nút Tư Vấn</span>
+          </NavLink>
+
           <div className="admin-nav-group-title">Bộ Sưu Tập Hoa</div>
           <NavLink
             to="/admin/products"

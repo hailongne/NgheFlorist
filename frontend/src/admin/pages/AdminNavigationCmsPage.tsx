@@ -22,6 +22,7 @@ interface MenuItem {
   id: number;
   label: string;
   url: string;
+  icon?: string | null;
   sort_order: number;
   is_active: number;
 }
@@ -57,12 +58,14 @@ export default function AdminNavigationCmsPage() {
   // Add form state
   const [newLabel, setNewLabel] = useState('');
   const [newUrl, setNewUrl] = useState('');
+  const [newIcon, setNewIcon] = useState('');
   const [newSortOrder, setNewSortOrder] = useState<number>(1);
 
   // Edit inline state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editLabel, setEditLabel] = useState('');
   const [editUrl, setEditUrl] = useState('');
+  const [editIcon, setEditIcon] = useState('');
   const [editSortOrder, setEditSortOrder] = useState(1);
 
   const fetchNavData = async () => {
@@ -108,6 +111,7 @@ export default function AdminNavigationCmsPage() {
         body: JSON.stringify({ 
           label: newLabel.trim(), 
           url: newUrl.trim(), 
+          icon: newIcon.trim() || null,
           sort_order: Number(newSortOrder) || (menuItems.length + 1),
           is_active: 1
         })
@@ -116,6 +120,7 @@ export default function AdminNavigationCmsPage() {
       if (res.ok) {
         setNewLabel('');
         setNewUrl('');
+        setNewIcon('');
         fetchNavData();
       } else {
         const data = await res.json();
@@ -130,6 +135,7 @@ export default function AdminNavigationCmsPage() {
     setEditingId(m.id);
     setEditLabel(m.label);
     setEditUrl(m.url);
+    setEditIcon(m.icon || '');
     setEditSortOrder(m.sort_order);
   };
 
@@ -145,6 +151,7 @@ export default function AdminNavigationCmsPage() {
         body: JSON.stringify({
           label: editLabel.trim(),
           url: editUrl.trim(),
+          icon: editIcon.trim() || null,
           sort_order: Number(editSortOrder)
         })
       });
@@ -360,11 +367,12 @@ export default function AdminNavigationCmsPage() {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 64, textAlign: 'center' }}>Thứ tự</th>
-                    <th style={{ minWidth: 140 }}>Tên hiển thị</th>
+                    <th style={{ width: 54, textAlign: 'center' }}>Thứ tự</th>
+                    <th style={{ width: 60, textAlign: 'center' }}>Icon</th>
+                    <th style={{ minWidth: 130 }}>Tên hiển thị</th>
                     <th style={{ minWidth: 150 }}>Đường dẫn (URL)</th>
-                    <th style={{ width: 100, textAlign: 'center' }}>Trạng thái</th>
-                    <th style={{ width: 120, textAlign: 'right' }}>Thao tác</th>
+                    <th style={{ width: 90, textAlign: 'center' }}>Trạng thái</th>
+                    <th style={{ width: 110, textAlign: 'right' }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -378,7 +386,7 @@ export default function AdminNavigationCmsPage() {
                             <input
                               type="number"
                               className="admin-input"
-                              style={{ width: 50, padding: '4px 6px', textAlign: 'center' }}
+                              style={{ width: 44, padding: '4px 6px', textAlign: 'center' }}
                               value={editSortOrder}
                               onChange={e => setEditSortOrder(Number(e.target.value))}
                             />
@@ -406,6 +414,25 @@ export default function AdminNavigationCmsPage() {
                                 </button>
                               </div>
                             </div>
+                          )}
+                        </td>
+
+                        {/* Icon */}
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              className="admin-input"
+                              style={{ width: 44, padding: '4px 6px', textAlign: 'center', fontSize: '1.1rem' }}
+                              value={editIcon}
+                              placeholder="Icon"
+                              title="Nhập emoji hoặc biểu tượng"
+                              onChange={e => setEditIcon(e.target.value)}
+                            />
+                          ) : (
+                            <span style={{ fontSize: '1.25rem', display: 'inline-block' }} title={m.icon ? `Icon: ${m.icon}` : 'Chưa có icon'}>
+                              {m.icon || <span style={{ color: '#CBD5E1', fontSize: '13px' }}>-</span>}
+                            </span>
                           )}
                         </td>
 
@@ -525,38 +552,66 @@ export default function AdminNavigationCmsPage() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 <button 
                   type="button" 
-                  onClick={() => handleApplyPreset('Tất cả hoa', '/flowers')}
+                  onClick={() => handleApplyPreset('Tất cả hoa', '/flowers', '✦')}
                   style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', color: '#0369A1', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  + Tất cả hoa
+                  ✦ Tất cả hoa
                 </button>
                 <button 
                   type="button" 
-                  onClick={() => handleApplyPreset('Cắm hoa theo yêu cầu', '/custom-order')}
+                  onClick={() => handleApplyPreset('Bó hoa tươi', '/category/bo-hoa', '⚘')}
+                  style={{ background: '#FDF4FF', border: '1px solid #F5D0FE', color: '#A21CAF', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  ⚘ Bó hoa
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleApplyPreset('Giỏ hoa tươi', '/category/gio-hoa', '❀')}
+                  style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', color: '#047857', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  ❀ Giỏ hoa
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleApplyPreset('Kệ hoa sự kiện', '/category/ke-hoa', '◈')}
+                  style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1D4ED8', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  ◈ Kệ hoa
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleApplyPreset('Lan hồ điệp', '/category/lan-ho-diep', '🪷')}
+                  style={{ background: '#FFF1F2', border: '1px solid #FECDD3', color: '#BE123C', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  🪷 Lan hồ điệp
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleApplyPreset('Hoa cưới thiết kế', '/category/hoa-cuoi', '♡')}
+                  style={{ background: '#FDF2F8', border: '1px solid #FBCFE8', color: '#BE185D', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  ♡ Hoa cưới
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleApplyPreset('Cắm hoa theo yêu cầu', '/custom-order', '✨')}
                   style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#15803D', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  + Thiết kế riêng
+                  ✨ Thiết kế riêng
                 </button>
                 <button 
                   type="button" 
-                  onClick={() => handleApplyPreset('Về Nghệ Florist', '/about')}
+                  onClick={() => handleApplyPreset('Về Nghệ Florist', '/about', '🌿')}
                   style={{ background: '#FAF5FF', border: '1px solid #E9D5FF', color: '#7E22CE', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  + Về chúng tôi
+                  🌿 Về chúng tôi
                 </button>
                 <button 
                   type="button" 
-                  onClick={() => handleApplyPreset('Chính sách giao hàng', '/policy')}
+                  onClick={() => handleApplyPreset('Chính sách giao hàng', '/policy', '◎')}
                   style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#B45309', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  + Chính sách
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleApplyPreset('Quy trình đặt hoa', '/order-guide')}
-                  style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569', padding: '4px 10px', borderRadius: 6, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
-                >
-                  + Quy trình đặt hoa
+                  ◎ Chính sách
                 </button>
               </div>
             </div>
@@ -575,7 +630,18 @@ export default function AdminNavigationCmsPage() {
                 + Thêm mục menu mới
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label className="admin-label">Icon</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="VD: ⚘"
+                    style={{ textAlign: 'center', fontSize: '1.15rem', padding: '7px 4px' }}
+                    value={newIcon}
+                    onChange={(e) => setNewIcon(e.target.value)}
+                  />
+                </div>
                 <div>
                   <label className="admin-label">Tên hiển thị trên Menu *</label>
                   <input
@@ -597,6 +663,50 @@ export default function AdminNavigationCmsPage() {
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Quick Icon Selector Buttons */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: '11.5px', color: '#64748B', fontWeight: 600, marginBottom: 6 }}>
+                  Gợi ý chọn nhanh biểu tượng tối giản (Icon):
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {[
+                    { icon: '⚘', name: 'Bó hoa' },
+                    { icon: '❀', name: 'Giỏ hoa' },
+                    { icon: '◈', name: 'Kệ hoa' },
+                    { icon: '🪷', name: 'Lan hồ điệp' },
+                    { icon: '♡', name: 'Hoa cưới' },
+                    { icon: '✦', name: 'Tất cả' },
+                    { icon: '✨', name: 'Thiết kế' },
+                    { icon: '🌿', name: 'Về Nghệ' },
+                    { icon: '⌂', name: 'Trang chủ' },
+                    { icon: '◎', name: 'Tra cứu' },
+                    { icon: '⚜', name: 'Hoàng gia' },
+                    { icon: '✿', name: 'Hoa cổ điển' }
+                  ].map(item => (
+                    <button
+                      key={item.icon}
+                      type="button"
+                      onClick={() => setNewIcon(item.icon)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '4px 9px',
+                        borderRadius: 6,
+                        border: newIcon === item.icon ? '1.5px solid #0284C7' : '1px solid #CBD5E1',
+                        background: newIcon === item.icon ? '#E0F2FE' : '#FFFFFF',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 600
+                      }}
+                    >
+                      <span style={{ fontSize: '14px', color: '#0F172A' }}>{item.icon}</span>
+                      <span>{item.name}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 

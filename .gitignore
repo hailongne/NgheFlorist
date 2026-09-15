@@ -39,3 +39,9 @@ backend/uploads/*
 # Deployment scripts with credentials
 deploy_to_vps.js
 exec_remote.js
+run_ssh.js
+ssh_output.txt
+deploy_sync.js
+sync_and_deploy.js
+deploy_log.txt
+deploy_status.txt
