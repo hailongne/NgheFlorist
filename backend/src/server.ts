@@ -13,6 +13,7 @@ import adminRoutes from './routes/adminRoutes';
 import customerRequestRoutes from './routes/customerRequestRoutes';
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 const PUBLIC_SITE_URL = process.env.PUBLIC_SITE_URL || 'http://localhost:3000';
 
