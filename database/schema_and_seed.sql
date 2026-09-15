@@ -220,8 +220,6 @@ CREATE TABLE IF NOT EXISTS pages (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-SET FOREIGN_KEY_CHECKS = 1;
-
 -- ===== Seed data (small examples) =====
 -- Roles & permissions
 INSERT INTO roles (name, description) VALUES
@@ -343,3 +341,5 @@ WHERE o.user_id = u.id LIMIT 1;
 -- - Replace the sample password hashes with real bcrypt hashes before using in production.
 -- - Adjust currency and prices as needed.
 -- - For PostgreSQL: change AUTO_INCREMENT to SERIAL and remove `SET FOREIGN_KEY_CHECKS` lines.
+
+SET FOREIGN_KEY_CHECKS = 1;
