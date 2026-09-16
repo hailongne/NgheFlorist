@@ -182,16 +182,25 @@ export default function QuickContactWidget({
           height: 52px;
           border-radius: 50%;
           border: none;
+          padding: 0;
+          margin: 0;
           cursor: pointer;
           display: flex;
           align-items: center;
-          justifyContent: center;
+          justify-content: center;
           background: #26383D;
           color: #FFFFFF;
-          font-size: 20px;
+          font-size: 22px;
           box-shadow: 0 6px 20px rgba(38, 56, 61, 0.35);
           transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
           position: relative;
+        }
+
+        .quick-contact-fab .anticon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
         }
 
         .quick-contact-fab:hover {
@@ -237,7 +246,11 @@ export default function QuickContactWidget({
           .quick-contact-fab {
             width: 44px;
             height: 44px;
-            font-size: 17px;
+            font-size: 18px;
+          }
+
+          .quick-contact-fab .anticon {
+            font-size: 18px;
           }
         }
       `}</style>
@@ -395,13 +408,14 @@ export default function QuickContactWidget({
             <span
               style={{
                 position: 'absolute',
-                top: 0,
-                right: 0,
-                width: 11,
-                height: 11,
+                top: 2,
+                right: 2,
+                width: 10,
+                height: 10,
                 backgroundColor: '#10B981',
                 borderRadius: '50%',
-                border: '2px solid #FFFFFF'
+                border: '2px solid #FFFFFF',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
               }}
             />
           )}
