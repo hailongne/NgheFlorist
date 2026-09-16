@@ -74,9 +74,6 @@ export default function QuickContactWidget({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const cleanPhone1 = hotline1.replace(/\s+/g, '');
-  const cleanPhone2 = hotline2.replace(/\s+/g, '');
-
   const getPlatformConfig = (type: PlatformType, idx: number) => {
     switch (type) {
       case 'zalo':
@@ -180,28 +177,6 @@ export default function QuickContactWidget({
           transition: transform 0.18s ease;
         }
 
-        .quick-call-chip {
-          display: flex;
-          align-items: center;
-          justifyContent: center;
-          gap: 6px;
-          background-color: #F8FAFC;
-          border: 1px solid #E2E8F0;
-          color: #334155;
-          border-radius: 8px;
-          padding: 7px 10px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          text-decoration: none;
-          transition: all 0.15s ease;
-        }
-
-        .quick-call-chip:hover {
-          background-color: #F1F5F9;
-          border-color: #CBD5E1;
-          color: #0F172A;
-        }
-
         .quick-contact-fab {
           width: 52px;
           height: 52px;
@@ -210,7 +185,7 @@ export default function QuickContactWidget({
           cursor: pointer;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justifyContent: center;
           background: #26383D;
           color: #FFFFFF;
           font-size: 20px;
@@ -257,11 +232,6 @@ export default function QuickContactWidget({
 
           .quick-contact-subtitle {
             font-size: 0.68rem !important;
-          }
-
-          .quick-call-chip {
-            padding: 5px 8px;
-            font-size: 0.74rem;
           }
 
           .quick-contact-fab {
@@ -311,7 +281,7 @@ export default function QuickContactWidget({
             </div>
 
             {/* Contact Items List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {widgets.length > 0 ? (
                 widgets.map((w, idx) => {
                   const cfg = getPlatformConfig(w.platform_type, idx);
@@ -410,30 +380,6 @@ export default function QuickContactWidget({
                   </a>
                 </>
               )}
-            </div>
-
-            {/* Direct Calling Quick Bar */}
-            <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 8 }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, textAlign: 'center' }}>
-                HOẶC GỌI TRỰC TIẾP
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                <a
-                  href={`tel:${cleanPhone1}`}
-                  className="quick-call-chip"
-                >
-                  <PhoneOutlined style={{ color: '#059669', fontSize: 11 }} />
-                  <span>{hotline1}</span>
-                </a>
-
-                <a
-                  href={`tel:${cleanPhone2}`}
-                  className="quick-call-chip"
-                >
-                  <PhoneOutlined style={{ color: '#0284C7', fontSize: 11 }} />
-                  <span>{hotline2}</span>
-                </a>
-              </div>
             </div>
           </div>
         )}
