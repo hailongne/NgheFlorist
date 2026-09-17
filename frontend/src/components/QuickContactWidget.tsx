@@ -8,6 +8,7 @@ import {
   RightOutlined
 } from '@ant-design/icons';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { RealSocialIcon } from './RealSocialIcons';
 
 export type PlatformType = 'zalo' | 'facebook' | 'instagram' | 'phone';
 
@@ -320,26 +321,13 @@ export default function QuickContactWidget({
                         style={{
                           width: 32,
                           height: 32,
-                          borderRadius: 8,
-                          backgroundColor: cfg.badgeBg,
-                          color: cfg.badgeColor,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: 13,
-                          fontWeight: 700,
                           flexShrink: 0
                         }}
                       >
-                        {w.platform_type === 'zalo' ? (
-                          cfg.iconText
-                        ) : w.platform_type === 'facebook' ? (
-                          <FacebookOutlined />
-                        ) : w.platform_type === 'instagram' ? (
-                          <InstagramOutlined />
-                        ) : (
-                          <PhoneOutlined />
-                        )}
+                        <RealSocialIcon platform={w.platform_type} size={32} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>
@@ -365,8 +353,8 @@ export default function QuickContactWidget({
                     onClick={() => setIsOpen(false)}
                     className="quick-contact-item-link"
                   >
-                    <div className="quick-contact-badge" style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#EBF5FF', color: '#0068FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
-                      Z1
+                    <div className="quick-contact-badge" style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <RealZaloIcon size={32} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 1: {hotline1}</div>
@@ -382,8 +370,8 @@ export default function QuickContactWidget({
                     onClick={() => setIsOpen(false)}
                     className="quick-contact-item-link"
                   >
-                    <div className="quick-contact-badge" style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#EBF5FF', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
-                      Z2
+                    <div className="quick-contact-badge" style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <RealZaloIcon size={32} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 2: {hotline2}</div>

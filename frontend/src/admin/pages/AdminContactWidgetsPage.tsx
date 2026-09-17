@@ -15,6 +15,7 @@ import {
   EyeOutlined
 } from '@ant-design/icons';
 import '../admin.css';
+import { RealSocialIcon } from '../../components/RealSocialIcons';
 
 export type PlatformType = 'zalo' | 'facebook' | 'instagram' | 'phone';
 
@@ -239,29 +240,29 @@ export default function AdminContactWidgetsPage() {
     switch (platform) {
       case 'zalo':
         return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, backgroundColor: '#EFF6FF', color: '#0068FF', fontWeight: 700, fontSize: 13 }}>
-            <span style={{ width: 20, height: 20, borderRadius: 5, backgroundColor: '#0068FF', color: '#FFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900 }}>Z</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '4px 10px', borderRadius: 8, backgroundColor: '#EFF6FF', color: '#0068FF', fontWeight: 700, fontSize: 13 }}>
+            <RealSocialIcon platform="zalo" size={20} />
             Zalo
           </span>
         );
       case 'facebook':
         return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, backgroundColor: '#F0F7FF', color: '#0084FF', fontWeight: 700, fontSize: 13 }}>
-            <FacebookOutlined style={{ fontSize: 15 }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '4px 10px', borderRadius: 8, backgroundColor: '#F0F7FF', color: '#1877F2', fontWeight: 700, fontSize: 13 }}>
+            <RealSocialIcon platform="facebook" size={20} />
             Messenger
           </span>
         );
       case 'instagram':
         return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, backgroundColor: '#FDF2F8', color: '#E1306C', fontWeight: 700, fontSize: 13 }}>
-            <InstagramOutlined style={{ fontSize: 15 }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '4px 10px', borderRadius: 8, backgroundColor: '#FDF2F8', color: '#E1306C', fontWeight: 700, fontSize: 13 }}>
+            <RealSocialIcon platform="instagram" size={20} />
             Instagram
           </span>
         );
       case 'phone':
         return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 8, backgroundColor: '#ECFDF5', color: '#059669', fontWeight: 700, fontSize: 13 }}>
-            <PhoneOutlined style={{ fontSize: 15 }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '4px 10px', borderRadius: 8, backgroundColor: '#ECFDF5', color: '#059669', fontWeight: 700, fontSize: 13 }}>
+            <RealSocialIcon platform="phone" size={20} />
             Điện Thoại
           </span>
         );
@@ -651,18 +652,12 @@ export default function AdminContactWidgetsPage() {
                         }}
                       >
                         <div style={{
-                          width: 26,
-                          height: 26,
-                          borderRadius: '50%',
-                          background: p.bgGradient,
-                          color: '#FFFFFF',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: 13,
-                          fontWeight: 900
+                          flexShrink: 0
                         }}>
-                          {p.value === 'zalo' ? 'Z' : p.value === 'facebook' ? <FacebookOutlined /> : p.value === 'instagram' ? <InstagramOutlined /> : <PhoneOutlined />}
+                          <RealSocialIcon platform={p.value} size={24} />
                         </div>
                         <span style={{ fontSize: 13, fontWeight: isSelected ? 800 : 600, color: isSelected ? '#0F172A' : '#64748B' }}>
                           {p.label}
@@ -775,18 +770,12 @@ export default function AdminContactWidgetsPage() {
                   boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)'
                 }}>
                   <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    backgroundColor: '#FFFFFF',
-                    color: PLATFORMS.find(p => p.value === formData.platform_type)?.color || '#0068FF',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontWeight: 900,
-                    fontSize: 14
+                    flexShrink: 0
                   }}>
-                    {formData.platform_type === 'zalo' ? 'Z' : formData.platform_type === 'facebook' ? <FacebookOutlined /> : formData.platform_type === 'instagram' ? <InstagramOutlined /> : <PhoneOutlined />}
+                    <RealSocialIcon platform={formData.platform_type} size={32} />
                   </div>
                   <div>
                     <div style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.2 }}>

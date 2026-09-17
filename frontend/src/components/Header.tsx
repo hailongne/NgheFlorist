@@ -25,6 +25,7 @@ import { useCustomerRequest } from '../context/RequestContext';
 import { useAdminAuth } from '../admin/AdminAuthContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
+import { RealSocialIcon } from './RealSocialIcons';
 
 interface HeaderContactWidget {
   id: number;
@@ -916,15 +917,12 @@ export default function Header() {
                             <div style={{
                               width: 32,
                               height: 32,
-                              borderRadius: 8,
-                              backgroundColor: 'rgba(255, 255, 255, 0.22)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: 16,
                               flexShrink: 0
                             }}>
-                              {isZalo ? 'Z' : isPhone ? <PhoneOutlined /> : isFb ? <FacebookOutlined /> : isInsta ? <InstagramOutlined /> : <MessageOutlined />}
+                              <RealSocialIcon platform={w.platform_type} size={32} />
                             </div>
                             <div style={{ flexGrow: 1, minWidth: 0 }}>
                               <div style={{ fontSize: '0.86rem', fontWeight: 700, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
