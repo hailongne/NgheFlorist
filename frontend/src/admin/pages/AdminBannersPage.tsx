@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
-import { DeleteOutlined, EditOutlined, UploadOutlined, LoadingOutlined, CloseOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, UploadOutlined, LoadingOutlined, CloseOutlined, PictureOutlined } from '@ant-design/icons';
 import ImageWithFallback from '../../components/ImageWithFallback';
 
 interface BannerItem {
@@ -203,11 +203,38 @@ export default function AdminBannersPage() {
           Chưa có banner nào. Hãy bấm <b>"Thêm Banner Mới"</b> để tạo banner đầu tiên.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
           {banners.map(b => (
-            <div key={b.id} className="admin-card" style={{ padding: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ position: 'relative', aspectRatio: '5 / 4', width: '100%', borderRadius: '8px', overflow: 'hidden', marginBottom: '14px', backgroundColor: '#F1F5F9' }}>
-                <ImageWithFallback src={b.image_url} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div key={b.id} className="admin-card" style={{ padding: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', borderRadius: '12px' }}>
+              <div style={{ position: 'relative', aspectRatio: '16 / 9', width: '100%', borderRadius: '8px', overflow: 'hidden', marginBottom: '14px', backgroundColor: '#F8FAFC' }}>
+                {b.image_url ? (
+                  <ImageWithFallback src={b.image_url} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: 6,
+                    backgroundColor: '#F8FAFC',
+                    border: '1.5px dashed #CBD5E1',
+                    borderRadius: '8px',
+                    color: '#64748B'
+                  }}>
+                    <PictureOutlined style={{ fontSize: 32, color: '#94A3B8' }} />
+                    <span style={{ fontSize: '13px', fontWeight: 500 }}>Chưa có hình ảnh banner</span>
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(b)}
+                      className="admin-btn admin-btn-outline"
+                      style={{ padding: '4px 12px', fontSize: '12px', borderRadius: 6, marginTop: 4 }}
+                    >
+                      + Tải ảnh lên
+                    </button>
+                  </div>
+                )}
                 <div style={{
                   position: 'absolute',
                   top: 8,

@@ -48,7 +48,7 @@ export default function ImageWithFallback({
       className={className}
       style={{
         ...style,
-        ...(isUsingFallback && !style?.objectFit ? { objectFit: 'contain', background: '#F8FAFB', padding: '16px' } : {})
+        ...(isUsingFallback ? { objectFit: 'contain', backgroundColor: '#F8FAFC', padding: '24px' } : {})
       }}
       {...props}
     />
