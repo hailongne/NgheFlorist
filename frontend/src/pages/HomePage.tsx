@@ -223,20 +223,28 @@ export default function HomePage() {
           }}
         >
           {/* Thông điệp & CTA - Trên Mobile ẩn ảnh hoàn toàn để tối ưu không gian */}
-          <div style={{ padding: '0 4px', textAlign: 'center', maxWidth: '480px', margin: '0 auto' }}>
+          <div style={{ padding: '0 4px', textAlign: 'center', maxWidth: '100%', margin: '0 auto', boxSizing: 'border-box', overflow: 'hidden' }}>
             {currentHero.badge && (
               <div
                 className="badge badge-pastel"
-                style={{ marginBottom: 10, display: 'inline-block', fontSize: '0.78rem' }}
+                style={{ 
+                  marginBottom: 10, 
+                  display: 'inline-block', 
+                  fontSize: '0.7rem',
+                  padding: '3px 10px',
+                  maxWidth: '100%',
+                  whiteSpace: 'normal',
+                  lineHeight: 1.35
+                }}
               >
                 {currentHero.badge}
               </div>
             )}
             <h1
               style={{
-                fontSize: '1.65rem',
+                fontSize: '1.35rem',
                 color: 'var(--color-text)',
-                lineHeight: 1.3,
+                lineHeight: 1.35,
                 marginBottom: 8,
                 fontFamily: 'var(--font-heading)',
                 fontWeight: 700
@@ -247,9 +255,9 @@ export default function HomePage() {
 
             <p
               style={{
-                fontSize: '0.92rem',
+                fontSize: '0.82rem',
                 color: 'var(--color-text-secondary)',
-                lineHeight: 1.6,
+                lineHeight: 1.5,
                 marginBottom: 16
               }}
             >
@@ -259,9 +267,11 @@ export default function HomePage() {
             <div 
               style={{ 
                 display: 'grid', 
-                gridTemplateColumns: currentHero.cta_secondary_text ? '1fr 1fr' : '1fr', 
-                gap: 10,
-                alignItems: 'stretch' 
+                gridTemplateColumns: currentHero.cta_secondary_text ? 'minmax(0, 1fr) minmax(0, 1fr)' : '1fr', 
+                gap: 8,
+                alignItems: 'stretch',
+                width: '100%',
+                boxSizing: 'border-box'
               }}
             >
               <Link
@@ -269,15 +279,17 @@ export default function HomePage() {
                 className="btn btn-primary"
                 style={{
                   width: '100%',
-                  padding: '11px 8px',
-                  fontSize: '0.84rem',
+                  minWidth: 0,
+                  boxSizing: 'border-box',
+                  padding: '9px 6px',
+                  fontSize: '0.78rem',
                   fontWeight: 700,
                   borderRadius: 'var(--radius-full)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 6,
-                  minHeight: 44,
+                  gap: 4,
+                  minHeight: 40,
                   boxShadow: '0 4px 14px rgba(42, 117, 211, 0.22)',
                   textAlign: 'center'
                 }}
@@ -285,7 +297,7 @@ export default function HomePage() {
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currentHero.cta_primary_text || 'Xem bộ sưu tập'}
                 </span>
-                <ArrowRightOutlined style={{ fontSize: 11, flexShrink: 0 }} />
+                <ArrowRightOutlined style={{ fontSize: 10, flexShrink: 0 }} />
               </Link>
               {currentHero.cta_secondary_text && (
                 <Link
@@ -293,14 +305,16 @@ export default function HomePage() {
                   className="btn btn-outline"
                   style={{
                     width: '100%',
-                    padding: '11px 8px',
-                    fontSize: '0.84rem',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    padding: '9px 6px',
+                    fontSize: '0.78rem',
                     fontWeight: 600,
                     borderRadius: 'var(--radius-full)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: 44,
+                    minHeight: 40,
                     textAlign: 'center'
                   }}
                 >
