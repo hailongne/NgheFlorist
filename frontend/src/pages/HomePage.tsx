@@ -229,12 +229,14 @@ export default function HomePage() {
                 className="badge badge-pastel"
                 style={{ 
                   marginBottom: 10, 
-                  display: 'inline-block', 
-                  fontSize: '0.7rem',
-                  padding: '3px 10px',
+                  display: 'inline-flex', 
+                  alignItems: 'center',
+                  fontSize: 'clamp(0.62rem, 2.7vw, 0.68rem)',
+                  padding: '3px 9px',
+                  letterSpacing: '-0.25px',
                   maxWidth: '100%',
-                  whiteSpace: 'normal',
-                  lineHeight: 1.35
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.2
                 }}
               >
                 {currentHero.badge}
