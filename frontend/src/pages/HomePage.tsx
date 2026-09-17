@@ -545,38 +545,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - TỈ LỆ CHUẨN NGANG 5:4 */}
+      {/* 4. BANNERS QUẢNG CÁO (HOMEPAGE CAMPAIGN BANNERS) - TỈ LỆ CHUẨN NGANG 5:4 (16:11 TRÊN MOBILE) */}
       {banners && banners.length > 0 && (
-        <section style={{ padding: '36px 0 28px', background: 'var(--color-white)' }}>
+        <section className="homepage-campaign-banners-section">
           <div className="container">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: banners.length === 1 
-                  ? 'minmax(320px, 640px)' 
-                  : 'repeat(auto-fit, minmax(320px, 1fr))',
-                gap: 24,
-                maxWidth: '1200px',
-                margin: '0 auto'
-              }}
-            >
+            <div className="homepage-campaign-banners-grid">
               {banners.map((b) => (
                 <Link
                   key={b.id}
                   to={b.cta_url || '/flowers'}
                   className="homepage-campaign-banner"
-                  style={{
-                    position: 'relative',
-                    aspectRatio: '5 / 4',
-                    width: '100%',
-                    borderRadius: 'var(--radius-lg, 16px)',
-                    overflow: 'hidden',
-                    textDecoration: 'none',
-                    display: 'block',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: '0 4px 16px rgba(38, 56, 61, 0.08)',
-                    transition: 'all 0.35s ease'
-                  }}
                 >
                   {/* Background Image */}
                   <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
@@ -605,45 +583,13 @@ export default function HomePage() {
                     }}
                   />
 
-                  {/* Content pinned to bottom of 3:4 frame */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      zIndex: 2,
-                      padding: '24px 20px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end',
-                      gap: 8
-                    }}
-                  >
-                    <h3
-                      style={{
-                        fontFamily: 'var(--font-heading, "Playfair Display", serif)',
-                        fontSize: 'clamp(1.1rem, 2.2vw, 1.35rem)',
-                        fontWeight: 700,
-                        color: '#FFFFFF',
-                        margin: 0,
-                        lineHeight: 1.3,
-                        textShadow: '0 1px 4px rgba(0, 0, 0, 0.6)'
-                      }}
-                    >
+                  {/* Content pinned to bottom */}
+                  <div className="banner-content-box">
+                    <h3 className="banner-heading">
                       {b.title}
                     </h3>
                     {b.subtitle && (
-                      <p
-                        style={{
-                          fontSize: '0.84rem',
-                          color: '#EAF6F9',
-                          margin: 0,
-                          lineHeight: 1.45,
-                          opacity: 0.95,
-                          textShadow: '0 1px 3px rgba(0, 0, 0, 0.4)'
-                        }}
-                      >
+                      <p className="banner-desc">
                         {b.subtitle}
                       </p>
                     )}
