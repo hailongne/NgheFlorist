@@ -75,6 +75,18 @@ export default function Header() {
   const [showZaloDropdown, setShowZaloDropdown] = useState(false);
   const [contactWidgets, setContactWidgets] = useState<HeaderContactWidget[]>([]);
   const [categoryTree, setCategoryTree] = useState<any[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategoryDropdown = (catKey: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setExpandedCategories(prev => ({
+      ...prev,
+      [catKey]: !prev[catKey]
+    }));
+  };
 
   // Admin Auth context & local fallback
   const { user: adminUser, isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAdminAuth();
@@ -194,6 +206,34 @@ export default function Header() {
       })
       .catch(err => console.warn('Header categories fetch fallback:', err));
   }, []);
+
+  // Auto expand active category dropdown in mobile drawer
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const rawCat = params.get('category') || (location.pathname.startsWith('/category/') ? location.pathname.replace('/category/', '') : '');
+    const decodedCat = decodeURIComponent(rawCat).trim().toLowerCase();
+    
+    if (decodedCat && categoryTree.length > 0) {
+      categoryTree.forEach((cat: any) => {
+        const catKey = String(cat.slug || cat.id);
+        const sSlug = String(cat.slug || '').toLowerCase();
+        const sId = String(cat.id || '').toLowerCase();
+        const sName = String(cat.name || '').toLowerCase();
+
+        const isParent = sSlug === decodedCat || sId === decodedCat || sName === decodedCat;
+        const isChild = cat.children?.some((sub: any) => {
+          const subSlug = String(sub.slug || '').toLowerCase();
+          const subId = String(sub.id || '').toLowerCase();
+          const subName = String(sub.name || '').toLowerCase();
+          return subSlug === decodedCat || subId === decodedCat || subName === decodedCat;
+        });
+
+        if (isParent || isChild) {
+          setExpandedCategories(prev => ({ ...prev, [catKey]: true }));
+        }
+      });
+    }
+  }, [location.pathname, location.search, categoryTree]);
 
   const activeContactWidgets = React.useMemo(() => {
     return contactWidgets
@@ -1299,110 +1339,218 @@ export default function Header() {
                   Danh mục hoa
                 </div>
 
-                {/* Tất cả mẫu hoa */}
-                <Link
-                  to="/flowers"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    background: location.pathname === '/flowers' && !location.search ? '#E0F2FE' : '#F0F9FF',
-                    color: '#0369A1',
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
-                    textDecoration: 'none',
-                    marginBottom: 16,
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>📁</span>
-                  <span>Tất cả mẫu hoa</span>
-                </Link>
+                {(() => {
+                  const isFlowersRoute = location.pathname === '/flowers';
+                  const drawerSearchParams = new URLSearchParams(location.search);
+                  const currentCatQuery = drawerSearchParams.get('category') || 
+                    (location.pathname.startsWith('/category/') ? location.pathname.replace('/category/', '') : '');
+                  const decodedCatQuery = decodeURIComponent(currentCatQuery).trim().toLowerCase();
+                  const currentSearchQuery = drawerSearchParams.get('search');
+                  const isAllFlowersActive = isFlowersRoute && !currentCatQuery && !currentSearchQuery;
 
-                {/* Category Tree 2 tầng */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {displayCategoryTree.map((cat: any) => (
-                    <div key={cat.id || cat.slug} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {/* Parent Category Header */}
+                  return (
+                    <>
+                      {/* Tất cả mẫu hoa */}
                       <Link
-                        to={`/flowers?category=${cat.slug || cat.id}`}
+                        to="/flowers"
                         onClick={() => setIsMobileMenuOpen(false)}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '6px 8px',
-                          borderRadius: 6,
+                          gap: 10,
+                          padding: '10px 14px',
+                          borderRadius: 8,
+                          background: isAllFlowersActive ? '#E0F2FE' : 'transparent',
+                          color: isAllFlowersActive ? '#0369A1' : '#1E293B',
+                          fontWeight: isAllFlowersActive ? 700 : 600,
+                          fontSize: '0.95rem',
                           textDecoration: 'none',
-                          color: '#1E293B',
-                          transition: 'background 0.15s'
+                          marginBottom: 14,
+                          transition: 'all 0.15s ease'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: '0.98rem' }}>
-                          <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📁</span>
-                          <span>{cat.name}</span>
-                        </div>
-                        {cat.product_count > 0 && (
-                          <span style={{
-                            background: '#F1F5F9',
-                            color: '#64748B',
-                            borderRadius: 12,
-                            padding: '2px 10px',
-                            fontSize: '0.82rem',
-                            fontWeight: 600
-                          }}>
-                            {cat.product_count}
-                          </span>
-                        )}
+                        <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>📁</span>
+                        <span>Tất cả mẫu hoa</span>
                       </Link>
 
-                      {/* Subcategories (Price Ranges or sub-items) */}
-                      {cat.children && cat.children.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingLeft: 16 }}>
-                          {cat.children.map((sub: any) => (
-                            <Link
-                              key={sub.id || sub.slug}
-                              to={`/flowers?category=${sub.slug || sub.id}`}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              style={{
+                      {/* Category Tree 2 tầng với hiệu ứng dropdown menu */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {displayCategoryTree.map((cat: any) => {
+                          const catKey = String(cat.slug || cat.id);
+                          const hasChildren = Array.isArray(cat.children) && cat.children.length > 0;
+                          const isCatExpanded = Boolean(expandedCategories[catKey]);
+
+                          const sCatSlug = String(cat.slug || '').toLowerCase();
+                          const sCatId = String(cat.id || '').toLowerCase();
+                          const sCatName = String(cat.name || '').toLowerCase();
+
+                          const isParentActive = (isFlowersRoute || location.pathname.startsWith('/category/')) && (
+                            Boolean(currentCatQuery) && (
+                              currentCatQuery === String(cat.slug) ||
+                              currentCatQuery === String(cat.id) ||
+                              decodedCatQuery === sCatSlug ||
+                              decodedCatQuery === sCatId ||
+                              decodedCatQuery === sCatName
+                            )
+                          );
+
+                          return (
+                            <div key={cat.id || cat.slug} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              {/* Parent Category Header Row */}
+                              <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                padding: '5px 8px',
-                                borderRadius: 6,
-                                textDecoration: 'none',
-                                color: '#475569',
-                                fontSize: '0.9rem',
-                                fontWeight: 500,
-                                transition: 'background 0.15s'
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <span style={{ color: '#94A3B8', fontWeight: 600 }}>↳</span>
-                                <span>{sub.name}</span>
+                                borderRadius: 8,
+                                background: isParentActive ? '#E0F2FE' : 'transparent',
+                                transition: 'background 0.15s ease'
+                              }}>
+                                <Link
+                                  to={`/flowers?category=${cat.slug || cat.id}`}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '8px 10px',
+                                    borderRadius: 8,
+                                    textDecoration: 'none',
+                                    color: isParentActive ? '#0284C7' : '#1E293B',
+                                    fontWeight: isParentActive ? 700 : 600,
+                                    fontSize: '0.98rem',
+                                    transition: 'color 0.15s ease'
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📁</span>
+                                    <span>{cat.name}</span>
+                                  </div>
+                                  {cat.product_count > 0 && (
+                                    <span style={{
+                                      background: isParentActive ? '#BAE6FD' : '#F1F5F9',
+                                      color: isParentActive ? '#0369A1' : '#64748B',
+                                      borderRadius: 12,
+                                      padding: '2px 8px',
+                                      fontSize: '0.78rem',
+                                      fontWeight: 600,
+                                      marginRight: hasChildren ? 4 : 0
+                                    }}>
+                                      {cat.product_count}
+                                    </span>
+                                  )}
+                                </Link>
+
+                                {hasChildren && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => toggleCategoryDropdown(catKey, e)}
+                                    aria-label={isCatExpanded ? `Thu gọn ${cat.name}` : `Mở rộng ${cat.name}`}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: 36,
+                                      height: 36,
+                                      padding: 0,
+                                      border: 'none',
+                                      background: isCatExpanded ? '#EFF6FF' : '#F8FAFC',
+                                      color: isCatExpanded ? '#0284C7' : '#64748B',
+                                      borderRadius: 7,
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s ease',
+                                      marginRight: 4
+                                    }}
+                                  >
+                                    <DownOutlined style={{
+                                      fontSize: '0.8rem',
+                                      transform: isCatExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                      transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }} />
+                                  </button>
+                                )}
                               </div>
-                              {sub.product_count > 0 && (
-                                <span style={{
-                                  background: '#F1F5F9',
-                                  color: '#64748B',
-                                  borderRadius: 10,
-                                  padding: '1px 8px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600
-                                }}>
-                                  {sub.product_count}
-                                </span>
+
+                              {/* Subcategories (Price Ranges or sub-items) với hiệu ứng dropdown accordion */}
+                              {hasChildren && (
+                                <div
+                                  style={{
+                                    display: 'grid',
+                                    gridTemplateRows: isCatExpanded ? '1fr' : '0fr',
+                                    transition: 'grid-template-rows 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease',
+                                    opacity: isCatExpanded ? 1 : 0
+                                  }}
+                                >
+                                  <div style={{ minHeight: 0, overflow: 'hidden' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingLeft: 14, paddingTop: 4, paddingBottom: 6 }}>
+                                      {cat.children.map((sub: any) => {
+                                        const sSubSlug = String(sub.slug || '').toLowerCase();
+                                        const sSubId = String(sub.id || '').toLowerCase();
+                                        const sSubName = String(sub.name || '').toLowerCase();
+
+                                        const isSubActive = (isFlowersRoute || location.pathname.startsWith('/category/')) && (
+                                          Boolean(currentCatQuery) && (
+                                            currentCatQuery === String(sub.slug) ||
+                                            currentCatQuery === String(sub.id) ||
+                                            decodedCatQuery === sSubSlug ||
+                                            decodedCatQuery === sSubId ||
+                                            decodedCatQuery === sSubName
+                                          )
+                                        );
+
+                                        return (
+                                          <Link
+                                            key={sub.id || sub.slug}
+                                            to={`/flowers?category=${sub.slug || sub.id}`}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            style={{
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'space-between',
+                                              padding: '6px 10px',
+                                              borderRadius: 6,
+                                              textDecoration: 'none',
+                                              background: isSubActive ? '#E0F2FE' : 'transparent',
+                                              color: isSubActive ? '#0284C7' : '#475569',
+                                              fontSize: '0.9rem',
+                                              fontWeight: isSubActive ? 700 : 500,
+                                              transition: 'all 0.15s ease'
+                                            }}
+                                          >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                              <span style={{ 
+                                                color: isSubActive ? '#0284C7' : '#94A3B8', 
+                                                fontWeight: isSubActive ? 700 : 600,
+                                                fontSize: '0.95rem'
+                                              }}>↳</span>
+                                              <span>{sub.name}</span>
+                                            </div>
+                                            {sub.product_count > 0 && (
+                                              <span style={{
+                                                background: isSubActive ? '#BAE6FD' : '#F1F5F9',
+                                                color: isSubActive ? '#0369A1' : '#64748B',
+                                                borderRadius: 10,
+                                                padding: '1px 8px',
+                                                fontSize: '0.78rem',
+                                                fontWeight: 600
+                                              }}>
+                                                {sub.product_count}
+                                              </span>
+                                            )}
+                                          </Link>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
                               )}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
 
                 {/* Primary CTA Buttons in Drawer: Thiết kế riêng & 2 Zalo 1-click */}
                 <div style={{ marginTop: 20, padding: '0 4px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1427,7 +1575,15 @@ export default function Header() {
                     <GiftOutlined /> Đặt cắm hoa thiết kế riêng
                   </button>
 
-                  <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 700, textAlign: 'center', marginTop: 4 }}>
+                  <div style={{ 
+                    fontSize: '0.65rem', 
+                    color: '#059669', 
+                    fontWeight: 600, 
+                    textAlign: 'center', 
+                    marginTop: 3,
+                    letterSpacing: -0.1,
+                    lineHeight: 1.3
+                  }}>
                     ● 1 chạm kết nối tư vấn ngay (Không cần điền form)
                   </div>
 
