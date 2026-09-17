@@ -72,6 +72,20 @@ export function extractPhoneFromZalo(url?: string, fallback = ''): string {
   return fallback || url;
 }
 
+export function formatPhoneNumber(phone?: string, fallback = '0862 926 866'): string {
+  if (!phone) return fallback;
+  const clean = phone.trim();
+  if (clean.includes(' ') || clean.includes('.') || clean.includes('-')) return clean;
+  const digits = clean.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+  }
+  if (digits.length === 11) {
+    return `${digits.slice(0, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+  }
+  return clean;
+}
+
 const DEFAULT_SETTINGS: SiteSettings = {
   site_name: 'Nghệ Florist',
   hotline: '0862926866',
@@ -143,7 +157,9 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const zaloUrl1 = normalizeZaloUrl(conversion.zalo_url, '0862926866');
   const zaloUrl2 = normalizeZaloUrl(conversion.fanpage_url, '0329806866');
-  const hotline1 = extractPhoneFromZalo(conversion.zalo_url, settings.hotline || '0862 926 866');
+  const hotline1 = settings.hotline 
+    ? formatPhoneNumber(settings.hotline) 
+    : extractPhoneFromZalo(conversion.zalo_url, '0862 926 866');
   const hotline2 = extractPhoneFromZalo(conversion.fanpage_url, '0329 806 866');
   const ctaText1 = conversion.primary_cta_text || 'Tư vấn qua Zalo';
   const ctaText2 = conversion.secondary_cta_text || 'Tư vấn qua Zalo';

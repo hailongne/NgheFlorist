@@ -110,7 +110,7 @@ export default function AdminLayout() {
 
 
 
-          <div className="admin-nav-group-title">Quản Trị CMS & Kênh Chuyển Đổi</div>
+          <div className="admin-nav-group-title">Quản Trị CMS & Giao Diện</div>
           <NavLink
             to="/admin/homepage"
             className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}

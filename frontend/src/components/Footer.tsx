@@ -7,7 +7,7 @@ import {
   PhoneOutlined 
 } from '@ant-design/icons';
 import { useAdminAuth } from '../admin/AdminAuthContext';
-import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useSiteSettings, formatPhoneNumber } from '../context/SiteSettingsContext';
 
 interface FooterConfig {
   brand_desc?: string;
@@ -21,8 +21,10 @@ export default function Footer() {
 
   const address = settings.address || '22 ngõ 115 Phố Núi Trúc, Ba Đình, Hà Nội';
   const email = settings.email || 'ngheflorist.com@gmail.com';
-  const hotline = hotline1 || settings.hotline || '0862 926 866';
-  const hotlineTel = hotline.replace(/\s+/g, '');
+  // Đồng bộ với số điện thoại đã lưu trong Cài Đặt Website
+  const rawHotline = settings.hotline || hotline1 || '0862 926 866';
+  const hotline = formatPhoneNumber(rawHotline);
+  const hotlineTel = rawHotline.replace(/\D/g, '');
 
   const [footerConfig, setFooterConfig] = useState<FooterConfig>({
     brand_desc: 'Nghệ Florist mang đến những tác phẩm hoa tươi nghệ thuật, tinh tế và tràn đầy cảm xúc. Từng đóa hoa được nâng niu tỉ mỉ từ khâu chọn hoa đến khi trao tận tay người nhận.',
