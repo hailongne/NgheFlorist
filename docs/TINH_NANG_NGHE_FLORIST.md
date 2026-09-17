@@ -96,7 +96,30 @@
   * Hỗ trợ tải tối đa 3 ảnh mẫu hoa yêu thích kèm ô ghi chú cho Florist.
   * Nút bấm gửi yêu cầu nổi bật, tự động lưu thông tin vào hệ thống quản trị và kết nối Zalo.
 
-### 2.4. Chân Trang Chuẩn Mực & Đồng Bộ (Footer)
+### 2.4. Trang Chi Tiết Sản Phẩm & Hệ Thống Nút Tư Vấn Nhanh 50/50 (`/product/:slug`)
+* **Thư viện ảnh sản phẩm (Lookbook Gallery)**:
+  * Ảnh chính tỉ lệ 3:4 chuẩn Studio cao cấp, hiển thị sắc nét kèm nút lưu vào danh sách yêu thích (Wishlist).
+  * Hàng thumbnails thu nhỏ bên dưới chuyển ảnh tức thì khi click.
+  * Trên Mobile: Lookbook cuộn ngang mượt mà.
+* **Thay thế toàn bộ nút CTA cũ bằng Nút Tư Vấn Nhanh (Contact Widgets)**:
+  * Tự động đồng bộ các kênh tư vấn từ trang quản trị `Quản Lý Nút Tư Vấn Nhanh` (Zalo 1, Zalo 2, FanPage Messenger, Hotline Gọi Nhanh).
+  * Thiết kế thẻ nút nổi bật, trực quan, có icon nhận diện thương hiệu và mô tả dịch vụ.
+* **Popup Tư Vấn & Đặt Hàng 50/50 Thông Minh**:
+  * **Cột Trái (50%) — Form Đặt Hoa Chuẩn Thực Tế**:
+    * Tự động lấy dữ liệu từ tài khoản khách hàng nếu đã đăng nhập (Họ tên, SĐT, Địa chỉ).
+    * Các trường: Số lượng kèm stepper `[-] [+]`, Ngày & giờ nhận hoa, SĐT người đặt, SĐT người nhận hoa, Địa chỉ giao hoa chi tiết, Nội dung in thiệp/biển chúc mừng, Ghi chú.
+    * Khi bấm gửi: Tự động format tin nhắn đặt hàng chuẩn từng dòng, sao chép cả ảnh & tin nhắn vào Clipboard, lưu Lead vào hệ thống và mở ngay ứng dụng chat.
+  * **Cột Phải (50%) — Bỏ Qua Form Chat Trực Tiếp Với Sale**:
+    * Xem trước ảnh mẫu hoa sắc nét, tên và giá tham khảo.
+    * Tự động sao chép ảnh mẫu hoa vào Clipboard.
+    * 3 nút tiện ích: *Sao chép ảnh*, *Tải ảnh về máy*, *Sao chép link sản phẩm*.
+    * Nút mở trực tiếp kênh tư vấn ngay không cần điền form.
+* **Gợi Ý Mẫu Hoa Tương Tự Phong Cách Shopee**:
+  * Đặt ở dưới cùng chi tiết sản phẩm với tiêu đề cam nổi bật *"CÓ THỂ BẠN CŨNG THÍCH"*.
+  * Lưới sản phẩm responsive: **2 cột chuẩn trên Mobile**, **4 cột trên Desktop**.
+  * Hiển thị 8–12 mẫu hoa cùng danh mục hoặc cùng phong cách được yêu thích nhất kèm nút xem thêm.
+
+### 2.5. Chân Trang Chuẩn Mực & Đồng Bộ (Footer)
 * **Tagline thương hiệu**: *"Nghệ Florist - Tiệm hoa & quả nhập khẩu"*.
 * **Thông Tin Liên Hệ Chuẩn Hóa**:
   * 📍 **Địa chỉ**: `22 ngõ 115 Phố Núi Trúc, Ba Đình, Hà Nội` (đồng bộ tự động từ cài đặt CMS).
