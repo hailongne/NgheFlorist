@@ -133,6 +133,7 @@ export default function ProductDetailPage() {
   const [senderName, setSenderName] = useState('');
   const [senderPhone, setSenderPhone] = useState('');
   const [isSameRecipient, setIsSameRecipient] = useState(true);
+  const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [cardMessage, setCardMessage] = useState('');
@@ -140,6 +141,8 @@ export default function ProductDetailPage() {
   const [copyStatus, setCopyStatus] = useState<string>('');
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [hasProfileAutofilled, setHasProfileAutofilled] = useState(false);
+  const [submittedText, setSubmittedText] = useState<string | null>(null);
+  const [isCopiedSuccess, setIsCopiedSuccess] = useState(false);
 
   // Load product detail
   useEffect(() => {
@@ -287,9 +290,58 @@ export default function ProductDetailPage() {
     } catch {}
   };
 
+  const formatPriceK = (price: number) => {
+    if (price >= 1000) {
+      const k = Math.round(price / 1000);
+      return `${k}k`;
+    }
+    return `${price}đ`;
+  };
+
+  // Generate formatted order summary text matching Florist standard template
+  const generateOrderSummaryText = () => {
+    if (!product) return '';
+
+    const priceK = formatPriceK(activePrice * orderQuantity);
+    const qtyPrefix = orderQuantity > 1 ? `${orderQuantity}x ` : '';
+    
+    // Dòng 1: - bó 400k (hoặc tên hoa + giá + ghi chú cọc/ship nếu có)
+    const line1 = `- ${qtyPrefix}${product.name} ${priceK}${orderNotes ? ` (${orderNotes})` : ''}`;
+
+    // Dòng 2: - giờ báo sau (hoặc giờ cụ thể)
+    let timeStr = deliveryTimePreset.trim();
+    if (!timeStr) {
+      timeStr = deliveryDate ? `Giao ngày ${deliveryDate}` : 'giờ báo sau';
+    }
+    const line2 = `- ${timeStr}`;
+
+    // Dòng 3: - Sđt người đặt: 0936245994
+    const line3 = `- Sđt người đặt: ${senderPhone || '(Chưa nhập)'}`;
+
+    // Dòng 4: - Sđt người nhận : Hoà 097 5905672
+    let recStr = '';
+    if (isSameRecipient) {
+      recStr = `${senderName ? `${senderName} ` : ''}${senderPhone || ''}`.trim();
+    } else {
+      recStr = `${recipientName ? `${recipientName} ` : ''}${recipientPhone || senderPhone || ''}`.trim();
+    }
+    const line4 = `- Sđt người nhận : ${recStr || '(Chưa nhập)'}`;
+
+    // Dòng 5: - Địa chỉ : Trường mầm non xứ sở thần tiên - Trung Văn ( gần số 1 Đại Linh )
+    const line5 = `- Địa chỉ : ${deliveryAddress.trim() || 'Nhận tại tiệm hoa / Trao đổi qua chat'}`;
+
+    // Dòng 6:
+    // - Nội dung : 
+    // Chúc mừng sinh nhật em!!!
+    const line6 = `- Nội dung : \n${cardMessage.trim() || '(Chưa có nội dung thiệp)'}`;
+
+    return [line1, line2, line3, line4, line5, line6].join('\n');
+  };
+
   // Open Consultation Modal
   const handleOpenConsultation = (widget: ContactWidget) => {
     setActiveWidget(widget);
+    setSubmittedText(null);
     setConsultModalOpen(true);
     const currentImg = selectedImage || (product ? getFallbackForId(product.id) : '');
     if (currentImg) {
@@ -297,7 +349,7 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Submit Order Form & Redirect to Channel (Left 50%)
+  // Submit Order Form & Show Copyable Text (Left 50%)
   const handleSubmitFormAndSend = async () => {
     if (!product || !activeWidget) return;
     if (!senderPhone.trim()) {
@@ -306,35 +358,26 @@ export default function ProductDetailPage() {
     }
     setIsSubmittingOrder(true);
 
-    const totalCost = activePrice * orderQuantity;
-    const formattedTotal = formatVND(totalCost);
-    const deliveryText = deliveryTimePreset ? `${deliveryTimePreset} (${deliveryDate})` : `Giao ngày ${deliveryDate}`;
-    const recPhone = isSameRecipient ? senderPhone : (recipientPhone || senderPhone);
+    const formattedOrderText = generateOrderSummaryText();
 
-    // Format message exactly like the user's uploaded order screenshot
-    const orderMessageLines = [
-      `- ${orderQuantity > 1 ? `${orderQuantity} x ` : ''}${product.name} (${formatVND(activePrice)}). Tổng: ${formattedTotal}`,
-      `- Ngày, thời gian nhận hoa: ${deliveryText}`,
-      `- SĐT của anh/chị: ${senderPhone}${senderName ? ` (${senderName})` : ''}`,
-      `- SĐT người nhận hoa: ${recPhone}`,
-      `- Địa chỉ nhận hoa: ${deliveryAddress || 'Nhận tại cửa hàng / Trao đổi qua chat'}`,
-      cardMessage ? `- Nội dung thiệp/biển: ${cardMessage}` : '- Nội dung thiệp/biển: (Chưa có / Trao đổi thêm)',
-      orderNotes ? `- Ghi chú: ${orderNotes}` : '',
-      `- Link sản phẩm: ${window.location.origin}/product/${product.slug}`
-    ].filter(Boolean);
-
-    const fullOrderMessage = orderMessageLines.join('\n');
-
-    // 1. Copy order message to clipboard
+    // 1. Copy order message to clipboard immediately
     try {
-      await navigator.clipboard.writeText(fullOrderMessage);
-    } catch {}
+      await navigator.clipboard.writeText(formattedOrderText);
+      setIsCopiedSuccess(true);
+      setTimeout(() => setIsCopiedSuccess(false), 3000);
+    } catch (e) {
+      console.warn('Clipboard error:', e);
+    }
 
     // 2. Copy image to clipboard
     const currentImg = selectedImage || getFallbackForId(product.id);
     copyImageToClipboard(currentImg);
 
-    // 3. Save Lead into backend
+    // 3. Save Lead into backend database
+    const totalCost = activePrice * orderQuantity;
+    const formattedTotal = formatVND(totalCost);
+    const deliveryText = deliveryTimePreset ? `${deliveryTimePreset} (${deliveryDate})` : `Giao ngày ${deliveryDate}`;
+
     try {
       await fetch('/api/customer-requests', {
         method: 'POST',
@@ -349,7 +392,7 @@ export default function ProductDetailPage() {
           delivery_area: deliveryAddress,
           delivery_time: deliveryText,
           card_message: cardMessage,
-          notes: `[ĐƠN QUA ${activeWidget.title}] ${orderQuantity}x ${product.name}. Tổng: ${formattedTotal}. Người nhận: ${recPhone}. Địa chỉ: ${deliveryAddress}. Thiệp: ${cardMessage}. Ghi chú: ${orderNotes}`,
+          notes: `[ĐƠN QUA ${activeWidget.title}]\n${formattedOrderText}`,
           budget: String(totalCost)
         })
       });
@@ -358,16 +401,8 @@ export default function ProductDetailPage() {
     }
 
     setIsSubmittingOrder(false);
-    setCopyStatus('order_sent');
-
-    // 4. Open destination channel
-    setTimeout(() => {
-      if (activeWidget.platform_type === 'phone' || activeWidget.action_link.startsWith('tel:')) {
-        window.location.href = activeWidget.action_link;
-      } else {
-        window.open(activeWidget.action_link, '_blank');
-      }
-    }, 350);
+    // Display the copyable text block on screen!
+    setSubmittedText(formattedOrderText);
   };
 
   // Skip Form & Direct Chat (Right 50%)
@@ -1030,259 +1065,420 @@ export default function ProductDetailPage() {
 
             {/* Modal Body: 50% Left (Order Form) & 50% Right (Direct Chat) */}
             <div className="consultation-modal-grid">
-              {/* CỘT TRÁI (50%): FORM ĐẶT HOA NHANH */}
+              {/* CỘT TRÁI (50%): FORM ĐẶT HOA NHANH HOẶC ĐOẠN VĂN SAO CHÉP */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingBottom: 8,
-                  borderBottom: '1px solid #E2E8F0'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <FormOutlined style={{ color: '#0284C7', fontSize: 18 }} />
-                    <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0F172A', textTransform: 'uppercase' }}>
-                      Điền thông tin đặt hoa
-                    </span>
-                  </div>
-                  {hasProfileAutofilled && (
-                    <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, background: '#ECFDF5', padding: '2px 8px', borderRadius: 4 }}>
-                      ✓ Đã tự động điền từ tài khoản
-                    </span>
-                  )}
-                </div>
-
-                {/* 1. Mẫu hoa & Số lượng */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Mẫu hoa & Số lượng:
-                  </label>
+                {submittedText ? (
+                  /* GIAO DIỆN HIỂN THỊ ĐOẠN VĂN ĐẶT HOA ĐỂ SAO CHÉP */
                   <div style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     justifyContent: 'space-between',
-                    padding: '8px 12px',
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: 10
+                    height: '100%',
+                    gap: 14
                   }}>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B' }}>
-                      {product.name}
+                    <div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '12px 14px',
+                        background: '#ECFDF5',
+                        border: '1px solid #A7F3D0',
+                        borderRadius: 10,
+                        marginBottom: 14
+                      }}>
+                        <CheckCircleOutlined style={{ color: '#059669', fontSize: 22, flexShrink: 0 }} />
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#065F46' }}>
+                            Đoạn văn đặt hoa đã sẵn sàng!
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: '#047857', marginTop: 2 }}>
+                            Nội dung đã được sao chép tự động vào bộ nhớ tạm (Clipboard).
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: 8
+                      }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          📋 Đoạn văn để sao chép:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(submittedText);
+                              setIsCopiedSuccess(true);
+                              setTimeout(() => setIsCopiedSuccess(false), 2500);
+                            } catch {}
+                          }}
+                          style={{
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            color: isCopiedSuccess ? '#059669' : 'var(--color-primary-dark)',
+                            background: '#F0F9FF',
+                            border: '1px solid #BAE6FD',
+                            borderRadius: 6,
+                            padding: '4px 10px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4
+                          }}
+                        >
+                          <CopyOutlined /> {isCopiedSuccess ? '✓ Đã sao chép!' : 'Sao chép nội dung'}
+                        </button>
+                      </div>
+
+                      <div style={{
+                        background: '#F8FAFC',
+                        border: '1px solid #CBD5E1',
+                        borderRadius: 10,
+                        padding: '14px 16px',
+                        fontSize: '0.86rem',
+                        lineHeight: 1.6,
+                        color: '#1E293B',
+                        whiteSpace: 'pre-wrap',
+                        maxHeight: 290,
+                        overflowY: 'auto',
+                        userSelect: 'all',
+                        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)',
+                        fontFamily: 'inherit'
+                      }}>
+                        {submittedText}
+                      </div>
+
+                      <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: 10, lineHeight: 1.45 }}>
+                        💡 <em>Khi khung chat mở ra, bạn chỉ cần bấm <strong>Dán (Ctrl + V)</strong> để gửi ngay nội dung trên và ảnh mẫu hoa cho Florist tư vấn nhé!</em>
+                      </p>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
                       <button
                         type="button"
-                        onClick={() => setOrderQuantity(prev => Math.max(1, prev - 1))}
-                        style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #CBD5E1', background: '#FFF', cursor: 'pointer', fontWeight: 700 }}
+                        onClick={() => {
+                          if (activeWidget.platform_type === 'phone' || activeWidget.action_link.startsWith('tel:')) {
+                            window.location.href = activeWidget.action_link;
+                          } else {
+                            window.open(activeWidget.action_link, '_blank');
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '13px 16px',
+                          borderRadius: 10,
+                          fontWeight: 800,
+                          fontSize: '0.95rem',
+                          background: activeWidget.platform_type === 'zalo' ? '#0068FF' :
+                                      activeWidget.platform_type === 'facebook' ? '#1877F2' :
+                                      activeWidget.platform_type === 'phone' ? 'var(--color-primary-dark)' : '#1E293B',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)'
+                        }}
                       >
-                        -
+                        <SendOutlined />
+                        <span>Mở {activeWidget.title} để dán gửi ngay ➜</span>
                       </button>
-                      <span style={{ fontWeight: 800, fontSize: '0.95rem', minWidth: 20, textAlign: 'center' }}>
-                        {orderQuantity}
-                      </span>
+
                       <button
                         type="button"
-                        onClick={() => setOrderQuantity(prev => prev + 1)}
-                        style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #CBD5E1', background: '#FFF', cursor: 'pointer', fontWeight: 700 }}
+                        onClick={() => setSubmittedText(null)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#64748B',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          padding: '6px'
+                        }}
                       >
-                        +
+                        ← Chỉnh sửa lại thông tin form
                       </button>
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#0284C7', fontWeight: 700, marginTop: 4, textAlign: 'right' }}>
-                    Tạm tính: {formatVND(activePrice * orderQuantity)}
-                  </div>
-                </div>
+                ) : (
+                  /* GIAO DIỆN FORM ĐIỀN THÔNG TIN ĐẶT HOA */
+                  <>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingBottom: 8,
+                      borderBottom: '1px solid #E2E8F0'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <FormOutlined style={{ color: 'var(--color-primary-dark)', fontSize: 18 }} />
+                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0F172A', textTransform: 'uppercase' }}>
+                          Điền thông tin đặt hoa
+                        </span>
+                      </div>
+                      {hasProfileAutofilled && (
+                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, background: '#ECFDF5', padding: '2px 8px', borderRadius: 4 }}>
+                          ✓ Đã tự động điền từ tài khoản
+                        </span>
+                      )}
+                    </div>
 
-                {/* 2. Ngày, thời gian nhận hoa */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Ngày & Thời gian nhận hoa:
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 8 }}>
-                    <input
-                      type="date"
-                      value={deliveryDate}
-                      onChange={e => setDeliveryDate(e.target.value)}
-                      style={{
-                        padding: '8px 10px',
-                        borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        fontSize: '0.85rem'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="VD: 17:30 chiều nay"
-                      value={deliveryTimePreset}
-                      onChange={e => setDeliveryTimePreset(e.target.value)}
-                      style={{
-                        padding: '8px 10px',
-                        borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        fontSize: '0.85rem'
-                      }}
-                    />
-                  </div>
-                </div>
+                    {/* 1. Mẫu hoa & Số lượng */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Mẫu hoa & Số lượng:
+                      </label>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 12px',
+                        background: '#F8FAFC',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: 10
+                      }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B' }}>
+                          {product.name}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => setOrderQuantity(prev => Math.max(1, prev - 1))}
+                            style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #CBD5E1', background: '#FFF', cursor: 'pointer', fontWeight: 700 }}
+                          >
+                            -
+                          </button>
+                          <span style={{ fontWeight: 800, fontSize: '0.95rem', minWidth: 20, textAlign: 'center' }}>
+                            {orderQuantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setOrderQuantity(prev => prev + 1)}
+                            style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #CBD5E1', background: '#FFF', cursor: 'pointer', fontWeight: 700 }}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--color-primary-dark)', fontWeight: 700, marginTop: 4, textAlign: 'right' }}>
+                        Tạm tính: {formatVND(activePrice * orderQuantity)}
+                      </div>
+                    </div>
 
-                {/* 3. SĐT & Họ tên người đặt hoa */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    SĐT của anh/chị <span style={{ color: '#EF4444' }}>*</span> :
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <input
-                      type="tel"
-                      placeholder="Số điện thoại *"
-                      value={senderPhone}
-                      onChange={e => setSenderPhone(e.target.value)}
-                      style={{
-                        padding: '8px 10px',
-                        borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        fontSize: '0.85rem',
-                        fontWeight: 600
-                      }}
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Họ tên của anh/chị"
-                      value={senderName}
-                      onChange={e => setSenderName(e.target.value)}
-                      style={{
-                        padding: '8px 10px',
-                        borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        fontSize: '0.85rem'
-                      }}
-                    />
-                  </div>
-                </div>
+                    {/* 2. Ngày, thời gian nhận hoa */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Ngày & Thời gian nhận hoa:
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 8 }}>
+                        <input
+                          type="date"
+                          value={deliveryDate}
+                          onChange={e => setDeliveryDate(e.target.value)}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: 8,
+                            border: '1px solid #CBD5E1',
+                            fontSize: '0.85rem'
+                          }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="VD: giờ báo sau, 17:30 chiều nay..."
+                          value={deliveryTimePreset}
+                          onChange={e => setDeliveryTimePreset(e.target.value)}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: 8,
+                            border: '1px solid #CBD5E1',
+                            fontSize: '0.85rem'
+                          }}
+                        />
+                      </div>
+                    </div>
 
-                {/* 4. SĐT người nhận hoa */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
-                      SĐT người nhận hoa:
-                    </label>
-                    <label style={{ fontSize: '0.78rem', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {/* 3. SĐT & Họ tên người đặt hoa */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        SĐT của anh/chị <span style={{ color: '#EF4444' }}>*</span> :
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <input
+                          type="tel"
+                          placeholder="Số điện thoại *"
+                          value={senderPhone}
+                          onChange={e => setSenderPhone(e.target.value)}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: 8,
+                            border: '1px solid #CBD5E1',
+                            fontSize: '0.85rem',
+                            fontWeight: 600
+                          }}
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="Họ tên của anh/chị"
+                          value={senderName}
+                          onChange={e => setSenderName(e.target.value)}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: 8,
+                            border: '1px solid #CBD5E1',
+                            fontSize: '0.85rem'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 4. SĐT người nhận hoa */}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                          Người nhận hoa:
+                        </label>
+                        <label style={{ fontSize: '0.78rem', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <input
+                            type="checkbox"
+                            checked={isSameRecipient}
+                            onChange={e => setIsSameRecipient(e.target.checked)}
+                          />
+                          <span>Người nhận là tôi</span>
+                        </label>
+                      </div>
+                      {!isSameRecipient && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 8 }}>
+                          <input
+                            type="text"
+                            placeholder="Tên người nhận (vd: Hoà)"
+                            value={recipientName}
+                            onChange={e => setRecipientName(e.target.value)}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: 8,
+                              border: '1px solid #CBD5E1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                          <input
+                            type="tel"
+                            placeholder="SĐT người nhận *"
+                            value={recipientPhone}
+                            onChange={e => setRecipientPhone(e.target.value)}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: 8,
+                              border: '1px solid #CBD5E1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 5. Địa chỉ nhận hoa */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Địa chỉ nhận hoa:
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={isSameRecipient}
-                        onChange={e => setIsSameRecipient(e.target.checked)}
+                        type="text"
+                        placeholder="Số nhà, tên đường, tòa nhà, quận/huyện..."
+                        value={deliveryAddress}
+                        onChange={e => setDeliveryAddress(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #CBD5E1',
+                          fontSize: '0.85rem',
+                          boxSizing: 'border-box'
+                        }}
                       />
-                      <span>Người nhận là tôi</span>
-                    </label>
-                  </div>
-                  {!isSameRecipient && (
-                    <input
-                      type="tel"
-                      placeholder="Nhập SĐT người nhận hoa"
-                      value={recipientPhone}
-                      onChange={e => setRecipientPhone(e.target.value)}
+                    </div>
+
+                    {/* 6. Nội dung thiệp / biển chúc mừng */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Nội dung thiệp / biển chúc mừng:
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="VD: Chúc mừng sinh nhật em! Chúc em luôn xinh đẹp, bình an và may mắn trong cuộc sống..."
+                        value={cardMessage}
+                        onChange={e => setCardMessage(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #CBD5E1',
+                          fontSize: '0.85rem',
+                          boxSizing: 'border-box',
+                          resize: 'vertical',
+                          lineHeight: 1.45,
+                          fontFamily: 'inherit'
+                        }}
+                      />
+                    </div>
+
+                    {/* 7. Ghi chú thêm */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Ghi chú thêm (ship / cọc / yêu cầu riêng):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="VD: + 70ship. 470k cọc 200k, hoa tone pastel..."
+                        value={orderNotes}
+                        onChange={e => setOrderNotes(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #CBD5E1',
+                          fontSize: '0.85rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    {/* Submit Form Button */}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleSubmitFormAndSend}
+                      disabled={isSubmittingOrder}
                       style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        fontSize: '0.85rem',
-                        boxSizing: 'border-box'
+                        padding: '12px 16px',
+                        borderRadius: 10,
+                        fontWeight: 800,
+                        fontSize: '0.92rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        marginTop: 6
                       }}
-                    />
-                  )}
-                </div>
-
-                {/* 5. Địa chỉ nhận hoa */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Địa chỉ nhận hoa:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Số nhà, tên đường, tòa nhà, quận/huyện..."
-                    value={deliveryAddress}
-                    onChange={e => setDeliveryAddress(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #CBD5E1',
-                      fontSize: '0.85rem',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                {/* 6. Nội dung thiệp / biển chúc mừng */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Nội dung thiệp / biển băng rôn chúc mừng:
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="VD: TPBank Chi Nhánh Đội Cấn - Chúc Mừng Khai Trương"
-                    value={cardMessage}
-                    onChange={e => setCardMessage(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #CBD5E1',
-                      fontSize: '0.85rem',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                {/* 7. Ghi chú thêm */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Ghi chú thêm (nếu có):
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="VD: Giao trước 17h, hoa tone vàng cam..."
-                    value={orderNotes}
-                    onChange={e => setOrderNotes(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #CBD5E1',
-                      fontSize: '0.85rem',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                {/* Submit Form Button */}
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSubmitFormAndSend}
-                  disabled={isSubmittingOrder}
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: 10,
-                    fontWeight: 800,
-                    fontSize: '0.92rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    marginTop: 6
-                  }}
-                >
-                  <SendOutlined />
-                  <span>
-                    {isSubmittingOrder ? 'Đang tạo đơn...' : `Gửi đơn & Kết nối qua ${activeWidget.title} ➜`}
-                  </span>
-                </button>
-                <div style={{ fontSize: '0.72rem', color: '#64748B', textAlign: 'center', lineHeight: 1.3 }}>
-                  * Tự động sao chép nội dung đơn hàng & ảnh mẫu hoa. Khi sang khung chat, bạn chỉ cần bấm <strong>Dán (Paste)</strong>!
-                </div>
+                    >
+                      <CopyOutlined />
+                      <span>
+                        {isSubmittingOrder ? 'Đang tạo nội dung...' : 'Hoàn tất & Lấy đoạn văn đặt hoa ➜'}
+                      </span>
+                    </button>
+                    <div style={{ fontSize: '0.72rem', color: '#64748B', textAlign: 'center', lineHeight: 1.3 }}>
+                      * Tự động tạo & sao chép đoạn văn đặt hàng kèm ảnh để bạn dán (Ctrl + V) gửi Florist!
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* CỘT PHẢI (50%): BỎ QUA FORM - TƯ VẤN TRỰC TIẾP */}

@@ -109,10 +109,26 @@
     * **Facebook Icon**: Sử dụng chuẩn vector SVG chính hãng Facebook sắc nét.
     * **Hotline Icon & Viền nút**: Được thiết kế đồng bộ theo **tone màu xanh chủ đạo của website** (`var(--color-primary-dark)` / `#5D9EAF`, nền mềm `#F7FBFC`, viền `#E4EEF1`), loại bỏ hoàn toàn các màu xanh lá hoặc màu cam lạc tông để tôn vinh sự thanh lịch, sang trọng của showroom hoa.
 * **Popup Tư Vấn & Đặt Hàng 50/50 Thông Minh**:
-  * **Cột Trái (50%) — Form Đặt Hoa Chuẩn Thực Tế**:
+  * **Cột Trái (50%) — Form Đặt Hoa Chuẩn Thực Tế & Hiển Thị Đoạn Văn Sao Chép**:
     * Tự động lấy dữ liệu từ tài khoản khách hàng nếu đã đăng nhập (Họ tên, SĐT, Địa chỉ).
-    * Các trường: Số lượng kèm stepper `[-] [+]`, Ngày & giờ nhận hoa, SĐT người đặt, SĐT người nhận hoa, Địa chỉ giao hoa chi tiết, Nội dung in thiệp/biển chúc mừng, Ghi chú.
-    * Khi bấm gửi: Tự động format tin nhắn đặt hàng chuẩn từng dòng, sao chép cả ảnh & tin nhắn vào Clipboard, lưu Lead vào hệ thống và mở ngay ứng dụng chat.
+    * Các trường: Số lượng kèm stepper `[-] [+]`, Ngày & giờ nhận hoa, SĐT người đặt, Tên & SĐT người nhận hoa, Địa chỉ giao hoa chi tiết, Nội dung thiệp/biển chúc mừng (textarea nhiều dòng), Ghi chú ship/cọc/yêu cầu riêng.
+    * **Hiển thị Đoạn văn để sao chép chuẩn Thực tế tiệm hoa**:
+      * Khi khách bấm *Hoàn tất & Lấy đoạn văn đặt hoa*, form tự động chuyển sang màn hình hiển thị đoạn văn mẫu theo đúng quy cách tiệm hoa:
+        ```text
+        - bó 400k + 70ship. 470k cọc 200k
+        - giờ báo sau
+        - Sđt người đặt: 0936245994
+        - Sđt người nhận : Hoà 097 5905672
+        - Địa chỉ : Trường mầm non xứ sở thần tiên - Trung Văn ( gần số 1 Đại Linh )
+        - Nội dung : 
+        Chúc mừng sinh nhật em!!!
+        Chúc em luôn xinh đẹp, bình an và may mắn trong cuộc sống!
+        ...
+        ```
+      * Đoạn văn và ảnh mẫu hoa được **tự động sao chép tức thì vào Clipboard**.
+      * Có nút bấm riêng **`[ 📋 Sao chép nội dung ]`** (kèm phản hồi *✓ Đã sao chép!*).
+      * Nút bấm mở trực tiếp kênh chat: **`[ 💬 Mở {Zalo/Messenger} để dán gửi ngay ➜ ]`**.
+      * Nút chuyển đổi quay lại sửa form bất cứ lúc nào nếu cần điều chỉnh.
   * **Cột Phải (50%) — Bỏ Qua Form Chat Trực Tiếp Với Sale**:
     * Xem trước ảnh mẫu hoa sắc nét, tên và giá tham khảo.
     * Tự động sao chép ảnh mẫu hoa vào Clipboard.
