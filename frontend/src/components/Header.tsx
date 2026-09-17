@@ -629,7 +629,7 @@ export default function Header() {
             {/* Desktop Brand Logo */}
             <Link to="/" className="site-logo desktop-only-action" title="Nghệ Florist - Tiệm hoa & quả nhập khẩu">
               <img 
-                src="/images/logoNgheFlorist-dark.png" 
+                src="/images/logoNgheFlorist-brand-blue.png?v=2" 
                 alt="Nghệ Florist" 
                 className="site-logo-img"
               />
@@ -650,7 +650,7 @@ export default function Header() {
             }}
           >
             <img 
-              src="/images/logoNgheFlorist-dark.png" 
+              src="/images/logoNgheFlorist-brand-blue.png?v=2" 
               alt="Nghệ Florist" 
               style={{ height: 38, width: 'auto', objectFit: 'contain' }}
             />
@@ -1274,7 +1274,7 @@ export default function Header() {
               {/* Drawer Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--color-border)' }}>
                 <img 
-                  src="/images/logoNgheFlorist-dark.png" 
+                  src="/images/logoNgheFlorist-brand-blue.png?v=2" 
                   alt="Nghệ Florist" 
                   style={{ height: 38, width: 'auto', objectFit: 'contain' }}
                 />

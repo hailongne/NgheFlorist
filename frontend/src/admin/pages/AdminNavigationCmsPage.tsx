@@ -236,9 +236,9 @@ export default function AdminNavigationCmsPage() {
             <div>
               <div style={{ marginBottom: 16 }}>
                 <img 
-                  src="/images/logoNgheFlorist.png" 
+                  src="/images/logoNgheFlorist-brand-blue.png?v=2" 
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/images/logoNgheFlorist-dark.png';
+                    (e.currentTarget as HTMLImageElement).src = '/images/logoNgheFlorist-brand-blue.png?v=2';
                   }}
                   alt="Nghệ Florist" 
                   style={{ height: 48, width: 'auto', objectFit: 'contain' }} 

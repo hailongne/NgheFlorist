@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img
-            src="/images/logoNgheFlorist-dark.png"
+            src="/images/logoNgheFlorist-brand-blue.png?v=2"
             alt="Nghệ Florist"
             style={{ height: '48px', objectFit: 'contain', marginBottom: '12px' }}
           />

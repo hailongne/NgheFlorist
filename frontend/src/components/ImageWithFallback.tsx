@@ -4,7 +4,7 @@ interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElemen
   fallbackSrc?: string;
 }
 
-export const DEFAULT_LOGO_FALLBACK = '/images/logoNgheFlorist.PNG';
+export const DEFAULT_LOGO_FALLBACK = '/images/logoNgheFlorist-brand-blue.png?v=2';
 
 // Fallback images default to the official Nghệ Florist logo
 export const BOTANICAL_FALLBACKS = [

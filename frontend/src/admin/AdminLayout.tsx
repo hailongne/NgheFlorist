@@ -57,7 +57,7 @@ export default function AdminLayout() {
       <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="admin-sidebar-header">
           <Link to="/admin" style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <img src="/images/logoNgheFlorist-dark.png" alt="Nghệ Florist" style={{ height: '38px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }} />
+            <img src="/images/logoNgheFlorist-brand-blue.png?v=2" alt="Nghệ Florist" style={{ height: '38px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }} />
           </Link>
           <button
             className="admin-sidebar-close-btn"

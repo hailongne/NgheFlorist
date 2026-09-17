@@ -36,7 +36,7 @@ export default function Footer() {
           {/* Brand info */}
           <div className="footer-col">
             <Link to="/" className="site-logo" style={{ marginBottom: 16 }}>
-              <img src="/images/logoNgheFlorist-dark.png" alt="Nghệ Florist" style={{ height: 50, width: 'auto', objectFit: 'contain' }} />
+              <img src="/images/logoNgheFlorist-brand-blue.png?v=2" alt="Nghệ Florist" style={{ height: 50, width: 'auto', objectFit: 'contain' }} />
             </Link>
             <p style={{ marginBottom: 0, lineHeight: 1.65, fontSize: '0.92rem' }}>
               {footerConfig.brand_desc}
@@ -96,7 +96,7 @@ export default function Footer() {
         {/* Mobile Compact Footer (<768px) per Spec #17 */}
         <div className="mobile-only-element" style={{ textAlign: 'center', paddingBottom: 16 }}>
           <Link to="/" style={{ display: 'inline-block', marginBottom: 16 }}>
-            <img src="/images/logoNgheFlorist-dark.png" alt="Nghệ Florist" style={{ height: 42, width: 'auto' }} />
+            <img src="/images/logoNgheFlorist-brand-blue.png?v=2" alt="Nghệ Florist" style={{ height: 42, width: 'auto' }} />
           </Link>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '14px 20px', marginBottom: 16, fontSize: '0.92rem', fontWeight: 600 }}>
