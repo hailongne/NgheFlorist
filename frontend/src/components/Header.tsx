@@ -1450,20 +1450,19 @@ export default function Header() {
                                       display: 'flex',
                                       alignItems: 'center',
                                       justifyContent: 'center',
-                                      width: 36,
-                                      height: 36,
+                                      width: 28,
+                                      height: 28,
                                       padding: 0,
                                       border: 'none',
-                                      background: isCatExpanded ? '#EFF6FF' : '#F8FAFC',
-                                      color: isCatExpanded ? '#0284C7' : '#64748B',
-                                      borderRadius: 7,
+                                      background: 'none',
+                                      color: isCatExpanded ? '#0284C7' : '#94A3B8',
                                       cursor: 'pointer',
-                                      transition: 'all 0.2s ease',
+                                      transition: 'color 0.15s ease',
                                       marginRight: 4
                                     }}
                                   >
                                     <DownOutlined style={{
-                                      fontSize: '0.8rem',
+                                      fontSize: '0.68rem',
                                       transform: isCatExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                                       transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
                                     }} />
