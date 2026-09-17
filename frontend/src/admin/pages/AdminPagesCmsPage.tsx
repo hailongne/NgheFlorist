@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { 
   EditOutlined, 
   FileTextOutlined, 
@@ -32,6 +33,17 @@ export default function AdminPagesCmsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [activeModalTab, setActiveModalTab] = useState<'editor' | 'preview' | 'seo'>('editor');
+  
+  const pageModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    id: 'admin-page-cms-modal',
+    isOpen: modalOpen,
+    onClose: () => setModalOpen(false),
+    containerRef: pageModalRef,
+    role: 'dialog',
+    priority: 10
+  });
   
   // Form State
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -500,8 +512,13 @@ export default function AdminPagesCmsPage() {
 
       {/* Rich Editor & Preview Modal */}
       {modalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: 860, width: '92%', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+        <div 
+          className="admin-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+        >
+          <div ref={pageModalRef} role="dialog" aria-modal="true" aria-label="Soạn thảo trang" className="admin-modal" style={{ maxWidth: 860, width: '92%', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
             {/* Modal Header */}
             <div className="admin-modal-header" style={{ padding: '16px 24px', borderBottom: '1px solid var(--admin-border)' }}>
               <div>

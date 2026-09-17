@@ -36,6 +36,17 @@
   --radius-full: 9999px;
 
   --header-height: 80px;
+
+  /* Systematic Z-Index Hierarchy */
+  --z-base: 1;
+  --z-header: 100;
+  --z-dropdown: 200;
+  --z-quick-contact: 300;
+  --z-backdrop: 1000;
+  --z-drawer: 1050;
+  --z-modal: 1100;
+  --z-alert-dialog: 1200;
+  --z-toast: 1300;
 }
 
 * {
@@ -836,6 +847,9 @@ h1, h2, h3, h4, h5, h6 {
   .desktop-sidebar-filter {
     display: none !important;
   }
+}
+
+@media (max-width: 900px) and (min-width: 769px) {
   .product-listing-layout .product-grid-4 {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 14px !important;
@@ -1174,7 +1188,8 @@ h1, h2, h3, h4, h5, h6 {
     display: none; /* Accessible via dedicated 🔍 mobile search */
   }
   
-  /* Showroom Product Grid - strictly 2 columns */
+  /* Showroom & Catalog Product Grid - strictly 2 columns */
+  .product-listing-layout .product-grid-4,
   .product-grid-4 {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1243,6 +1258,13 @@ h1, h2, h3, h4, h5, h6 {
     width: 100% !important;
     box-sizing: border-box !important;
     gap: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  .product-card-price-wrap {
+    flex: 1 !important;
+    min-width: 0 !important;
   }
   .product-card-price-label {
     font-size: 0.52rem !important;
@@ -1250,8 +1272,10 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1px !important;
   }
   .product-card-price {
-    font-size: 0.82rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
     white-space: nowrap !important;
+    line-height: 1.2 !important;
   }
   .product-card-select-btn {
     width: 26px !important;
@@ -2691,6 +2715,113 @@ h1, h2, h3, h4, h5, h6 {
     gap: 6px;
   }
 }
+
+/* ==========================================================================
+   GLOBAL FOCUS LOCK & INTERACTION BARRIER SYSTEM
+   ========================================================================== */
+
+/* Locked state on HTML & Body */
+html.global-overlay-locked,
+body.global-overlay-locked {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+
+/* Inactive background when overlay is active */
+body.global-overlay-locked > #root {
+  user-select: none;
+}
+
+/* Contain overscroll inside all modal & drawer scrollable areas (Zero Scroll Chaining) */
+.request-modal-body,
+.consultation-modal-box,
+.consultation-modal-scrollable,
+.mobile-drawer,
+.drawer-content,
+.admin-modal,
+.admin-modal-body,
+[data-overlay-scrollable="true"] {
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+
+/* Backdrops as Interaction Barriers (Blocks click-through & touch gestures) */
+.request-modal-overlay,
+.consultation-modal-backdrop,
+.mobile-backdrop,
+.admin-modal-overlay,
+.drawer-backdrop,
+.admin-mobile-backdrop {
+  z-index: var(--z-backdrop, 1000) !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  overscroll-behavior: none !important;
+}
+
+/* Explicit Modal Container Z-Indexes */
+.mobile-drawer {
+  z-index: var(--z-drawer, 1050) !important;
+}
+
+.request-modal-container,
+.consultation-modal-box,
+.admin-modal {
+  z-index: var(--z-modal, 1100) !important;
+}
+
+/* ==========================================================================
+   FAVORITES ALBUM & WISHLIST RESPONSIVE STYLING
+   ========================================================================== */
+
+.favorites-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 16px 60px;
+}
+
+.favorites-header-card {
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  padding: 24px 28px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  margin-bottom: 24px;
+}
+
+.favorites-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .favorites-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .favorites-container {
+    padding: 12px 10px 48px !important;
+  }
+  .favorites-header-card {
+    padding: 14px 12px !important;
+    border-radius: 14px !important;
+    margin-bottom: 14px !important;
+  }
+  .favorites-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+}
+
 
 
 

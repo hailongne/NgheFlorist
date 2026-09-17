@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
+import { useOverlayLock } from '../hooks/useOverlayLock';
 
 export default function IosWishlistModal() {
   const { showIosAlert, setShowIosAlert } = useWishlist();
   const navigate = useNavigate();
   const location = useLocation();
+  const modalBoxRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    isOpen: showIosAlert,
+    containerRef: modalBoxRef,
+    onClose: () => setShowIosAlert(false),
+    overlayId: 'ios-wishlist-modal',
+    priority: 20
+  });
 
   if (!showIosAlert) return null;
 
@@ -24,7 +34,7 @@ export default function IosWishlistModal() {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 99999,
+        zIndex: 'var(--z-alert-dialog, 1200)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -58,6 +68,11 @@ export default function IosWishlistModal() {
 
       {/* iOS Dialog Window */}
       <div
+        ref={modalBoxRef}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="ios-wishlist-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -104,6 +119,7 @@ export default function IosWishlistModal() {
 
           {/* Title */}
           <div
+            id="ios-wishlist-title"
             style={{
               fontSize: '1.06rem',
               fontWeight: 700,

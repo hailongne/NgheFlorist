@@ -19,7 +19,7 @@ import {
   ArrowRightOutlined
 } from '@ant-design/icons';
 import ProductCard from '../components/ProductCard';
-import { useWishlist } from '../context/WishlistContext';
+import { useWishlist, notifyAuthChange } from '../context/WishlistContext';
 
 interface DeliveryInfo {
   ordering_name?: string;
@@ -344,6 +344,7 @@ export default function CustomerProfilePage() {
     localStorage.removeItem('nghe_customer_token');
     localStorage.removeItem('nghe_customer_user');
     localStorage.removeItem('nghe_customer_delivery_info');
+    notifyAuthChange();
     navigate('/login');
   };
 

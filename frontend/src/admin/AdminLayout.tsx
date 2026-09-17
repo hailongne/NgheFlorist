@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthContext';
+import { useOverlayLock } from '../hooks/useOverlayLock';
 import {
   DashboardOutlined,
   ShopOutlined,
@@ -28,6 +29,14 @@ export default function AdminLayout() {
   const { user, isAuthenticated, isLoading, logout } = useAdminAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  useOverlayLock({
+    isOpen: mobileOpen,
+    containerRef: sidebarRef,
+    onClose: () => setMobileOpen(false),
+    overlayId: 'admin-sidebar-drawer'
+  });
 
   if (isLoading) {
     return (
@@ -54,7 +63,13 @@ export default function AdminLayout() {
       {mobileOpen && <div className="admin-mobile-backdrop" onClick={() => setMobileOpen(false)} />}
 
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`}>
+      <aside 
+        ref={sidebarRef} 
+        className={`admin-sidebar ${mobileOpen ? 'open' : ''}`}
+        role="navigation"
+        aria-label="Menu quản trị Showroom"
+        tabIndex={-1}
+      >
         <div className="admin-sidebar-header">
           <Link to="/admin" style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <img src="/images/logoNgheFlorist-brand-blue.png?v=2" alt="Nghệ Florist" style={{ height: '38px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }} />

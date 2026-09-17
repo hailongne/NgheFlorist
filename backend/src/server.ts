@@ -348,14 +348,17 @@ app.get('/api/products', async (req: Request, res: Response) => {
         p.id, p.category_id, p.name, p.slug, p.description,
         p.price, p.currency, p.is_active, p.created_at,
         c.name as category_name, c.slug as category_slug,
-                (
+        c.parent_id as category_parent_id,
+        parent.name as parent_category_name, parent.slug as parent_category_slug,
+        (
           SELECT url FROM product_images pi 
           WHERE pi.product_id = p.id 
           ORDER BY pi.is_featured DESC, pi.sort_order ASC LIMIT 1
         ) as featured_image
       FROM products p
       LEFT JOIN categories c ON c.id = p.category_id
-            WHERE ${whereSql}
+      LEFT JOIN categories parent ON parent.id = c.parent_id
+      WHERE ${whereSql}
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
     `, [...queryParams, limitNum, offset]);
@@ -365,7 +368,9 @@ app.get('/api/products', async (req: Request, res: Response) => {
         ...p,
         price: Number(p.price),
         image_url: p.featured_image || null,
-        featured_image: p.featured_image || null
+        featured_image: p.featured_image || null,
+        parent_category_name: p.parent_category_name || null,
+        parent_category_slug: p.parent_category_slug || null
       })),
       pagination: {
         page: pageNum,

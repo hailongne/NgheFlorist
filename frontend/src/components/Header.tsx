@@ -26,7 +26,8 @@ import {
 import { useCustomerRequest } from '../context/RequestContext';
 import { useAdminAuth } from '../admin/AdminAuthContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
-import { useWishlist } from '../context/WishlistContext';
+import { useWishlist, notifyAuthChange } from '../context/WishlistContext';
+import { useOverlayLock } from '../hooks/useOverlayLock';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
 import { RealSocialIcon } from './RealSocialIcons';
 
@@ -116,6 +117,22 @@ export default function Header() {
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const zaloDropdownRef = useRef<HTMLDivElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+  const mobileMenuDrawerRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    isOpen: isMobileMenuOpen,
+    containerRef: mobileMenuDrawerRef,
+    onClose: () => setIsMobileMenuOpen(false),
+    overlayId: 'mobile-menu-drawer'
+  });
+
+  useOverlayLock({
+    isOpen: isMobileSearchOpen,
+    containerRef: mobileSearchRef,
+    onClose: () => setIsMobileSearchOpen(false),
+    overlayId: 'mobile-search-overlay'
+  });
 
   useEffect(() => {
     if (isMobileSearchOpen) {
@@ -160,6 +177,7 @@ export default function Header() {
   const handleCustomerLogout = () => {
     localStorage.removeItem('nghe_customer_token');
     localStorage.removeItem('nghe_customer_user');
+    notifyAuthChange();
     setCustomerUser(null);
     setShowUserDropdown(false);
     navigate('/');
@@ -171,6 +189,7 @@ export default function Header() {
     localStorage.removeItem('nghe_admin_user');
     localStorage.removeItem('nghe_customer_token');
     localStorage.removeItem('nghe_customer_user');
+    notifyAuthChange();
     setCustomerUser(null);
     setShowUserDropdown(false);
     navigate('/');
@@ -359,6 +378,11 @@ export default function Header() {
       {/* Mobile & Tablet Dedicated Search Overlay */}
       {isMobileSearchOpen && (
         <div 
+          ref={mobileSearchRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Tìm kiếm mẫu hoa"
+          tabIndex={-1}
           style={{
             position: 'fixed',
             top: 0,
@@ -691,13 +715,16 @@ export default function Header() {
               left: '50%', 
               transform: 'translateX(-50%)',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxWidth: 'calc(100vw - 110px)',
+              pointerEvents: 'auto'
             }}
           >
             <img 
               src="/images/logoNgheFlorist-brand-blue.png?v=2" 
               alt="Nghệ Florist" 
-              style={{ height: 38, width: 'auto', objectFit: 'contain' }}
+              style={{ height: 32, maxWidth: '100%', width: 'auto', objectFit: 'contain' }}
             />
           </Link>
 
@@ -809,42 +836,6 @@ export default function Header() {
           >
             <SearchOutlined />
           </button>
-
-          {/* Right: Mobile Wishlist Button (on Mobile) */}
-          <Link
-            to={isWishlistLoggedIn ? "/favorites" : "#"}
-            onClick={(e) => {
-              if (!isWishlistLoggedIn) {
-                e.preventDefault();
-                setShowIosAlert(true);
-              }
-            }}
-            className="mobile-search-btn"
-            style={{
-              position: 'relative',
-              color: wishlistCount > 0 ? '#E11D48' : 'inherit',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            aria-label="Bộ sưu tập yêu thích"
-            title="Bộ sưu tập hoa yêu thích"
-          >
-            {wishlistCount > 0 ? <HeartFilled style={{ color: '#E11D48' }} /> : <HeartOutlined />}
-            {wishlistCount > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: 7,
-                right: 7,
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                backgroundColor: '#E11D48',
-                border: '1.5px solid #FFFFFF'
-              }} />
-            )}
-          </Link>
 
           {/* Right: Conversion Actions & Auth (on Desktop/Tablet) */}
           <div className="header-actions desktop-only-action" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1446,7 +1437,14 @@ export default function Header() {
               className="mobile-backdrop"
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            <div className="mobile-drawer">
+            <div 
+              ref={mobileMenuDrawerRef}
+              className="mobile-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu danh mục hoa"
+              tabIndex={-1}
+            >
               {/* Drawer Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--color-border)' }}>
                 <img 

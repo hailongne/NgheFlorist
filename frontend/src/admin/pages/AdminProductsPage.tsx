@@ -20,6 +20,7 @@ import {
   LoadingOutlined
 } from '@ant-design/icons';
 import ImageWithFallback, { BOTANICAL_FALLBACKS } from '../../components/ImageWithFallback';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 
 interface ProductItem {
   id: number;
@@ -75,6 +76,14 @@ export default function AdminProductsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const productModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    isOpen: modalOpen,
+    containerRef: productModalRef,
+    onClose: () => setModalOpen(false),
+    overlayId: 'admin-product-modal'
+  });
 
   // Form State
   const [formName, setFormName] = useState('');
@@ -1017,8 +1026,21 @@ export default function AdminProductsPage() {
 
       {/* Product Create / Edit Modal */}
       {modalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '680px', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+        <div 
+          className="admin-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+        >
+          <div 
+            ref={productModalRef}
+            className="admin-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={editingId ? 'Chỉnh Sửa Sản Phẩm Hoa' : 'Thêm Mẫu Hoa Mới Vào Hệ Thống'}
+            tabIndex={-1}
+            style={{ maxWidth: '680px', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+          >
             <div className="admin-modal-header">
               <h3 className="admin-modal-title">
                 {editingId ? 'Chỉnh Sửa Sản Phẩm Hoa' : 'Thêm Mẫu Hoa Mới Vào Hệ Thống'}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LockOutlined, UserOutlined, ArrowRightOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { notifyAuthChange } from '../context/WishlistContext';
 
 export default function CustomerLoginPage() {
   const [login, setLogin] = useState('');
@@ -50,6 +51,11 @@ export default function CustomerLoginPage() {
       if (data.user?.role_name === 'admin') {
         localStorage.setItem('nghe_admin_token', data.token);
         localStorage.setItem('nghe_admin_user', JSON.stringify(data.user));
+      }
+
+      notifyAuthChange();
+
+      if (data.user?.role_name === 'admin') {
         navigate(redirectParam || '/admin');
       } else {
         navigate(redirectParam || '/');

@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../AdminAuthContext';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -56,6 +57,30 @@ export default function AdminCategoriesPage() {
   // Block Delete Modal
   const [blockModalOpen, setBlockModalOpen] = useState(false);
   const [blockedCategory, setBlockedCategory] = useState<CategoryItem | null>(null);
+
+  const categoryModalRef = useRef<HTMLDivElement>(null);
+  const blockModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    id: 'admin-category-edit-modal',
+    isOpen: modalOpen,
+    onClose: () => setModalOpen(false),
+    containerRef: categoryModalRef,
+    role: 'dialog',
+    priority: 10
+  });
+
+  useOverlayLock({
+    id: 'admin-category-block-delete-modal',
+    isOpen: blockModalOpen,
+    onClose: () => {
+      setBlockModalOpen(false);
+      setBlockedCategory(null);
+    },
+    containerRef: blockModalRef,
+    role: 'alertdialog',
+    priority: 20
+  });
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -656,8 +681,13 @@ export default function AdminCategoriesPage() {
 
       {/* Modal Thêm / Chỉnh Sửa Danh Mục */}
       {modalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '520px' }}>
+        <div 
+          className="admin-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+        >
+          <div ref={categoryModalRef} role="dialog" aria-modal="true" className="admin-modal" style={{ maxWidth: '520px' }}>
             <div className="admin-modal-header">
               <h3 className="admin-modal-title">
                 {editingId
@@ -819,8 +849,16 @@ export default function AdminCategoriesPage() {
 
       {/* Modal Chặn Xóa Khi Đang Có Sản Phẩm */}
       {blockModalOpen && blockedCategory && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '480px', borderTop: '4px solid #E53E3E' }}>
+        <div 
+          className="admin-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setBlockModalOpen(false);
+              setBlockedCategory(null);
+            }
+          }}
+        >
+          <div ref={blockModalRef} role="alertdialog" aria-modal="true" className="admin-modal" style={{ maxWidth: '480px', borderTop: '4px solid #E53E3E' }}>
             <div className="admin-modal-header" style={{ alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#FED7D7', color: '#C53030', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>

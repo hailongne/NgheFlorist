@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import { useCustomerRequest } from '../context/RequestContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useOverlayLock } from '../hooks/useOverlayLock';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
 
 interface AttachmentItem {
@@ -87,6 +88,14 @@ const OCCASION_PRESETS = [
 export default function CustomerRequestModal() {
   const { isOpen, selectedProduct, requestType, closeRequestModal, openRequestModal } = useCustomerRequest();
   const { zaloUrl1, zaloUrl2, hotline1, hotline2 } = useSiteSettings();
+  const modalContainerRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    isOpen,
+    containerRef: modalContainerRef,
+    onClose: closeRequestModal,
+    overlayId: 'customer-request-modal'
+  });
 
   // Form states
   const [activeType, setActiveType] = useState<'PRODUCT_SELECTION' | 'CUSTOM_DESIGN'>('PRODUCT_SELECTION');
@@ -314,11 +323,18 @@ export default function CustomerRequestModal() {
         if (e.target === e.currentTarget) closeRequestModal();
       }}
     >
-      <div className="request-modal-container">
+      <div 
+        ref={modalContainerRef}
+        className="request-modal-container"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="request-modal-title"
+        tabIndex={-1}
+      >
         {/* Modal Header */}
         <div className="request-modal-header">
           <div style={{ minWidth: 0, paddingRight: 8 }}>
-            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary-dark)', lineHeight: 1.3 }}>
+            <h3 id="request-modal-title" style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-primary-dark)', lineHeight: 1.3 }}>
               {successResult ? 'Yêu Cầu Tư Vấn Của Bạn' : 'Yêu Cầu Tư Vấn & Chọn Mẫu Hoa'}
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>

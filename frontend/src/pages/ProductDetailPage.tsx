@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   CheckCircleOutlined, 
@@ -26,6 +26,7 @@ import { useSiteSettings } from '../context/SiteSettingsContext';
 import ProductCard from '../components/ProductCard';
 import { RealSocialIcon } from '../components/RealSocialIcons';
 import { useWishlist } from '../context/WishlistContext';
+import { useOverlayLock } from '../hooks/useOverlayLock';
 
 interface ProductImage {
   id: number;
@@ -91,6 +92,14 @@ export default function ProductDetailPage() {
   const [consultModalOpen, setConsultModalOpen] = useState(false);
   const [activeWidget, setActiveWidget] = useState<ContactWidget | null>(null);
   const [modalTab, setModalTab] = useState<'quick_chat' | 'order_form'>('quick_chat');
+  const consultModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    isOpen: consultModalOpen && Boolean(activeWidget),
+    containerRef: consultModalRef,
+    onClose: () => setConsultModalOpen(false),
+    overlayId: 'product-consult-modal'
+  });
 
   // Form State in Modal (Left Column)
   const [orderQuantity, setOrderQuantity] = useState(1);
@@ -857,7 +866,15 @@ export default function ProductDetailPage() {
       {/* CONSULTATION & ORDER MODAL (TABBED & STICKY HEADER) */}
       {consultModalOpen && activeWidget && (
         <div className="consultation-modal-backdrop" onClick={() => setConsultModalOpen(false)}>
-          <div className="consultation-modal-box" onClick={e => e.stopPropagation()}>
+          <div
+            ref={consultModalRef}
+            className="consultation-modal-box"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Tư vấn qua ${activeWidget.title}`}
+            tabIndex={-1}
+            onClick={e => e.stopPropagation()}
+          >
             {/* 1. STICKY MODAL HEADER - KHÔNG BAO GIỜ BỊ MẤT NÚT X */}
             <div className="consultation-modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { 
   SearchOutlined, 
   DownloadOutlined, 
@@ -82,6 +83,16 @@ export default function AdminCustomerRequestsPage() {
   const [detailStatus, setDetailStatus] = useState<string>('new');
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const detailModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    id: 'admin-customer-request-detail-modal',
+    isOpen: Boolean(selectedRequest),
+    onClose: () => setSelectedRequest(null),
+    containerRef: detailModalRef,
+    role: 'dialog',
+    priority: 10
+  });
 
   const fetchRequests = async () => {
     try {
@@ -653,14 +664,19 @@ export default function AdminCustomerRequestsPage() {
             inset: 0,
             backgroundColor: 'rgba(15, 23, 42, 0.65)',
             backdropFilter: 'blur(6px)',
-            zIndex: 9999,
+            zIndex: 'var(--z-modal, 1100)' as any,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 16
+            padding: 16,
+            touchAction: 'none'
           }}
         >
           <div 
+            ref={detailModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Chi tiết yêu cầu ${selectedRequest.code}`}
             style={{
               backgroundColor: '#FFFFFF',
               borderRadius: 20,
@@ -706,7 +722,7 @@ export default function AdminCustomerRequestsPage() {
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: '24px', overflowY: 'auto', flexGrow: 1 }}>
+            <div style={{ padding: '24px', overflowY: 'auto', flexGrow: 1, overscrollBehavior: 'contain' }}>
               {/* Customer Contact Card */}
               <div 
                 style={{

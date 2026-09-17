@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
 import { DeleteOutlined, EditOutlined, UploadOutlined, LoadingOutlined, CloseOutlined, PictureOutlined } from '@ant-design/icons';
 import ImageWithFallback from '../../components/ImageWithFallback';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 
 interface BannerItem {
   id: number;
@@ -22,6 +23,17 @@ export default function AdminBannersPage() {
   // Modal State (Add / Edit)
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<BannerItem | null>(null);
+
+  const bannerModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    id: 'admin-banner-modal',
+    isOpen: modalOpen,
+    onClose: () => setModalOpen(false),
+    containerRef: bannerModalRef,
+    role: 'dialog',
+    priority: 10
+  });
 
   // Form inputs
   const [title, setTitle] = useState('');
@@ -280,8 +292,13 @@ export default function AdminBannersPage() {
 
       {/* Modal (Add / Edit) */}
       {modalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '560px' }}>
+        <div 
+          className="admin-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+        >
+          <div ref={bannerModalRef} role="dialog" aria-modal="true" aria-label="Quản lý banner" className="admin-modal" style={{ maxWidth: '560px' }}>
             <div className="admin-modal-header">
               <h3 className="admin-modal-title">
                 {editingBanner ? `Sửa Banner #${editingBanner.id}` : 'Thêm Banner Mới'}

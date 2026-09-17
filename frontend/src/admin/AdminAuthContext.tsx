@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { notifyAuthChange } from '../context/WishlistContext';
 
 export interface AdminUser {
   id: number;
@@ -71,6 +72,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     localStorage.setItem('nghe_admin_user', JSON.stringify(newUser));
     localStorage.setItem('nghe_customer_token', newToken);
     localStorage.setItem('nghe_customer_user', JSON.stringify(newUser));
+    notifyAuthChange();
   };
 
   const logout = () => {
@@ -80,6 +82,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     localStorage.removeItem('nghe_admin_user');
     localStorage.removeItem('nghe_customer_token');
     localStorage.removeItem('nghe_customer_user');
+    notifyAuthChange();
   };
 
   const hasPermission = (perm: string) => {

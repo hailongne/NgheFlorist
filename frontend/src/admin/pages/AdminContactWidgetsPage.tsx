@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {
   PlusOutlined,
   EditOutlined,
@@ -81,6 +82,17 @@ export default function AdminContactWidgetsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingWidget, setEditingWidget] = useState<ContactWidgetItem | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const widgetModalRef = useRef<HTMLDivElement>(null);
+
+  useOverlayLock({
+    id: 'admin-contact-widget-modal',
+    isOpen: modalOpen,
+    onClose: () => setModalOpen(false),
+    containerRef: widgetModalRef,
+    role: 'dialog',
+    priority: 10
+  });
 
   // Form State
   const [formData, setFormData] = useState({
@@ -577,30 +589,45 @@ export default function AdminContactWidgetsPage() {
 
       {/* Modal Add / Edit */}
       {modalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(3px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: 16,
-            width: '100%',
-            maxWidth: 520,
-            boxShadow: '0 20px 50px rgba(15, 23, 42, 0.25)',
-            border: '1px solid #E2E8F0',
-            overflow: 'hidden',
-            animation: 'fadeInUp 0.2s ease-out'
-          }}>
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 'var(--z-modal, 1100)' as any,
+            padding: 16,
+            touchAction: 'none'
+          }}
+        >
+          <div 
+            ref={widgetModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={editingWidget ? 'Chỉnh Sửa Nút Tư Vấn' : 'Thêm Nút Tư Vấn Mới'}
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: 16,
+              width: '100%',
+              maxWidth: 520,
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 50px rgba(15, 23, 42, 0.25)',
+              border: '1px solid #E2E8F0',
+              overflow: 'hidden',
+              animation: 'fadeInUp 0.2s ease-out'
+            }}
+          >
             <div style={{
               padding: '18px 24px',
               borderBottom: '1px solid #E2E8F0',
@@ -626,7 +653,7 @@ export default function AdminContactWidgetsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
+            <form onSubmit={handleSubmit} style={{ padding: 24, overflowY: 'auto', overscrollBehavior: 'contain' }}>
               {/* Platform Selector */}
               <div className="admin-form-group" style={{ marginBottom: 16 }}>
                 <label className="admin-label" style={{ display: 'block', fontWeight: 700, marginBottom: 8 }}>

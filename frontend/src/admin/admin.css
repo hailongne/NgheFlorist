@@ -402,8 +402,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-backdrop, 1000);
   padding: 20px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
 }
 
 .admin-modal {
@@ -413,7 +417,10 @@
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 20px 40px rgba(38, 56, 61, 0.2);
+  z-index: var(--z-modal, 1100);
 }
 
 .admin-modal-header {
