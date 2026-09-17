@@ -256,26 +256,36 @@ export default function HomePage() {
               {currentHero.subtitle}
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div 
+              style={{ 
+                display: 'grid', 
+                gridTemplateColumns: currentHero.cta_secondary_text ? '1fr 1fr' : '1fr', 
+                gap: 10,
+                alignItems: 'stretch' 
+              }}
+            >
               <Link
                 to={currentHero.cta_primary_url || '/flowers'}
                 className="btn btn-primary"
                 style={{
                   width: '100%',
-                  padding: '13px 20px',
-                  fontSize: '0.96rem',
+                  padding: '11px 8px',
+                  fontSize: '0.84rem',
                   fontWeight: 700,
                   borderRadius: 'var(--radius-full)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 8,
-                  minHeight: 46,
-                  boxShadow: '0 4px 14px rgba(42, 117, 211, 0.22)'
+                  gap: 6,
+                  minHeight: 44,
+                  boxShadow: '0 4px 14px rgba(42, 117, 211, 0.22)',
+                  textAlign: 'center'
                 }}
               >
-                <span>{currentHero.cta_primary_text || 'Xem bộ sưu tập hoa'}</span>
-                <ArrowRightOutlined />
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {currentHero.cta_primary_text || 'Xem bộ sưu tập'}
+                </span>
+                <ArrowRightOutlined style={{ fontSize: 11, flexShrink: 0 }} />
               </Link>
               {currentHero.cta_secondary_text && (
                 <Link
@@ -283,17 +293,20 @@ export default function HomePage() {
                   className="btn btn-outline"
                   style={{
                     width: '100%',
-                    padding: '11px 20px',
-                    fontSize: '0.9rem',
+                    padding: '11px 8px',
+                    fontSize: '0.84rem',
                     fontWeight: 600,
                     borderRadius: 'var(--radius-full)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: 42
+                    minHeight: 44,
+                    textAlign: 'center'
                   }}
                 >
-                  {currentHero.cta_secondary_text}
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {currentHero.cta_secondary_text}
+                  </span>
                 </Link>
               )}
             </div>
