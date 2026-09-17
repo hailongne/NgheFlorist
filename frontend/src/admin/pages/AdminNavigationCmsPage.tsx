@@ -6,7 +6,10 @@ import {
   EyeOutlined,
   CheckCircleOutlined,
   LockOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  EnvironmentOutlined,
+  MailOutlined,
+  PhoneOutlined
 } from '@ant-design/icons';
 
 interface FooterConfig {
@@ -244,9 +247,23 @@ export default function AdminNavigationCmsPage() {
                   style={{ height: 48, width: 'auto', objectFit: 'contain' }} 
                 />
               </div>
-              <p style={{ margin: 0, color: '#64748B', fontSize: '0.88rem', lineHeight: 1.65 }}>
+              <p style={{ margin: '0 0 14px 0', color: '#64748B', fontSize: '0.88rem', lineHeight: 1.65 }}>
                 {footerConfig.brand_desc || 'Mô tả tiệm hoa tươi nghệ thuật...'}
               </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.84rem', color: '#64748B' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <EnvironmentOutlined style={{ color: '#0D9488', marginTop: 3 }} />
+                  <span>22 ngõ 115 Phố Núi Trúc, Ba Đình, Hà Nội</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <MailOutlined style={{ color: '#0D9488' }} />
+                  <span>ngheflorist.com@gmail.com</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <PhoneOutlined style={{ color: '#0D9488' }} />
+                  <span>0862 926 866</span>
+                </div>
+              </div>
             </div>
 
             {/* Col 2: Khám phá */}
