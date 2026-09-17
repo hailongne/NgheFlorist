@@ -1787,16 +1787,13 @@ export default function Header() {
                               width: 28,
                               height: 28,
                               borderRadius: 7,
-                              backgroundColor: badgeBg,
-                              color: badgeColor,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: 13,
-                              fontWeight: 700,
-                              flexShrink: 0
+                              flexShrink: 0,
+                              overflow: 'hidden'
                             }}>
-                              {isZalo ? `Z${idx + 1}` : isPhone ? <PhoneOutlined /> : isFb ? <FacebookOutlined /> : isInsta ? <InstagramOutlined /> : <MessageOutlined />}
+                              <RealSocialIcon platform={w.platform_type} size={28} />
                             </div>
                             <div style={{ flexGrow: 1, minWidth: 0 }}>
                               <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
