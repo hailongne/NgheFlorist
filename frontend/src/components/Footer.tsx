@@ -113,7 +113,7 @@ export default function Footer() {
             {footerConfig.copyright || `© ${new Date().getFullYear()} Nghệ Florist. Tất cả các quyền được bảo lưu.`}
           </div>
           <div>
-            Digital Showroom Hoa Tươi Nghệ Thuật — Nghệ Florist
+            Nghệ Florist - Tiệm hoa & quả nhập khẩu
           </div>
         </div>
       </div>
