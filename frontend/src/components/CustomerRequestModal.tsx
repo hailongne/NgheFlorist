@@ -586,9 +586,9 @@ export default function CustomerRequestModal() {
                 style={{
                   display: 'flex',
                   backgroundColor: '#F1F5F9',
-                  borderRadius: 12,
-                  padding: 4,
-                  marginBottom: 18,
+                  borderRadius: 10,
+                  padding: 3,
+                  marginBottom: 12,
                   gap: 4
                 }}
               >
@@ -598,17 +598,20 @@ export default function CustomerRequestModal() {
                   onClick={() => setActiveType('PRODUCT_SELECTION')}
                   style={{
                     flex: 1,
-                    padding: '9px 8px',
-                    borderRadius: 8,
+                    minWidth: 0,
+                    padding: '7px 6px',
+                    borderRadius: 7,
                     border: 'none',
                     fontWeight: 600,
-                    fontSize: '0.84rem',
+                    fontSize: '0.78rem',
                     cursor: 'pointer',
                     backgroundColor: activeType === 'PRODUCT_SELECTION' ? '#FFFFFF' : 'transparent',
                     color: activeType === 'PRODUCT_SELECTION' ? 'var(--color-primary-dark)' : '#64748B',
-                    boxShadow: activeType === 'PRODUCT_SELECTION' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+                    boxShadow: activeType === 'PRODUCT_SELECTION' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
                     transition: 'all 0.2s',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden'
                   }}
                 >
                   🌸 Chọn mẫu hoa có sẵn
@@ -619,17 +622,20 @@ export default function CustomerRequestModal() {
                   onClick={() => setActiveType('CUSTOM_DESIGN')}
                   style={{
                     flex: 1,
-                    padding: '9px 8px',
-                    borderRadius: 8,
+                    minWidth: 0,
+                    padding: '7px 6px',
+                    borderRadius: 7,
                     border: 'none',
                     fontWeight: 600,
-                    fontSize: '0.84rem',
+                    fontSize: '0.78rem',
                     cursor: 'pointer',
                     backgroundColor: activeType === 'CUSTOM_DESIGN' ? '#FFFFFF' : 'transparent',
                     color: activeType === 'CUSTOM_DESIGN' ? 'var(--color-primary-dark)' : '#64748B',
-                    boxShadow: activeType === 'CUSTOM_DESIGN' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+                    boxShadow: activeType === 'CUSTOM_DESIGN' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
                     transition: 'all 0.2s',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden'
                   }}
                 >
                   🎨 Thiết kế hoa theo yêu cầu
@@ -642,15 +648,15 @@ export default function CustomerRequestModal() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 14,
-                    padding: '12px 14px',
+                    gap: 10,
+                    padding: '8px 10px',
                     backgroundColor: 'var(--color-primary-light)',
                     border: '1px solid var(--color-border)',
-                    borderRadius: 12,
-                    marginBottom: 20
+                    borderRadius: 10,
+                    marginBottom: 12
                   }}
                 >
-                  <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
                     <ImageWithFallback
                       src={selectedProduct.imageUrl}
                       alt={selectedProduct.name || 'Mẫu hoa đã chọn'}
@@ -659,13 +665,13 @@ export default function CustomerRequestModal() {
                     />
                   </div>
                   <div style={{ flexGrow: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-primary-dark)', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', color: 'var(--color-primary-dark)', fontWeight: 700 }}>
                       Mẫu hoa bạn quan tâm:
                     </div>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {selectedProduct.name}
                     </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)' }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
                       Giá tham khảo: <strong style={{ color: 'var(--color-primary-dark)' }}>
                         {typeof selectedProduct.price === 'number' ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedProduct.price) : selectedProduct.price}
                       </strong>
@@ -680,10 +686,10 @@ export default function CustomerRequestModal() {
                     backgroundColor: '#FEF2F2',
                     border: '1px solid #F87171',
                     color: '#991B1B',
-                    padding: '10px 14px',
+                    padding: '8px 12px',
                     borderRadius: 8,
-                    fontSize: '0.88rem',
-                    marginBottom: 16
+                    fontSize: '0.82rem',
+                    marginBottom: 12
                   }}
                 >
                   {errorMessage}
@@ -691,15 +697,15 @@ export default function CustomerRequestModal() {
               )}
 
               {/* Contact Information (Mandatory) */}
-              <div style={{ marginBottom: 20 }}>
-                <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ marginBottom: 14 }}>
+                <h4 style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>1. Thông tin liên hệ</span>
-                  <span style={{ fontSize: '0.75rem', color: '#E11D48', fontWeight: 500 }}>(Bắt buộc)</span>
+                  <span style={{ fontSize: '0.72rem', color: '#E11D48', fontWeight: 500 }}>(Bắt buộc)</span>
                 </h4>
 
                 <div className="request-form-row">
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                    <label className="request-modal-label">
                       Họ và tên của bạn *
                     </label>
                     <input
@@ -708,20 +714,12 @@ export default function CustomerRequestModal() {
                       placeholder="Ví dụ: Chị Lan, Anh Nam..."
                       value={customerName}
                       onChange={e => setCustomerName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: '1.5px solid var(--color-border)',
-                        borderRadius: 8,
-                        fontSize: '0.9rem',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
+                      className="request-modal-input"
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                    <label className="request-modal-label">
                       Số điện thoại nhận tư vấn *
                     </label>
                     <input
@@ -730,22 +728,14 @@ export default function CustomerRequestModal() {
                       placeholder="09xx xxx xxx"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: '1.5px solid var(--color-border)',
-                        borderRadius: 8,
-                        fontSize: '0.9rem',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
+                      className="request-modal-input"
                     />
                   </div>
                 </div>
 
                 {/* Zalo Option */}
-                <div style={{ marginTop: 10 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: '#475569', cursor: 'pointer' }}>
+                <div style={{ marginTop: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: '#475569', cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={sameAsPhone}
@@ -756,21 +746,13 @@ export default function CustomerRequestModal() {
                   </label>
 
                   {!sameAsPhone && (
-                    <div style={{ marginTop: 8 }}>
+                    <div style={{ marginTop: 6 }}>
                       <input
                         type="text"
                         placeholder="Nhập số Zalo khác nếu có..."
                         value={zalo}
                         onChange={e => setZalo(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid var(--color-border)',
-                          borderRadius: 8,
-                          fontSize: '0.88rem',
-                          outline: 'none',
-                          boxSizing: 'border-box'
-                        }}
+                        className="request-modal-input"
                       />
                     </div>
                   )}
@@ -778,23 +760,24 @@ export default function CustomerRequestModal() {
               </div>
 
               {/* Floral & Customization Specifications */}
-              <div style={{ marginBottom: 20 }}>
-                <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 12 }}>
+              <div style={{ marginBottom: 14 }}>
+                <h4 style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>
                   2. Mong muốn về hoa & Giao nhận
                 </h4>
 
                 {/* Kiểu dáng hoa (Bó hoa, Giỏ hoa, Kệ hoa, Khác) */}
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <label className="request-modal-label">
                     Kiểu dáng hoa:
                   </label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                     {FLOWER_TYPES.map(ft => {
                       const isSelected = style === ft || (!style && ft === 'Bó hoa');
                       return (
                         <button
                           key={ft}
                           type="button"
+                          className="request-chip-btn"
                           onClick={() => {
                             setStyle(ft);
                             setCustomBudget('');
@@ -806,15 +789,10 @@ export default function CustomerRequestModal() {
                             else setBudget('Tùy ý');
                           }}
                           style={{
-                            padding: '6px 14px',
-                            borderRadius: 20,
-                            border: isSelected ? '2px solid var(--color-primary-dark)' : '1px solid #CBD5E1',
+                            border: isSelected ? '1.5px solid var(--color-primary-dark)' : '1px solid #CBD5E1',
                             backgroundColor: isSelected ? 'var(--color-primary-light)' : '#F8FAFC',
                             color: isSelected ? 'var(--color-primary-dark)' : '#334155',
-                            fontWeight: isSelected ? 700 : 500,
-                            fontSize: '0.82rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s'
+                            fontWeight: isSelected ? 700 : 500
                           }}
                         >
                           {ft}
@@ -825,18 +803,18 @@ export default function CustomerRequestModal() {
                 </div>
 
                 {/* Budget selector */}
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <label className="request-modal-label">
                     Ngân sách tham khảo:
-                    {style === 'Bó hoa' && <span style={{ fontSize: '0.78rem', color: '#0284C7', marginLeft: 6 }}>(từ 300k trở lên)</span>}
-                    {style === 'Giỏ hoa' && <span style={{ fontSize: '0.78rem', color: '#0284C7', marginLeft: 6 }}>(từ 600k trở lên)</span>}
-                    {style === 'Kệ hoa' && <span style={{ fontSize: '0.78rem', color: '#0284C7', marginLeft: 6 }}>(từ 1.200k trở lên)</span>}
-                    {style === 'Hoa Cưới' && <span style={{ fontSize: '0.78rem', color: '#0284C7', marginLeft: 6 }}>(từ 500k trở lên)</span>}
-                    {style === 'Kệ Tang' && <span style={{ fontSize: '0.78rem', color: '#0284C7', marginLeft: 6 }}>(từ 800k trở lên)</span>}
+                    {style === 'Bó hoa' && <span style={{ fontSize: '0.74rem', color: '#0284C7', marginLeft: 6 }}>(từ 300k trở lên)</span>}
+                    {style === 'Giỏ hoa' && <span style={{ fontSize: '0.74rem', color: '#0284C7', marginLeft: 6 }}>(từ 600k trở lên)</span>}
+                    {style === 'Kệ hoa' && <span style={{ fontSize: '0.74rem', color: '#0284C7', marginLeft: 6 }}>(từ 1.2tr trở lên)</span>}
+                    {style === 'Hoa Cưới' && <span style={{ fontSize: '0.74rem', color: '#0284C7', marginLeft: 6 }}>(từ 500k trở lên)</span>}
+                    {style === 'Kệ Tang' && <span style={{ fontSize: '0.74rem', color: '#0284C7', marginLeft: 6 }}>(từ 800k trở lên)</span>}
                   </label>
                   {style !== 'Khác' ? (
                     <>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                         {(style === 'Giỏ hoa' 
                           ? BASKET_BUDGETS 
                           : style === 'Kệ hoa' 
@@ -852,20 +830,16 @@ export default function CustomerRequestModal() {
                             <button
                               key={b}
                               type="button"
+                              className="request-chip-btn"
                               onClick={() => { 
                                 setBudget(b); 
                                 if (b !== 'Tùy ý') setCustomBudget(''); 
                               }}
                               style={{
-                                padding: '6px 14px',
-                                borderRadius: 20,
-                                border: isSelected ? '2px solid var(--color-primary-dark)' : '1px solid #CBD5E1',
+                                border: isSelected ? '1.5px solid var(--color-primary-dark)' : '1px solid #CBD5E1',
                                 backgroundColor: isSelected ? 'var(--color-primary-light)' : '#F8FAFC',
                                 color: isSelected ? 'var(--color-primary-dark)' : '#334155',
-                                fontWeight: isSelected ? 700 : 500,
-                                fontSize: '0.82rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s'
+                                fontWeight: isSelected ? 700 : 500
                               }}
                             >
                               {b}
@@ -874,38 +848,15 @@ export default function CustomerRequestModal() {
                         })}
                       </div>
                       {budget === 'Tùy ý' && (
-                        <div style={{ marginTop: 10 }}>
+                        <div style={{ marginTop: 8 }}>
                           <input
                             type="text"
                             autoFocus
-                            placeholder={
-                              style === 'Bó hoa'
-                                ? 'Nhập mức ngân sách theo ý bạn (từ 300k trở lên)...'
-                                : style === 'Giỏ hoa'
-                                ? 'Nhập mức ngân sách theo ý bạn (từ 600k trở lên)...'
-                                : style === 'Kệ hoa'
-                                ? 'Nhập mức ngân sách theo ý bạn (từ 1.2tr trở lên)...'
-                                : style === 'Hoa Cưới'
-                                ? 'Nhập mức ngân sách theo ý bạn (từ 500k trở lên)...'
-                                : style === 'Kệ Tang'
-                                ? 'Nhập mức ngân sách theo ý bạn (từ 800k trở lên)...'
-                                : 'Nhập mức ngân sách theo ý bạn...'
-                            }
+                            placeholder="Nhập mức ngân sách theo ý bạn..."
                             value={customBudget}
                             onChange={e => setCustomBudget(e.target.value)}
-                            style={{
-                              width: '100%',
-                              padding: '10px 14px',
-                              border: '2px solid #0284C7',
-                              background: '#FFFFFF',
-                              color: '#0F172A',
-                              fontWeight: 600,
-                              borderRadius: 8,
-                              fontSize: '0.9rem',
-                              outline: 'none',
-                              boxSizing: 'border-box',
-                              boxShadow: '0 0 0 2px rgba(2, 132, 199, 0.15)'
-                            }}
+                            className="request-modal-input"
+                            style={{ borderColor: 'var(--color-primary-dark)', fontWeight: 600 }}
                           />
                         </div>
                       )}
@@ -915,22 +866,11 @@ export default function CustomerRequestModal() {
                       <input
                         type="text"
                         autoFocus
-                        placeholder="Viết mức ngân sách mong muốn của bạn (VD: 800.000đ, 2 triệu, thỏa thuận...)"
+                        placeholder="Viết mức ngân sách mong muốn của bạn..."
                         value={customBudget}
                         onChange={e => setCustomBudget(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          border: '2px solid #0284C7',
-                          background: '#FFFFFF',
-                          color: '#0F172A',
-                          fontWeight: 600,
-                          borderRadius: 8,
-                          fontSize: '0.9rem',
-                          outline: 'none',
-                          boxSizing: 'border-box',
-                          boxShadow: '0 0 0 2px rgba(2, 132, 199, 0.15)'
-                        }}
+                        className="request-modal-input"
+                        style={{ borderColor: 'var(--color-primary-dark)', fontWeight: 600 }}
                       />
                     </div>
                   )}
@@ -939,7 +879,7 @@ export default function CustomerRequestModal() {
                 {/* Color tone & Style */}
                 <div className="request-form-row">
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                    <label className="request-modal-label">
                       Tông màu ưu thích:
                     </label>
                     <input
@@ -948,14 +888,7 @@ export default function CustomerRequestModal() {
                       placeholder="Ví dụ: Hồng pastel, Đỏ tươi..."
                       value={colorTone}
                       onChange={e => setColorTone(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 8,
-                        fontSize: '0.88rem',
-                        boxSizing: 'border-box'
-                      }}
+                      className="request-modal-input"
                     />
                     <datalist id="color-presets">
                       {COLOR_PRESETS.map(c => <option key={c} value={c} />)}
@@ -963,7 +896,7 @@ export default function CustomerRequestModal() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                    <label className="request-modal-label">
                       Dịp tặng / Người nhận:
                     </label>
                     <input
@@ -972,14 +905,7 @@ export default function CustomerRequestModal() {
                       placeholder="Ví dụ: Tặng sinh nhật bạn gái..."
                       value={recipient}
                       onChange={e => setRecipient(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 8,
-                        fontSize: '0.88rem',
-                        boxSizing: 'border-box'
-                      }}
+                      className="request-modal-input"
                     />
                     <datalist id="occasion-presets">
                       {OCCASION_PRESETS.map(o => <option key={o} value={o} />)}
@@ -990,7 +916,7 @@ export default function CustomerRequestModal() {
                 {/* Delivery Date & Time & Area */}
                 <div className="request-form-row">
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                    <label className="request-modal-label">
                       Ngày & Giờ cần nhận hoa:
                     </label>
                     <div style={{ display: 'flex', gap: 6, width: '100%', boxSizing: 'border-box' }}>
@@ -998,35 +924,21 @@ export default function CustomerRequestModal() {
                         type="date"
                         value={requestedDate}
                         onChange={e => setRequestedDate(e.target.value)}
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          padding: '9px 8px',
-                          border: '1px solid var(--color-border)',
-                          borderRadius: 8,
-                          fontSize: '0.82rem',
-                          boxSizing: 'border-box'
-                        }}
+                        className="request-modal-input"
+                        style={{ flex: 1, minWidth: 0 }}
                       />
                       <input
                         type="time"
                         value={requestedTime}
                         onChange={e => setRequestedTime(e.target.value)}
-                        style={{
-                          width: 95,
-                          flexShrink: 0,
-                          padding: '9px 6px',
-                          border: '1px solid var(--color-border)',
-                          borderRadius: 8,
-                          fontSize: '0.82rem',
-                          boxSizing: 'border-box'
-                        }}
+                        className="request-modal-input"
+                        style={{ width: 88, flexShrink: 0 }}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                    <label className="request-modal-label">
                       Khu vực giao nhận:
                     </label>
                     <input
@@ -1034,21 +946,14 @@ export default function CustomerRequestModal() {
                       placeholder="Quận/Huyện hoặc địa chỉ cụ thể"
                       value={deliveryArea}
                       onChange={e => setDeliveryArea(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 8,
-                        fontSize: '0.88rem',
-                        boxSizing: 'border-box'
-                      }}
+                      className="request-modal-input"
                     />
                   </div>
                 </div>
 
                 {/* Greeting Card Message */}
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <label className="request-modal-label">
                     Nội dung lời nhắn trên thiệp / banner (nếu có):
                   </label>
                   <input
@@ -1056,32 +961,25 @@ export default function CustomerRequestModal() {
                     placeholder="Ví dụ: Chúc mừng sinh nhật em yêu! Yêu em nhiều..."
                     value={cardMessage}
                     onChange={e => setCardMessage(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 8,
-                      fontSize: '0.88rem',
-                      boxSizing: 'border-box'
-                    }}
+                    className="request-modal-input"
                   />
                 </div>
 
                 {/* Reference Photo Attachments */}
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <label className="request-modal-label">
                     Ảnh mẫu hoa bạn thích (tối đa 3 ảnh):
                   </label>
 
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                     {attachments.map((att, idx) => (
                       <div 
                         key={idx}
                         style={{
                           position: 'relative',
-                          width: 68,
-                          height: 68,
-                          borderRadius: 8,
+                          width: 54,
+                          height: 54,
+                          borderRadius: 7,
                           overflow: 'hidden',
                           border: '1px solid #CBD5E1'
                         }}
@@ -1102,9 +1000,9 @@ export default function CustomerRequestModal() {
                             color: '#FFFFFF',
                             border: 'none',
                             borderRadius: '50%',
-                            width: 20,
-                            height: 20,
-                            fontSize: 10,
+                            width: 18,
+                            height: 18,
+                            fontSize: 9,
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -1122,9 +1020,9 @@ export default function CustomerRequestModal() {
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
                         style={{
-                          width: 68,
-                          height: 68,
-                          borderRadius: 8,
+                          width: 54,
+                          height: 54,
+                          borderRadius: 7,
                           border: '1.5px dashed #94A3B8',
                           background: '#F8FAFC',
                           color: '#64748B',
@@ -1133,11 +1031,11 @@ export default function CustomerRequestModal() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           cursor: 'pointer',
-                          fontSize: '0.72rem',
-                          gap: 4
+                          fontSize: '0.68rem',
+                          gap: 2
                         }}
                       >
-                        {isUploading ? <LoadingOutlined /> : <UploadOutlined style={{ fontSize: 16 }} />}
+                        {isUploading ? <LoadingOutlined /> : <UploadOutlined style={{ fontSize: 14 }} />}
                         <span>{isUploading ? 'Đang tải' : 'Thêm ảnh'}</span>
                       </button>
                     )}
@@ -1154,7 +1052,7 @@ export default function CustomerRequestModal() {
 
                 {/* Additional Notes */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>
+                  <label className="request-modal-label">
                     Ghi chú thêm cho Florist:
                   </label>
                   <textarea
@@ -1162,22 +1060,14 @@ export default function CustomerRequestModal() {
                     placeholder="Yêu cầu riêng về hoa nhập khẩu, cách gói hoa, thông tin người nhận..."
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 8,
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                      resize: 'vertical'
-                    }}
+                    className="request-modal-input"
+                    style={{ resize: 'vertical', minHeight: 48 }}
                   />
                 </div>
               </div>
 
               {/* Submit Button */}
-              <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--color-border)' }}>
+              <div style={{ marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--color-border)' }}>
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -1185,11 +1075,11 @@ export default function CustomerRequestModal() {
                     width: '100%',
                     backgroundColor: 'var(--color-primary-dark)',
                     color: '#FFFFFF',
-                    padding: '14px 20px',
-                    minHeight: 48,
-                    borderRadius: 12,
+                    padding: '11px 16px',
+                    minHeight: 42,
+                    borderRadius: 10,
                     border: 'none',
-                    fontSize: '0.96rem',
+                    fontSize: '0.88rem',
                     fontWeight: 700,
                     cursor: isSubmitting ? 'not-allowed' : 'pointer',
                     opacity: isSubmitting ? 0.7 : 1,
@@ -1197,7 +1087,7 @@ export default function CustomerRequestModal() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
-                    boxShadow: '0 4px 14px rgba(42, 117, 211, 0.25)',
+                    boxShadow: '0 3px 10px rgba(42, 117, 211, 0.2)',
                     transition: 'all 0.2s',
                     boxSizing: 'border-box'
                   }}
@@ -1206,7 +1096,7 @@ export default function CustomerRequestModal() {
                   {isSubmitting ? 'Đang gửi thông tin...' : 'Gửi Yêu Cầu & Nhận Báo Giá Nhanh'}
                 </button>
 
-                <div style={{ textAlign: 'center', marginTop: 10, fontSize: '0.76rem', color: '#94A3B8', lineHeight: 1.4 }}>
+                <div style={{ textAlign: 'center', marginTop: 8, fontSize: '0.72rem', color: '#94A3B8', lineHeight: 1.4 }}>
                   ✦ Miễn phí tư vấn & thiết kế thiệp • Cam kết gửi ảnh hoa thực tế trước khi giao
                 </div>
               </div>

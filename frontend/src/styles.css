@@ -1857,13 +1857,51 @@ h1, h2, h3, h4, h5, h6 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .request-form-row > div {
   min-width: 0;
+}
+
+.request-modal-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.request-modal-input {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 38px;
+}
+
+.request-modal-input:focus {
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 0 0 2px rgba(93, 158, 175, 0.15);
+}
+
+.request-chip-btn {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  line-height: 1.3;
 }
 
 /* Mobile & Tablet Overrides */
@@ -1884,32 +1922,43 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .request-modal-header {
-    padding: 14px 16px;
+    padding: 12px 14px;
   }
 
   .request-modal-header h3 {
-    font-size: 1.08rem !important;
+    font-size: 1.05rem !important;
   }
 
   .request-modal-header p {
-    font-size: 0.78rem !important;
+    font-size: 0.76rem !important;
   }
 
   .request-modal-body {
-    padding: 14px 16px 20px;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    padding: 12px 14px 18px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
   }
 
   /* Force 1-column on mobile for inputs so they don't get truncated */
   .request-form-row {
     grid-template-columns: 1fr !important;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
   }
 
   .request-type-btn {
-    font-size: 0.78rem !important;
-    padding: 8px 4px !important;
+    font-size: 0.76rem !important;
+    padding: 7px 4px !important;
+  }
+
+  .request-modal-input {
+    padding: 7px 10px !important;
+    font-size: 0.82rem !important;
+    min-height: 36px !important;
+  }
+
+  .request-chip-btn {
+    padding: 4px 10px !important;
+    font-size: 0.74rem !important;
   }
 }
 
