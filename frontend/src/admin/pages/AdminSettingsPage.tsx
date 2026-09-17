@@ -4,14 +4,14 @@ import { useAdminAuth } from '../AdminAuthContext';
 import { 
   ShopOutlined, 
   SaveOutlined, 
-  SoundOutlined, 
   EyeOutlined,
   EnvironmentOutlined,
   MailOutlined,
   PhoneOutlined,
   CustomerServiceOutlined,
   ArrowRightOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons';
 import { formatPhoneNumber } from '../../context/SiteSettingsContext';
 
@@ -22,7 +22,7 @@ interface SiteSettings {
   address: string;
   business_hours: string;
   currency: string;
-  announcement: string;
+  announcement?: string;
 }
 
 export default function AdminSettingsPage() {
@@ -33,8 +33,7 @@ export default function AdminSettingsPage() {
     email: 'ngheflorist.com@gmail.com',
     address: '22 ngõ 115 phố Núi Trúc, Ba Đình, Hà Nội',
     business_hours: '07:30 - 21:30 hàng ngày',
-    currency: 'VND',
-    announcement: 'Miễn phí thiệp chúc mừng & banner cao cấp cho tất cả đơn hàng'
+    currency: 'VND'
   });
 
   const [loading, setLoading] = useState(true);
@@ -112,7 +111,7 @@ export default function AdminSettingsPage() {
             Cài Đặt Website
           </h1>
           <div className="admin-page-subtitle" style={{ fontSize: '0.88rem', color: '#64748B', marginTop: 4 }}>
-            Quản lý thông tin thương hiệu, hotline tư vấn, email, địa chỉ và thông báo hiển thị trên toàn hệ thống
+            Quản lý thông tin thương hiệu, hotline tư vấn, email, địa chỉ tiệm hoa và đồng bộ hiển thị toàn hệ thống
           </div>
         </div>
 
@@ -158,7 +157,7 @@ export default function AdminSettingsPage() {
                   Thông Tin Tiệm Hoa & Liên Hệ
                 </h3>
                 <span style={{ fontSize: '0.80rem', color: '#64748B' }}>
-                  Được đồng bộ trên Chân trang (Footer), Header và hóa đơn
+                  Được đồng bộ trực tiếp trên Chân trang (Footer), Header và hóa đơn
                 </span>
               </div>
             </div>
@@ -177,14 +176,14 @@ export default function AdminSettingsPage() {
                 style={{ borderRadius: 8, padding: '9px 12px', fontSize: '0.9rem' }}
               />
               <small style={{ color: '#64748B', fontSize: '0.78rem', display: 'block', marginTop: 4 }}>
-                Hiển thị trên tiêu đề trình duyệt, thương hiệu và hóa đơn
+                Hiển thị trên tiêu đề website, thương hiệu tiệm hoa và hóa đơn
               </small>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
               <div className="admin-form-group">
-                <label className="admin-label" style={{ fontWeight: 600, fontSize: '0.86rem', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Hotline tư vấn đặt hoa <span style={{ color: '#EF4444' }}>*</span></span>
+                <label className="admin-label" style={{ fontWeight: 600, fontSize: '0.86rem', marginBottom: 6, display: 'block' }}>
+                  Hotline tư vấn đặt hoa <span style={{ color: '#EF4444' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -266,61 +265,9 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-          {/* CỘT 2: THÔNG BÁO & LIVE PREVIEW CHÂN TRANG */}
+          {/* CỘT 2: XEM TRƯỚC CHÂN TRANG & TIỆN ÍCH TƯ VẤN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             
-            {/* Card Thông Báo Đầu Trang */}
-            <div className="admin-card" style={{ padding: 24, borderRadius: 12, border: '1px solid var(--color-border)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #F1F5F9' }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: 'rgba(234, 179, 8, 0.14)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17 }}>
-                  <SoundOutlined />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#1E293B' }}>
-                    Thanh Thông Báo Đầu Trang
-                  </h3>
-                  <span style={{ fontSize: '0.80rem', color: '#64748B' }}>
-                    Hiển thị ở dải banner thông điệp trên cùng website
-                  </span>
-                </div>
-              </div>
-
-              <div className="admin-form-group" style={{ marginBottom: 14 }}>
-                <label className="admin-label" style={{ fontWeight: 600, fontSize: '0.86rem', marginBottom: 6, display: 'block' }}>
-                  Nội dung thông báo (Announcement Bar)
-                </label>
-                <textarea
-                  rows={2}
-                  className="admin-input"
-                  placeholder="VD: Miễn phí thiệp chúc mừng & banner cao cấp cho tất cả đơn hàng"
-                  value={settings.announcement}
-                  onChange={(e) => setSettings({ ...settings, announcement: e.target.value })}
-                  style={{ borderRadius: 8, padding: '9px 12px', fontSize: '0.88rem', lineHeight: 1.5 }}
-                />
-              </div>
-
-              {/* Preview Announcement Bar */}
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: '0.78rem', color: '#64748B', marginBottom: 6, fontWeight: 600 }}>
-                  Xem trước thông báo hiển thị:
-                </div>
-                <div style={{ 
-                  backgroundColor: 'var(--color-primary-dark)', 
-                  color: '#FFFFFF', 
-                  padding: '7px 12px', 
-                  borderRadius: 6, 
-                  fontSize: '0.78rem', 
-                  textAlign: 'center',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  ✨ {settings.announcement || 'Chưa có thông báo nào'}
-                </div>
-              </div>
-            </div>
-
             {/* Card Live Preview Footer */}
             <div className="admin-card" style={{ padding: 24, borderRadius: 12, border: '1.5px solid #CBD5E1', backgroundColor: '#F8FAFC' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -333,7 +280,7 @@ export default function AdminSettingsPage() {
                       Xem Trước Thông Tin Chân Trang
                     </h3>
                     <span style={{ fontSize: '0.78rem', color: '#64748B' }}>
-                      Được cập nhật tự động khi thay đổi thông tin
+                      Được cập nhật tự động khi bạn thay đổi thông tin
                     </span>
                   </div>
                 </div>
@@ -350,8 +297,8 @@ export default function AdminSettingsPage() {
                 padding: '16px 18px',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
               }}>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1E293B', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>{settings.site_name || 'Nghệ Florist'}</span>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <img src="/images/logoNgheFlorist-brand-blue.png?v=2" alt="Nghệ Florist" style={{ height: 32, width: 'auto' }} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.84rem', color: '#475569' }}>
@@ -381,38 +328,60 @@ export default function AdminSettingsPage() {
               </div>
             </div>
 
-            {/* Quick Navigation to Widget Manager */}
+            {/* Thông tin đồng bộ & điều hướng Nút Tư Vấn */}
             <div style={{ 
-              padding: '14px 16px', 
-              backgroundColor: 'rgba(93, 158, 175, 0.08)', 
-              borderRadius: 10, 
-              border: '1px solid rgba(93, 158, 175, 0.25)',
+              padding: '18px 20px', 
+              backgroundColor: '#FFFFFF', 
+              borderRadius: 12, 
+              border: '1px solid var(--color-border)',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              flexDirection: 'column',
               gap: 12
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <CustomerServiceOutlined style={{ color: 'var(--color-primary-dark)', fontSize: 20 }} />
-                <div style={{ fontSize: '0.84rem', color: '#334155' }}>
-                  Quản lý các nút liên hệ Zalo, Messenger, Hotline nổi?
-                </div>
+                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1E293B' }}>
+                  Nút Tư Vấn & Kênh Liên Hệ Nổi
+                </h4>
               </div>
-              <Link 
-                to="/admin/contact-widgets" 
-                style={{ 
-                  color: 'var(--color-primary-dark)', 
-                  fontWeight: 600, 
-                  fontSize: '0.84rem', 
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                Quản lý Nút Tư Vấn <ArrowRightOutlined />
-              </Link>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748B', lineHeight: 1.6 }}>
+                Các nút liên hệ nhanh như Zalo, Hotline, Messenger hay Fanpage hiện được quản lý độc lập tại mục <strong>Quản Lý Nút Tư Vấn</strong>, giúp bạn chủ động bật/tắt hoặc sắp xếp vị trí bất cứ lúc nào.
+              </p>
+              <div>
+                <Link 
+                  to="/admin/contact-widgets" 
+                  className="admin-btn admin-btn-outline"
+                  style={{ 
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    padding: '8px 16px',
+                    borderRadius: 8
+                  }}
+                >
+                  Mở trang Quản Lý Nút Tư Vấn <ArrowRightOutlined />
+                </Link>
+              </div>
+            </div>
+
+            <div style={{ 
+              padding: '14px 16px', 
+              backgroundColor: 'rgba(93, 158, 175, 0.08)', 
+              borderRadius: 10, 
+              border: '1px solid rgba(93, 158, 175, 0.2)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              fontSize: '0.80rem',
+              color: '#334155',
+              lineHeight: 1.5
+            }}>
+              <InfoCircleOutlined style={{ color: 'var(--color-primary-dark)', marginTop: 2, flexShrink: 0 }} />
+              <div>
+                Mọi thay đổi cài đặt khi được lưu sẽ được cập nhật tự động lên trang khách hàng mà không cần khởi động lại máy chủ.
+              </div>
             </div>
 
           </div>
