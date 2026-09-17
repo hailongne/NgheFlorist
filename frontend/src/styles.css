@@ -1411,23 +1411,7 @@ h1, h2, h3, h4, h5, h6 {
   object-fit: cover;
 }
 
-/* Sticky Bottom CTA bar for Product Detail on Mobile */
-.mobile-sticky-cta-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--color-border);
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  z-index: 95;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-}
+
 
 /* Bottom Sheet Filter on Mobile */
 .bottom-sheet-backdrop {

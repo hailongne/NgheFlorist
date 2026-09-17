@@ -872,57 +872,6 @@ export default function ProductDetailPage() {
         )}
       </div>
 
-      {/* Mobile Sticky Bottom CTA Bar */}
-      <div className="mobile-sticky-cta-bar mobile-only-element">
-        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, marginRight: 'auto' }}>
-          <span style={{ fontSize: '0.62rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>
-            Giá tham khảo
-          </span>
-          <span style={{ fontSize: '1.08rem', fontWeight: 800, color: 'var(--color-primary-dark)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
-            {formatVND(activePrice)}
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-          {contactWidgets.length > 0 ? (
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{
-                minHeight: 40,
-                padding: '8px 16px',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                borderRadius: 'var(--radius-full)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6
-              }}
-              onClick={() => handleOpenConsultation(contactWidgets[0])}
-            >
-              <MessageOutlined />
-              <span>Tư vấn mẫu này ngay</span>
-            </button>
-          ) : (
-            <a
-              href={zaloUrl1 || 'https://zalo.me/0862926866'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary"
-              style={{
-                minHeight: 40,
-                padding: '8px 16px',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                borderRadius: 'var(--radius-full)',
-                textDecoration: 'none'
-              }}
-            >
-              <span>Chat Zalo tư vấn</span>
-            </a>
-          )}
-        </div>
-      </div>
-
       {/* 50/50 CONSULTATION & ORDER MODAL */}
       {consultModalOpen && activeWidget && (
         <div className="consultation-modal-backdrop" onClick={() => setConsultModalOpen(false)}>
