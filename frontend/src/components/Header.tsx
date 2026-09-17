@@ -19,11 +19,14 @@ import {
   PhoneOutlined,
   FacebookOutlined,
   InstagramOutlined,
-  RightOutlined
+  RightOutlined,
+  HeartOutlined,
+  HeartFilled
 } from '@ant-design/icons';
 import { useCustomerRequest } from '../context/RequestContext';
 import { useAdminAuth } from '../admin/AdminAuthContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useWishlist } from '../context/WishlistContext';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
 import { RealSocialIcon } from './RealSocialIcons';
 
@@ -56,6 +59,7 @@ interface MenuItem {
 
 export default function Header() {
   const { openRequestModal } = useCustomerRequest();
+  const { wishlistCount, isLoggedIn: isWishlistLoggedIn, setShowIosAlert } = useWishlist();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -806,6 +810,42 @@ export default function Header() {
             <SearchOutlined />
           </button>
 
+          {/* Right: Mobile Wishlist Button (on Mobile) */}
+          <Link
+            to={isWishlistLoggedIn ? "/favorites" : "#"}
+            onClick={(e) => {
+              if (!isWishlistLoggedIn) {
+                e.preventDefault();
+                setShowIosAlert(true);
+              }
+            }}
+            className="mobile-search-btn"
+            style={{
+              position: 'relative',
+              color: wishlistCount > 0 ? '#E11D48' : 'inherit',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            aria-label="Bộ sưu tập yêu thích"
+            title="Bộ sưu tập hoa yêu thích"
+          >
+            {wishlistCount > 0 ? <HeartFilled style={{ color: '#E11D48' }} /> : <HeartOutlined />}
+            {wishlistCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: 7,
+                right: 7,
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                backgroundColor: '#E11D48',
+                border: '1.5px solid #FFFFFF'
+              }} />
+            )}
+          </Link>
+
           {/* Right: Conversion Actions & Auth (on Desktop/Tablet) */}
           <div className="header-actions desktop-only-action" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Floral Custom Order CTA */}
@@ -995,6 +1035,62 @@ export default function Header() {
               )}
             </div>
 
+            {/* Desktop Wishlist / Album Yêu thích Icon Button */}
+            <Link
+              to={isWishlistLoggedIn ? "/favorites" : "#"}
+              onClick={(e) => {
+                if (!isWishlistLoggedIn) {
+                  e.preventDefault();
+                  setShowIosAlert(true);
+                }
+              }}
+              style={{
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 38,
+                height: 38,
+                borderRadius: '50%',
+                backgroundColor: wishlistCount > 0 ? '#FFF1F2' : '#F1F5F9',
+                border: wishlistCount > 0 ? '1px solid #FECDD3' : '1px solid #E2E8F0',
+                color: wishlistCount > 0 ? '#E11D48' : '#475569',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                boxShadow: wishlistCount > 0 ? '0 2px 8px rgba(225, 29, 72, 0.15)' : 'none'
+              }}
+              title={wishlistCount > 0 ? `Xem ${wishlistCount} mẫu hoa yêu thích` : 'Bộ sưu tập hoa yêu thích'}
+            >
+              {wishlistCount > 0 ? (
+                <HeartFilled style={{ fontSize: 18, color: '#E11D48' }} />
+              ) : (
+                <HeartOutlined style={{ fontSize: 18 }} />
+              )}
+              {wishlistCount > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    backgroundColor: '#E11D48',
+                    color: '#FFFFFF',
+                    fontSize: '0.66rem',
+                    fontWeight: 800,
+                    borderRadius: 10,
+                    minWidth: 18,
+                    height: 18,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 4px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)'
+                  }}
+                >
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
             {/* Admin or Customer Auth Button (Far Right) */}
             {isEffectiveAdmin && activeAdminUser ? (
               <div ref={userDropdownRef} style={{ position: 'relative' }}>
@@ -1123,6 +1219,27 @@ export default function Header() {
                       <span>Quản lý sản phẩm</span>
                     </Link>
 
+                    <Link
+                      to="/favorites"
+                      onClick={() => setShowUserDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#E11D48',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap',
+                        backgroundColor: '#FFF5F5',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <HeartFilled style={{ color: '#E11D48', fontSize: '0.95rem' }} />
+                      <span>Sản phẩm yêu thích {wishlistCount > 0 ? `(${wishlistCount})` : ''}</span>
+                    </Link>
+
                     <div style={{ height: 1, backgroundColor: '#F1F5F9', margin: '4px 0' }} />
 
                     <button
@@ -1233,6 +1350,27 @@ export default function Header() {
                     >
                       <UserOutlined style={{ color: '#5D9EAF', fontSize: '0.95rem' }} />
                       <span>Hồ sơ thông tin</span>
+                    </Link>
+
+                    <Link
+                      to="/profile?tab=favorites"
+                      onClick={() => setShowUserDropdown(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: '#E11D48',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap',
+                        backgroundColor: '#FFF5F5',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <HeartFilled style={{ color: '#E11D48', fontSize: '0.95rem' }} />
+                      <span>Sản phẩm yêu thích {wishlistCount > 0 ? `(${wishlistCount})` : ''}</span>
                     </Link>
                     <div style={{ height: 1, backgroundColor: '#F1F5F9', margin: '4px 0' }} />
                     <button
@@ -1571,6 +1709,35 @@ export default function Header() {
                   >
                     <GiftOutlined /> Đặt cắm hoa thiết kế riêng
                   </button>
+
+                  <Link
+                    to={isWishlistLoggedIn ? "/favorites" : "#"}
+                    onClick={(e) => {
+                      setIsMobileMenuOpen(false);
+                      if (!isWishlistLoggedIn) {
+                        e.preventDefault();
+                        setShowIosAlert(true);
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: 'var(--radius-full)',
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      backgroundColor: wishlistCount > 0 ? '#FFF1F2' : '#F8FAFC',
+                      color: wishlistCount > 0 ? '#E11D48' : '#334155',
+                      border: wishlistCount > 0 ? '1px solid #FECDD3' : '1px solid #E2E8F0',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <HeartFilled style={{ color: '#E11D48' }} />
+                    <span>Bộ sưu tập hoa yêu thích {wishlistCount > 0 ? `(${wishlistCount})` : ''}</span>
+                  </Link>
 
                   <div style={{ 
                     fontSize: '0.65rem', 

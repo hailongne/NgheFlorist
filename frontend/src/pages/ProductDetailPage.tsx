@@ -25,6 +25,7 @@ import ImageWithFallback, { getFallbackForId } from '../components/ImageWithFall
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import ProductCard from '../components/ProductCard';
 import { RealSocialIcon } from '../components/RealSocialIcons';
+import { useWishlist } from '../context/WishlistContext';
 
 interface ProductImage {
   id: number;
@@ -80,7 +81,8 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isWishlisted: checkWishlisted, toggleWishlist: triggerToggleWishlist } = useWishlist();
+  const isWishlisted = product ? checkWishlisted(product.id) : false;
 
   // Dynamic Contact Widgets from Admin
   const [contactWidgets, setContactWidgets] = useState<ContactWidget[]>([]);
@@ -130,15 +132,6 @@ export default function ProductDetailPage() {
         } else {
           setSelectedImage(getFallbackForId(data.id));
         }
-
-        // Check wishlist
-        try {
-          const saved = localStorage.getItem('nghe_wishlist');
-          if (saved) {
-            const list = JSON.parse(saved);
-            setIsWishlisted(list.includes(data.id));
-          }
-        } catch {}
       })
       .catch(err => {
         setError(err.message || 'Lỗi tải thông tin mẫu hoa');
@@ -177,20 +170,7 @@ export default function ProductDetailPage() {
 
   const toggleWishlist = () => {
     if (!product) return;
-    setIsWishlisted(prev => {
-      const next = !prev;
-      try {
-        const saved = localStorage.getItem('nghe_wishlist');
-        let list: number[] = saved ? JSON.parse(saved) : [];
-        if (next) {
-          list.push(product.id);
-        } else {
-          list = list.filter(item => item !== product.id);
-        }
-        localStorage.setItem('nghe_wishlist', JSON.stringify(list));
-      } catch {}
-      return next;
-    });
+    triggerToggleWishlist(product.id);
   };
 
   const formatVND = (price: number) => {

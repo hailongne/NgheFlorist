@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LockOutlined, UserOutlined, ArrowRightOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 export default function CustomerLoginPage() {
@@ -9,6 +9,7 @@ export default function CustomerLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // If already logged in as Admin, redirect directly to /admin
   useEffect(() => {
@@ -44,12 +45,14 @@ export default function CustomerLoginPage() {
       localStorage.setItem('nghe_customer_token', data.token);
       localStorage.setItem('nghe_customer_user', JSON.stringify(data.user));
 
+      const redirectParam = new URLSearchParams(location.search).get('redirect');
+
       if (data.user?.role_name === 'admin') {
         localStorage.setItem('nghe_admin_token', data.token);
         localStorage.setItem('nghe_admin_user', JSON.stringify(data.user));
-        navigate('/admin');
+        navigate(redirectParam || '/admin');
       } else {
-        navigate('/');
+        navigate(redirectParam || '/');
       }
     } catch (err: any) {
       setError(err.message || 'Lỗi đăng nhập');

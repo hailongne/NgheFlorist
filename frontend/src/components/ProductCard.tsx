@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { HeartOutlined, HeartFilled, MessageOutlined } from '@ant-design/icons';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
 import { useCustomerRequest } from '../context/RequestContext';
+import { useWishlist } from '../context/WishlistContext';
 
 export interface ProductCardProps {
   id: number;
@@ -26,34 +27,13 @@ export default function ProductCard({
   tags = []
 }: ProductCardProps) {
   const { openRequestModal } = useCustomerRequest();
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('nghe_wishlist');
-      if (saved) {
-        const list = JSON.parse(saved);
-        return list.includes(id);
-      }
-    } catch {}
-    return false;
-  });
+  const { isWishlisted: checkWishlisted, toggleWishlist } = useWishlist();
+  const isWishlisted = checkWishlisted(id);
 
-  const toggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted((prev: boolean) => {
-      const next = !prev;
-      try {
-        const saved = localStorage.getItem('nghe_wishlist');
-        let list: number[] = saved ? JSON.parse(saved) : [];
-        if (next) {
-          list.push(id);
-        } else {
-          list = list.filter(item => item !== id);
-        }
-        localStorage.setItem('nghe_wishlist', JSON.stringify(list));
-      } catch {}
-      return next;
-    });
+    toggleWishlist(id);
   };
 
   const handleSelectSample = (e: React.MouseEvent) => {
@@ -93,7 +73,7 @@ export default function ProductCard({
         {/* Wishlist Button */}
         <button
           className={`card-wishlist-btn ${isWishlisted ? 'active' : ''}`}
-          onClick={toggleWishlist}
+          onClick={handleToggleWishlist}
           aria-label={isWishlisted ? 'Bỏ lưu' : 'Lưu mẫu'}
           title="Lưu mẫu hoa"
         >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   UserOutlined, 
   LockOutlined, 
@@ -14,8 +14,12 @@ import {
   DollarCircleOutlined,
   FileTextOutlined,
   HeartOutlined,
-  GiftOutlined
+  HeartFilled,
+  GiftOutlined,
+  ArrowRightOutlined
 } from '@ant-design/icons';
+import ProductCard from '../components/ProductCard';
+import { useWishlist } from '../context/WishlistContext';
 
 interface DeliveryInfo {
   ordering_name?: string;
@@ -56,6 +60,11 @@ interface OrderRequest {
 
 export default function CustomerProfilePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { wishlist } = useWishlist();
+  const [favoriteProducts, setFavoriteProducts] = useState<any[]>([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('nghe_customer_token'));
   const [user, setUser] = useState<CustomerUser | null>(() => {
     try {
@@ -66,7 +75,45 @@ export default function CustomerProfilePage() {
     }
   });
 
-  const [activeTab, setActiveTab] = useState<'delivery' | 'security' | 'orders'>('delivery');
+  const [activeTab, setActiveTab] = useState<'delivery' | 'security' | 'orders' | 'favorites'>('delivery');
+
+  // Handle URL query tab parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'favorites' || tabParam === 'wishlist') {
+      setActiveTab('favorites');
+    } else if (tabParam === 'orders') {
+      setActiveTab('orders');
+    } else if (tabParam === 'security') {
+      setActiveTab('security');
+    } else if (tabParam === 'delivery') {
+      setActiveTab('delivery');
+    }
+  }, [location.search]);
+
+  // Fetch favorite products when tab is active
+  useEffect(() => {
+    if (activeTab === 'favorites' && wishlist.length > 0) {
+      setLoadingFavorites(true);
+      fetch(`/api/products?ids=${wishlist.join(',')}&limit=60`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.products && Array.isArray(data.products)) {
+            setFavoriteProducts(data.products);
+          } else {
+            setFavoriteProducts([]);
+          }
+        })
+        .catch(err => {
+          console.warn('Fetch favorites error:', err);
+          setFavoriteProducts([]);
+        })
+        .finally(() => setLoadingFavorites(false));
+    } else if (wishlist.length === 0) {
+      setFavoriteProducts([]);
+    }
+  }, [activeTab, wishlist]);
   const [loading, setLoading] = useState(true);
   const [savingDelivery, setSavingDelivery] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -496,6 +543,27 @@ export default function CustomerProfilePage() {
             >
               <HistoryOutlined style={{ fontSize: '18px' }} />
               <span>Lịch Sử Yêu Cầu Hoa</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('favorites')}
+              style={{
+                padding: '16px 24px',
+                fontSize: '0.95rem',
+                fontWeight: activeTab === 'favorites' ? 700 : 500,
+                color: activeTab === 'favorites' ? '#E11D48' : '#64748B',
+                border: 'none',
+                borderBottom: activeTab === 'favorites' ? '3px solid #E11D48' : '3px solid transparent',
+                backgroundColor: 'transparent',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <HeartFilled style={{ fontSize: '18px', color: activeTab === 'favorites' ? '#E11D48' : '#94A3B8' }} />
+              <span>Sản Phẩm Yêu Thích {wishlist.length > 0 ? `(${wishlist.length})` : ''}</span>
             </button>
           </div>
 
@@ -1086,6 +1154,159 @@ export default function CustomerProfilePage() {
                           </span>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ========================================== */}
+            {/* TAB 4: SẢN PHẨM YÊU THÍCH (ALBUM HOA ĐÃ THẢ TIM) */}
+            {/* ========================================== */}
+            {activeTab === 'favorites' && (
+              <div>
+                {/* Album Header Banner */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 16,
+                  padding: '20px 24px',
+                  borderRadius: 14,
+                  background: 'linear-gradient(135deg, #FFF1F2 0%, #FFF5F7 100%)',
+                  border: '1px solid #FFE4E6',
+                  marginBottom: 26
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: '50%',
+                      backgroundColor: '#FFE4E6',
+                      color: '#E11D48',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      boxShadow: '0 2px 8px rgba(225, 29, 72, 0.15)'
+                    }}>
+                      <HeartFilled />
+                    </div>
+                    <div>
+                      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1E293B', margin: 0 }}>
+                        Album Bộ Sưu Tập Hoa Yêu Thích
+                      </h2>
+                      <p style={{ margin: '3px 0 0', color: '#64748B', fontSize: '0.85rem' }}>
+                        Các mẫu hoa bạn đã ấn thả tim sẽ được lưu tại đây để dễ dàng tham khảo và gửi yêu cầu cắm hoa.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{
+                      backgroundColor: '#FFFFFF',
+                      padding: '6px 14px',
+                      borderRadius: 20,
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      color: '#E11D48',
+                      border: '1px solid #FECDD3',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                    }}>
+                      ✦ Đã lưu {wishlist.length} mẫu hoa
+                    </span>
+                    <Link
+                      to="/flowers"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '8px 16px',
+                        borderRadius: 20,
+                        backgroundColor: '#26383D',
+                        color: '#FFFFFF',
+                        textDecoration: 'none',
+                        fontSize: '0.84rem',
+                        fontWeight: 600,
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <span>Khám phá thêm</span>
+                      <ArrowRightOutlined style={{ fontSize: 12 }} />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Content: Loading, Empty State, or Product Cards Grid */}
+                {loadingFavorites ? (
+                  <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748B' }}>
+                    <div style={{ fontSize: 36, marginBottom: 12 }}>🌸</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Đang tải album các mẫu hoa yêu thích...</div>
+                  </div>
+                ) : wishlist.length === 0 || favoriteProducts.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '64px 20px',
+                    backgroundColor: '#FAFCFD',
+                    borderRadius: 14,
+                    border: '1px dashed #CBD5E1'
+                  }}>
+                    <div style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      backgroundColor: '#FFF1F2',
+                      color: '#FDA4AF',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 28,
+                      marginBottom: 16
+                    }}>
+                      <HeartOutlined />
+                    </div>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1E293B', marginBottom: 8 }}>
+                      Album yêu thích của bạn chưa có mẫu hoa nào
+                    </h3>
+                    <p style={{ color: '#64748B', fontSize: '0.88rem', maxWidth: 440, margin: '0 auto 24px', lineHeight: 1.5 }}>
+                      Khi ngắm các bộ sưu tập hoa trên website, bạn chỉ cần nhấn vào biểu tượng <strong>thả tim</strong> trên từng mẫu hoa để lưu vào album này nhé!
+                    </p>
+                    <Link
+                      to="/flowers"
+                      className="btn btn-primary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '10px 24px',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: '0.9rem',
+                        fontWeight: 700,
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <span>Khám phá bộ sưu tập hoa ngay</span>
+                      <ArrowRightOutlined />
+                    </Link>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                    gap: 20
+                  }}>
+                    {favoriteProducts.map(prod => (
+                      <ProductCard
+                        key={prod.id}
+                        id={prod.id}
+                        name={prod.name}
+                        slug={prod.slug}
+                        price={Number(prod.price)}
+                        imageUrl={prod.image_url}
+                        categoryName={prod.category_name}
+                        tags={prod.tags || []}
+                      />
                     ))}
                   </div>
                 )}

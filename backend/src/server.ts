@@ -262,6 +262,7 @@ app.get('/api/products', async (req: Request, res: Response) => {
       maxPrice,
       inStockOnly,
       sort,
+      ids,
       page = '1',
       limit = '16'
     } = req.query;
@@ -294,6 +295,15 @@ app.get('/api/products', async (req: Request, res: Response) => {
     if (maxPrice && !isNaN(Number(maxPrice))) {
       whereClauses.push('p.price <= ?');
       queryParams.push(Number(maxPrice));
+    }
+
+    // Filter by specific IDs (e.g. for wishlist album)
+    if (ids && typeof ids === 'string' && ids.trim() !== '') {
+      const idArr = ids.split(',').map(x => parseInt(x.trim(), 10)).filter(x => !isNaN(x) && x > 0);
+      if (idArr.length > 0) {
+        whereClauses.push(`p.id IN (${idArr.map(() => '?').join(',')})`);
+        queryParams.push(...idArr);
+      }
     }
 
 
