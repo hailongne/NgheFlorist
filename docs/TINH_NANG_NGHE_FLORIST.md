@@ -101,9 +101,13 @@
   * Ảnh chính tỉ lệ 3:4 chuẩn Studio cao cấp, hiển thị sắc nét kèm nút lưu vào danh sách yêu thích (Wishlist).
   * Hàng thumbnails thu nhỏ bên dưới chuyển ảnh tức thì khi click.
   * Trên Mobile: Lookbook cuộn ngang mượt mà.
-* **Thay thế toàn bộ nút CTA cũ bằng Nút Tư Vấn Nhanh (Contact Widgets)**:
-  * Tự động đồng bộ các kênh tư vấn từ trang quản trị `Quản Lý Nút Tư Vấn Nhanh` (Zalo 1, Zalo 2, FanPage Messenger, Hotline Gọi Nhanh).
-  * Thiết kế thẻ nút nổi bật, trực quan, có icon nhận diện thương hiệu và mô tả dịch vụ.
+* **Hệ Thống Nút Tư Vấn Nhanh Tone Màu Chủ Đạo & Ma Trận 2 Cột Tiết Kiệm Diện Tích**:
+  * Tự động đồng bộ các kênh tư vấn từ trang quản trị `Quản Lý Nút Tư Vấn Nhanh` (Zalo 1, Zalo 2, Hotline 1, Hotline 2, FanPage Facebook).
+  * **Bố cục Ma trận 2 cột thông minh (`.consultation-buttons-grid`)**: Sắp xếp gọn gàng 2 cột (Zalo 1 bên cạnh Zalo 2; Hotline 1 bên cạnh Hotline 2; FanPage Facebook trải rộng 2 cột ở dưới), tiết kiệm hơn 50% diện tích chiều dọc so với xếp dọc đơn thuần, giúp trang tinh tế, gọn mắt và khách hàng thao tác cực kỳ thuận tiện.
+  * **Icon Real & Tone Màu Chủ Đạo Đồng Bộ**:
+    * **Zalo Icon**: Sử dụng chuẩn vector SVG chính hãng Zalo sắc nét với nhận diện thương hiệu chuẩn mực.
+    * **Facebook Icon**: Sử dụng chuẩn vector SVG chính hãng Facebook sắc nét.
+    * **Hotline Icon & Viền nút**: Được thiết kế đồng bộ theo **tone màu xanh chủ đạo của website** (`var(--color-primary-dark)` / `#5D9EAF`, nền mềm `#F7FBFC`, viền `#E4EEF1`), loại bỏ hoàn toàn các màu xanh lá hoặc màu cam lạc tông để tôn vinh sự thanh lịch, sang trọng của showroom hoa.
 * **Popup Tư Vấn & Đặt Hàng 50/50 Thông Minh**:
   * **Cột Trái (50%) — Form Đặt Hoa Chuẩn Thực Tế**:
     * Tự động lấy dữ liệu từ tài khoản khách hàng nếu đã đăng nhập (Họ tên, SĐT, Địa chỉ).
@@ -113,9 +117,9 @@
     * Xem trước ảnh mẫu hoa sắc nét, tên và giá tham khảo.
     * Tự động sao chép ảnh mẫu hoa vào Clipboard.
     * 3 nút tiện ích: *Sao chép ảnh*, *Tải ảnh về máy*, *Sao chép link sản phẩm*.
-    * Nút mở trực tiếp kênh tư vấn ngay không cần điền form.
+    * Nút mở trực tiếp kênh tư vấn ngay không cần điền form (icon real, màu tone chủ đạo).
 * **Gợi Ý Mẫu Hoa Tương Tự Phong Cách Shopee**:
-  * Đặt ở dưới cùng chi tiết sản phẩm với tiêu đề cam nổi bật *"CÓ THỂ BẠN CŨNG THÍCH"*.
+  * Đặt ở dưới cùng chi tiết sản phẩm với thanh chỉ thị và chữ đồng bộ **tone màu xanh chủ đạo** *"CÓ THỂ BẠN CŨNG THÍCH"*.
   * Lưới sản phẩm responsive: **2 cột chuẩn trên Mobile**, **4 cột trên Desktop**.
   * Hiển thị 8–12 mẫu hoa cùng danh mục hoặc cùng phong cách được yêu thích nhất kèm nút xem thêm.
 
