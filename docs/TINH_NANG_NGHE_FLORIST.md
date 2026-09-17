@@ -1,19 +1,20 @@
 # TÀI LIỆU TOÀN DIỆN HỆ THỐNG NGHỆ FLORIST
 *(Premium Flower Digital Showroom, Lead Conversion & Production Deployment Manual)*
 
-> **Phiên bản**: 2.0 (Production Live)  
-> **Cập nhật lần cuối**: 11/09/2026  
+> **Phiên bản**: 2.5 (Production Live & Brand Upgraded)  
+> **Cập nhật lần cuối**: 17/09/2026  
 > **Kho lưu trữ GitHub**: [https://github.com/hailongne/NgheFlorist.git](https://github.com/hailongne/NgheFlorist.git) (Nhánh `main`)  
-> **Địa chỉ IP Production**: [http://180.93.136.241](http://180.93.136.241)  
-> **Tên miền chính thức**: `ngheflorist.com` (Đang cấu hình bản ghi DNS)  
-> **Triết lý cốt lõi**: *"Show first, sell later."* — Tối giản, thẩm mỹ cao, tập trung trải nghiệm hình ảnh hoa tươi nghệ thuật và chuyển đổi khách hàng mượt mà qua Zalo & Hotline.
+> **Tên miền chính thức**: [https://ngheflorist.com](https://ngheflorist.com)  
+> **Địa chỉ IP Production**: `180.93.136.241`  
+> **Slogan / Tagline**: *"Nghệ Florist — Tiệm hoa & quả nhập khẩu"*  
+> **Triết lý cốt lõi**: *"Show first, sell later."* — Tối giản, thẩm mỹ cao, trải nghiệm lookbook hoa tươi nghệ thuật chuẩn mực và chuyển đổi khách hàng mượt mà qua Zalo, Hotline & Widget tư vấn đa kênh.
 
 ---
 
 ## MỤC LỤC
 1. [Tổng Quan Hệ Thống & Triết Lý Sản Phẩm](#1-tổng-quan-hệ-thống--triết-lý-sản-phẩm)
 2. [Chi Tiết Tính Năng Cửa Hàng (Storefront)](#2-chi-tiết-tính-năng-cửa-hàng-storefront)
-3. [Hệ Thống Chuyển Đổi & Tư Vấn Zalo 1-Chạm](#3-hệ-thống-chuyển-đổi--tư-vấn-zalo-1-chạm)
+3. [Hệ Thống Chuyển Đổi & Tư Vấn Đa Kênh (Lead Conversion System)](#3-hệ-thống-chuyển-đổi--tư-vấn-đa-kênh-lead-conversion-system)
 4. [Chi Tiết Tính Năng Quản Trị (Admin CMS)](#4-chi-tiết-tính-năng-quản-trị-admin-cms)
 5. [Kiến Trúc & Chế Độ Bảo Mật Toàn Diện (Security Architecture)](#5-kiến-trúc--chế-độ-bảo-mật-toàn-diện-security-architecture)
 6. [Quy Chuẩn UI/UX Đa Nền Tảng (Mobile, Tablet, Desktop)](#6-quy-chuẩn-uiux-đa-nền-tảng-mobile-tablet-desktop)
@@ -24,19 +25,22 @@
 
 ## 1. TỔNG QUAN HỆ THỐNG & TRIẾT LÝ SẢN PHẨM
 
-### 1.1. Bản Chất Định Vị
-* **Nghệ Florist** là **Digital Showroom hoa tươi nghệ thuật & trái cây nhập khẩu**, không phải sàn thương mại điện tử kiểu Shopee/Lazada.
-* **Loại bỏ sự phức tạp**: Không có giỏ hàng cồng kềnh, không cổng thanh toán phức tạp, không biến thể rối rắm hay đánh giá sao ảo.
+### 1.1. Bản Chất Định Vị & Nhận Diện Thương Hiệu
+* **Nghệ Florist** là **Digital Showroom hoa tươi nghệ thuật & trái cây nhập khẩu**, tôn vinh từng tác phẩm cắm hoa thiết kế tinh tế, không phải sàn thương mại điện tử đại trà.
+* **Bộ nhận diện chuẩn hóa (Brand Identity)**:
+  * **Logo thương hiệu**: Sử dụng sắc xanh dương thương hiệu độc quyền `#1FAAE1` (`logoNgheFlorist-brand-blue.png?v=2`), loại bỏ hoàn toàn các biến thể màu đen/màu cũ trên toàn bộ Header, Footer và trang quản trị.
+  * **Tagline chính thức**: *"Nghệ Florist - Tiệm hoa & quả nhập khẩu"*.
+  * **Phong cách thẩm mỹ**: Tone màu Pastel kết hợp xanh Teal & Deep Slate sang trọng, hiện đại, mang hơi thở lookbook hoa tạp chí cao cấp.
 * **Tập trung cốt lõi**:
-  * Trưng bày các tác phẩm hoa tươi nghệ thuật với hình ảnh chất lượng cao.
-  * Phục vụ trải nghiệm "lướt tạp chí hoa" mượt mà trên Mobile & Tablet.
-  * Chuyển đổi khách hàng thành đơn hàng thông qua kết nối trực tiếp với Florist qua Zalo Hotline 1 & 2.
+  * Trưng bày các bộ sưu tập hoa tươi nghệ thuật với hình ảnh chất lượng cao, tỉ lệ cân đối.
+  * Trải nghiệm mượt mà, tối ưu sâu cho thiết bị di động (Mobile & Tablet).
+  * Chuyển đổi khách hàng thành đơn hàng nhanh chóng qua widget nút tư vấn nổi và hotline trực tiếp.
 
 ### 1.2. Kiến Trúc Kỹ Thuật Tổng Thể (Monorepo)
 ```
                                  [ Khách Hàng / Quản Trị ]
                                              │
-                                             ▼ (Port 80 / 443)
+                                             ▼ (Port 80 / 443 HTTPS - SSL)
                                 ┌─────────────────────────┐
                                 │     NGINX Web Server    │
                                 └────────────┬────────────┘
@@ -49,7 +53,7 @@
                                                           ┌───────────────────────┐
                                                           │     MySQL Database    │
                                                           │      Port: 3306       │
-                                                          │ (Database: ngheflorist)│
+                                                          │(Database: ngheflorist)│
                                                           └───────────────────────┘
 ```
 
@@ -58,131 +62,160 @@
 ## 2. CHI TIẾT TÍNH NĂNG CỬA HÀNG (STOREFRONT)
 
 ### 2.1. Trang Chủ (Home Page — `/`)
-* **Thanh Header Sticky mờ**: Logo Nghệ Florist sắc nét, menu điều hướng danh mục, nút hotline gọi nhanh và icon tìm kiếm.
-* **Hero Banner Lookbook**: Banner toàn cảnh sang trọng với thông điệp *"Trao gửi yêu thương bằng những đóa hoa thật đẹp"*, kèm nút bấm kêu gọi hành động (CTA) xem bộ sưu tập hoặc cắm hoa theo yêu cầu.
-* **Bộ Sưu Tập Nổi Bật**: Hiển thị danh mục lớn (Bó hoa tươi, Giỏ hoa nghệ thuật, Kệ hoa sự kiện, Lan hồ điệp tuyển chọn).
-* **Mẫu Hoa Tiêu Biểu**: Lưới sản phẩm hoa bán chạy nhất, hình ảnh hiển thị tỉ lệ 4:5 rõ nét, giá tham khảo rõ ràng.
+* **Thanh Header Sticky mờ**: Logo Nghệ Florist xanh thương hiệu, menu điều hướng danh mục hoa, nút tư vấn gọi nhanh, tìm kiếm sản phẩm thông minh và tài khoản khách hàng.
+* **Hero Banner Lookbook**: Banner toàn cảnh sang trọng với thông điệp *"Trao gửi yêu thương bằng những đóa hoa thật đẹp"*, kèm nút kêu gọi hành động (CTA) xem bộ sưu tập hoặc cắm hoa theo yêu cầu.
+* **Bộ Sưu Tập Nổi Bật**: Hiển thị các nhóm sản phẩm chủ lực (Bó hoa tươi, Giỏ hoa nghệ thuật, Kệ hoa khai trương, Lan hồ điệp tuyển chọn).
+* **Mẫu Hoa Tiêu Biểu**: Lưới sản phẩm hoa tuyển chọn, tỉ lệ chuẩn ảnh hoa 1:1 và 4:5 rõ nét, giá tham khảo minh bạch.
+* **Banners Quảng Cáo Chiến Dịch (Campaign Banners)**:
+  * Hiển thị tỉ lệ chuẩn ngang 16:9 sắc nét (trên mobile 16:11 chống tràn viền).
+  * Hiệu ứng chuyển động mượt mà, hỗ trợ gắn link chiến dịch trực tiếp đến từng nhóm hoa sự kiện.
 * **Khối 5 Cam Kết Dịch Vụ Vàng**:
   1. *Giao Hỏa Tốc 2H* nội thành nhanh chóng.
   2. *Cắm Hoa Theo Yêu Cầu* đúng tone màu, phong cách, ngân sách.
   3. *Gửi Ảnh Duyệt Trước*: Chụp ảnh thành phẩm tại xưởng gửi khách duyệt 100% trước khi giao.
-  4. *Uy Tín & Chất Lượng*: Cam kết đổi mới nếu hoa không đạt chất lượng cam kết.
-  5. *Hoa Nhập Khẩu Tuyển Chọn*: Nguồn hoa tươi mới mỗi ngày.
-* **Khối Đặt Hoa Theo Mẫu Riêng (Custom Floral Design)**: Lời mời khách hàng gửi ảnh mẫu trên Pinterest/Instagram để florist thực hiện.
+  4. *Uy Tín & Chất Lượng*: Cam kết đổi mới nếu hoa không đạt độ tươi và chuẩn mẫu.
+  5. *Hoa Nhập Khẩu Tuyển Chọn*: Nguồn hoa tươi mới mỗi ngày từ Đà Lạt, Hà Lan, Ecuador.
+* **Khối Đặt Hoa Theo Mẫu Riêng (Custom Floral Design)**: Hỗ trợ khách hàng gửi ảnh mẫu trên Pinterest/Instagram để florist thực hiện theo yêu cầu.
 
 ### 2.2. Trang Bộ Sưu Tập Sản Phẩm (`/flowers` & `/category/:slug`)
-* **Lọc Theo Danh Mục 2 Tầng**: Chọn danh mục cha và các danh mục con trực quan.
-* **Bộ Lọc Ngân Sách Nhanh**: Thẻ chọn nhanh dưới dạng pill tags: *Tất cả • Dưới 500k • 500k – 1tr • 1tr – 2tr • Trên 2tr*.
-* **Sắp Xếp Linh Hoạt**: Theo hoa mới nhất, bán chạy nhất, giá từ thấp đến cao, giá từ cao đến thấp.
+* **Bộ Lọc Thông Minh Đa Tầng**:
+  * **Trên Mobile**: Tối ưu nút bấm `"Lọc"` nhỏ gọn, Drawer trượt mượt mà, phân loại 1 hàng 2 cột cân đối, không bị xô lệch layout.
+  * **Thẻ Lọc Ngân Sách Nhanh**: Thanh vuốt ngang các mức ngân sách: *Tất cả • Dưới 500k • 500k – 1tr • 1tr – 2tr • Trên 2tr*.
+  * **Sắp Xếp Linh Hoạt**: Theo mới nhất, bán chạy nhất, giá từ thấp đến cao, giá từ cao đến thấp.
 * **Thẻ Sản Phẩm Tinh Tế (Product Card)**:
-  * Ảnh mẫu hoa chiếm 80% diện tích thẻ.
-  * Tên sản phẩm sang trọng (Font Playfair Display).
-  * Giá tham khảo dạng số formatted rõ ràng theo chuẩn tiền tệ VND.
-  * Nút `[ Chọn mẫu ]` hoặc nút xem nhanh chi tiết.
+  * Ảnh mẫu hoa rõ nét với lớp xử lý dự phòng `ImageWithFallback` thông minh (nếu thiếu ảnh sẽ hiện logo bo tròn có đệm, không bị kéo vỡ).
+  * Nhãn phân loại và giá formatted theo chuẩn tiền tệ VND.
+  * Nút `[ Chọn mẫu ]` mở ngay modal tư vấn chuyên nghiệp.
 
-### 2.3. Trang Chi Tiết Hoa (`/product/:slug`)
-* **Lookbook Gallery Ảnh**: Khung ảnh phóng lớn cho phép xem chi tiết cánh hoa, màu sắc và góc chụp cắm hoa.
-* **Thông Tin Mẫu & Tư Vấn**:
-  * Tên mẫu hoa nghệ thuật và mã sản phẩm.
-  * Mức giá tham khảo (kèm lưu ý giá hoa có thể dao động nhẹ theo mùa).
-  * Mô tả cảm xúc và thành phần hoa chính.
-  * Khối cam kết tặng kèm thiệp thiết kế riêng & túi hoa cao cấp.
-* **Nút Sticky CTA dưới chân màn hình**: Luôn hiển thị nút `[ 💬 Tư vấn qua Zalo ]` và nút `[ Đặt làm theo mẫu này ]`.
+### 2.3. Modal Yêu Cầu Tư Vấn & Chọn Mẫu Hoa (`CustomerRequestModal.tsx`)
+* **Thiết kế tối ưu sâu cho Mobile**:
+  * Tabs chọn dạng tư vấn: *Chọn mẫu có sẵn* hoặc *Thiết kế hoa theo yêu cầu*.
+  * Khung xem trước mẫu hoa nhỏ gọn (ảnh 44x44px), hiển thị rõ ràng giá tham khảo.
+  * Nhãn trường (Labels) và ô nhập liệu (Inputs) có kích thước chuẩn `0.82rem – 0.85rem`, chiều cao 36–38px, khoảng cách giữa các trường được tinh giản giúp form thanh thoát, thoáng đãng, không bị dài dòng.
+  * Thẻ tag chọn nhanh kiểu dáng hoa (Bó hoa, Giỏ hoa, Kệ hoa, Hoa cưới, Lan hồ điệp...) và ngân sách tham khảo hiển thị vừa vặn, không tràn lề.
+  * Hỗ trợ tải tối đa 3 ảnh mẫu hoa yêu thích kèm ô ghi chú cho Florist.
+  * Nút bấm gửi yêu cầu nổi bật, tự động lưu thông tin vào hệ thống quản trị và kết nối Zalo.
 
-### 2.4. Trang Cắm Hoa Theo Mẫu Riêng (`/custom-order`)
-* Phù hợp cho khách hàng muốn cắm theo ngân sách, sở thích hoặc gửi mẫu hoa có sẵn trên mạng:
-  * **Bước 1**: Chọn loại hoa (Bó hoa, Giỏ hoa, Hộp hoa, Kệ hoa, Bình hoa cao cấp).
-  * **Bước 2**: Nhập ngân sách mong muốn và tone màu yêu thích (Pastel ngọt ngào, Đỏ lãng mạn, Trắng thanh khiết, Vàng sang trọng...).
-  * **Bước 3**: Tải ảnh mẫu hoa có sẵn (Chụp từ điện thoại hoặc tải ảnh từ máy tính).
-  * **Bước 4**: Nhập thông tin nhận hoa, thời gian giao hàng, lời chúc in trên thiệp.
-* **Gửi Thành Công**: Hệ thống tự động cấp mã định danh duy nhất (VD: `NF20260911001`), hiển thị bản tóm tắt và kích hoạt nút chuyển thẳng sang Zalo.
+### 2.4. Chân Trang Chuẩn Mực & Đồng Bộ (Footer)
+* **Tagline thương hiệu**: *"Nghệ Florist - Tiệm hoa & quả nhập khẩu"*.
+* **Thông Tin Liên Hệ Chuẩn Hóa**:
+  * 📍 **Địa chỉ**: `22 ngõ 115 Phố Núi Trúc, Ba Đình, Hà Nội` (đồng bộ tự động từ cài đặt CMS).
+  * ✉️ **Email**: `ngheflorist.com@gmail.com` (gắn link `mailto:` tiện lợi).
+  * 📞 **Hotline**: `0862 926 866` (gắn link `tel:` bấm gọi tức thì, đồng bộ 100% với số điện thoại đã lưu trong Cài Đặt Website).
+* **Bố Cục Responsive Đa Màn Hình**:
+  * **Desktop**: 4 cột cân xứng (`2.2fr 1fr 1fr 1.5fr`) gồm Brand + Liên hệ, Khám phá, Danh mục hoa, Cam kết dịch vụ.
+  * **Tablet (769px – 1024px)**: Tự động chuyển đổi sang lưới 2 cột (`1.35fr 1fr`) rộng rãi, dễ đọc.
+  * **Mobile (< 768px)**: Hộp thông tin liên hệ bo góc nhẹ (`.footer-mobile-contact`) hiển thị địa chỉ, email và hotline cân bằng, trang nhã.
 
 ### 2.5. Các Trang Thương Hiệu & Chính Sách
-* **Về Chúng Tôi (`/about`)**: Giới thiệu triết lý cắm hoa, tay nghề Florist và nguồn gốc hoa nhập khẩu từ Đà Lạt, Hà Lan, Ecuador.
-* **Chính Sách & Cam Kết (`/policy`)**: Quy định giao hàng hỏa tốc, chính sách chụp ảnh duyệt trước, xuất hóa đơn VAT cho doanh nghiệp và chính sách hoàn tiền 100%.
+* **Về Chúng Tôi (`/about`)**: Giới thiệu không gian tiệm hoa, triết lý cắm hoa và nguồn hoa nhập khẩu.
+* **Chính Sách & Cam Kết (`/policy`)**: Quy định giao hàng hỏa tốc, chụp ảnh thành phẩm duyệt trước và cam kết bảo hành.
 
 ---
 
-## 3. HỆ THỐNG CHUYỂN ĐỔI & TƯ VẤN ZALO 1-CHẠM
+## 3. HỆ THỐNG CHUYỂN ĐỔI & TƯ VẤN ĐA KÊNH (LEAD CONVERSION SYSTEM)
 
-Nghệ Florist loại bỏ toàn bộ rào cản đặt hàng bằng giải pháp **Zalo Realtime Synchronization**:
+Hệ thống tư vấn của Nghệ Florist được thiết kế tập trung, tinh giản và chuyển đổi trực tiếp:
 
 ```
-Khách Hàng Thích Mẫu Hoa 
-          │
-          ▼
-Bấm nút "Tư Vấn Zalo 1" hoặc "Zalo 2"
-          │
-          ├──> Hệ thống tự động định dạng tin nhắn mẫu:
-          │    - Tên mẫu hoa + Mã yêu cầu (nếu có)
-          │    - Link xem mẫu trực tiếp
-          │    - Mức ngân sách mong muốn
-          │
-          ▼
-Mở ứng dụng Zalo trên điện thoại/máy tính
-          │
-          ▼
-Florist tiếp nhận & chốt đơn lập tức trong 3 phút!
+Khách Hàng Lướt Mẫu / Cần Tư Vấn
+               │
+               ▼
+Bấm nút Widget Tư Vấn hoặc Nút Chọn Mẫu
+               │
+               ├──> 1. Widget Đa Kênh Nổi: Lựa chọn Zalo 1, Zalo 2, Gọi Hotline, Messenger
+               └──> 2. Form Tư Vấn: Điền thông tin + gửi ảnh mẫu ➜ Tạo mã Lead tự động
+               │
+               ▼
+Mở ứng dụng Zalo / Cuộc gọi trực tiếp với Florist
+               │
+               ▼
+Florist tiếp nhận & chốt đơn nhanh chóng trong 3 phút!
 ```
 
-### Các điểm tương tác Zalo trên hệ thống:
-1. **Thanh Header**: Nút hotline số 1 & 2 trực quan, chạm là gọi hoặc chuyển Zalo.
-2. **Widget Tròn Góc Màn Hình (Quick Contact Widget)**: Nổi bật ở góc phải màn hình, có sẵn 2 nút Zalo ứng với 2 số hotline trực tiếp.
-3. **Modal Chi Tiết Mẫu Hoa**: Nút `💬 Tư Vấn Zalo Ngay Với Mẫu Này` tự động điền sẵn tên hoa khi chat.
-4. **Trang Giới Thiệu & Chân Trang (Footer)**: Đồng bộ tự động 2 số hotline từ cài đặt Admin CMS, không bao giờ bị lệch số.
+### Các điểm tương tác chuyển đổi trên hệ thống:
+1. **Quản Lý Nút Tư Vấn Nổi (`QuickContactWidget.tsx`)**:
+   * Widget tròn góc dưới màn hình, tích hợp mở danh sách các kênh tư vấn có thể cấu hình linh hoạt từ Admin (Zalo, Hotline, Messenger, Fanpage).
+2. **Thanh Header**: Nút hotline gọi nhanh và mở trực tiếp kênh Zalo.
+3. **Modal Chọn Mẫu Nhanh**: Tự động đính kèm tên mẫu hoa, giá và link sản phẩm vào nội dung trao đổi.
+4. **Footer Website**: Hiển thị đầy đủ số hotline và email đồng bộ từ hệ thống.
 
 ---
 
 ## 4. CHI TIẾT TÍNH NĂNG QUẢN TRỊ (ADMIN CMS)
 
-Đường dẫn quản trị: `http://180.93.136.241/admin`  
-Tài khoản mặc định: `admin@ngheflorist.vn` *(Mật khẩu: `Admin@NgheFlorist2026!`)*
+* **Đường dẫn quản trị**: `https://ngheflorist.com/admin`
+* **Tài khoản quản trị duy nhất**: `admin@ngheflorist.vn`
+* **Giao diện Menu Sidebar**:
+  * Cố định độ rộng chuẩn `260px` (`min-width: 260px`, `flex: 0 0 260px`, `flex-shrink: 0`), chống hiện tượng co rúm hay rớt chữ dọc trên mọi kích thước màn hình.
+  * Nhóm menu chia rõ ràng: **Trung Tâm Lead & Tư Vấn**, **Bộ Sưu Tập Hoa**, **Quản Trị CMS & Giao Diện**, **Hệ Thống**.
 
 ### 4.1. Quản Lý Yêu Cầu Khách Hàng (Customer Leads — `/admin/requests`)
 * Hiển thị danh sách khách hàng gửi yêu cầu thiết kế riêng hoặc chọn mẫu.
-* Thiết kế dạng **Thẻ Lead thông minh (Lead Cards)** trên mobile và bảng dữ liệu chi tiết trên desktop:
-  * Mã yêu cầu (VD: `NF20260911001`).
+* Thẻ Lead thông minh:
+  * Mã yêu cầu định danh (VD: `NF20260917001`).
   * Tên khách hàng & Số điện thoại / Zalo.
-  * Mẫu hoa yêu cầu hoặc hình ảnh mẫu khách tải lên (nhấn vào phóng to xem chi tiết).
-  * Ngân sách, thời gian cần giao hoa và nội dung thiệp chúc.
-  * Thao tác nhanh: Nút **[Gọi ngay]** và **[Nhắn Zalo]** trực tiếp cho khách.
-  * Cập nhật tiến độ xử lý: *Mới ➜ Đã liên hệ ➜ Đang cắm hoa ➜ Đã giao / Hoàn thành*.
+  * Mẫu hoa yêu cầu hoặc hình ảnh mẫu khách tải lên (nhấn phóng to xem chi tiết).
+  * Ngân sách, thời gian nhận hoa, khu vực giao và nội dung thiệp chúc.
+  * Thao tác 1-chạm: Nút **[Gọi ngay]** và **[Nhắn Zalo]** trực tiếp.
+  * Cập nhật trạng thái xử lý: *Mới ➜ Đã liên hệ ➜ Đang cắm hoa ➜ Đã giao / Hoàn thành*.
 
-### 4.2. Quản Lý Sản Phẩm Mẫu Hoa (`/admin/products`)
-* **Duyệt theo Folder Explorer**: Phân cấp theo Thư mục Loại hoa ➜ Khoảng giá ➜ Danh sách mẫu hoa.
-* **Thao tác Thêm / Sửa / Xóa Sản Phẩm**:
-  * Tên hoa, đường dẫn URL (slug), mô tả ngắn, giá tham khảo.
-  * Chọn danh mục cha và danh mục con.
+### 4.2. Quản Lý Nút Tư Vấn Nổi (Contact Widgets CMS — `/admin/contact-widgets`)
+* Quản lý tập trung toàn bộ các kênh liên hệ nổi ở góc màn hình:
+  * Thêm/sửa kênh tư vấn: Zalo, Điện thoại (Hotline), Facebook Messenger, Fanpage.
+  * Tiêu đề, phụ đề, đường dẫn liên kết (`https://zalo.me/...`, `tel:...`).
+  * Sắp xếp thứ tự hiển thị bằng trường `sort_order`.
+  * Công tắc bật/tắt (kích hoạt/hủy kích hoạt) từng kênh tức thì.
+
+### 4.3. Quản Lý Sản Phẩm Mẫu Hoa (`/admin/products`)
+* Duyệt theo danh mục và bộ lọc giá.
+* Thao tác Thêm / Sửa / Xóa sản phẩm:
+  * Tên hoa, slug, mô tả cảm xúc, giá tham khảo.
+  * Gán danh mục cha / danh mục con.
   * Công tắc bật/tắt hiển thị sản phẩm ngoài website.
-  * Tải nhiều hình ảnh hoa cùng lúc, chọn ảnh đại diện chính (Featured Image).
+  * Tải ảnh sản phẩm, tự động tạo ảnh đại diện với xử lý fallback an toàn.
 
-### 4.3. Quản Lý Danh Mục (`/admin/categories`)
-* Quản lý cây danh mục 2 tầng (Ví dụ: Bó hoa ➜ Bó hoa hồng, Bó hoa baby, Bó hoa tulip).
-* Sắp xếp thứ tự hiển thị bằng trường `sort_order`.
-* Kiểm đếm số lượng sản phẩm hoa trực thuộc từng danh mục.
-* Cơ chế khóa an toàn: Cảnh báo không cho xóa nếu danh mục đang chứa sản phẩm.
+### 4.4. Quản Lý Danh Mục Hoa (`/admin/categories`)
+* Quản lý cây danh mục 2 tầng (Bó hoa tươi, Giỏ hoa tươi, Kệ hoa khai trương, Lan hồ điệp...).
+* Thiết lập thứ tự sắp xếp và đếm số lượng hoa thuộc từng danh mục.
+* Cơ chế bảo vệ: Cảnh báo an toàn không cho xóa danh mục đang có sản phẩm.
 
-### 4.4. Quản Lý Banner Trang Chủ & Trang Nội Dung (`/admin/banners`, `/admin/pages`)
-* Tùy chỉnh danh sách ảnh banner trượt trên đầu trang chủ.
-* Chỉnh sửa tiêu đề, phụ đề, link liên kết khi khách bấm vào banner.
-* Soạn thảo và cập nhật nội dung trang Giới thiệu (`/about`) và Chính sách (`/policy`).
+### 4.5. Quản Lý Banners Quảng Cáo (Homepage Banners — `/admin/banners`)
+* Quản lý các banner chiến dịch hiển thị ngoài trang chủ.
+* **Cải tiến giao diện**:
+  * Tỉ lệ khung ảnh chuẩn ngang 16:9 thanh thoát, hiện đại.
+  * Khung thông báo placeholder trực quan **"Chưa có hình ảnh banner"** kèm nút **[+ Tải ảnh lên]** nhanh chóng khi banner chưa có ảnh, loại bỏ triệt để hiện tượng phóng to cắt cụt logo.
+  * Chỉnh sửa tiêu đề, phụ đề, đường dẫn liên kết CTA và thứ tự hiển thị.
 
-### 4.5. Cấu Hình Website & Kênh Chuyển Đổi (`/admin/settings`)
-* Đồng bộ thời gian thực (Real-time):
-  * Tên thương hiệu, thông báo đầu trang (Announcement Bar).
-  * Số Hotline 1, Hotline 2, Link Zalo 1, Link Zalo 2.
-  * Địa chỉ tiệm hoa, email tiếp nhận thông tin, khung giờ mở cửa.
-  * Mẫu tin nhắn tự động khi khách gửi yêu cầu cắm hoa.
+### 4.6. Cài Đặt Website & Đồng Bộ Footer (`/admin/settings`)
+* **Thiết kế giao diện 2 cột cân bằng (Balanced Grid)**:
+  * Đã loại bỏ phần cấu hình kênh chuyển đổi cũ (do đã chuyển sang module Quản Lý Nút Tư Vấn độc lập).
+  * Đã loại bỏ trường thanh thông báo đầu trang không sử dụng để giao diện tinh giản tuyệt đối.
+* **Cột trái — Thông Tin Tiệm Hoa & Liên Hệ**:
+  * Tên thương hiệu tiệm hoa (hiển thị trên tiêu đề, footer và hóa đơn).
+  * **Hotline tư vấn đặt hoa \***: Đồng bộ trực tiếp 100% với số điện thoại hiển thị ở Chân trang (Footer) trên toàn bộ Desktop, Tablet và Mobile.
+  * **Email hỗ trợ khách hàng**: Đồng bộ trực tiếp với email ở Chân trang.
+  * **Địa chỉ tiệm hoa / Showroom \***: Đồng bộ trực tiếp với địa chỉ ở Chân trang và trang Giới Thiệu.
+  * Giờ mở cửa phục vụ & Đơn vị tiền tệ (VND).
+* **Cột phải — Xem Trước Trực Quan & Tiện Ích**:
+  * **Xem Trước Thông Tin Chân Trang (Footer Live Preview)**: Khung mô phỏng thời gian thực, cập nhật ngay khi admin gõ thay đổi thông tin.
+  * **Thẻ điều hướng nhanh**: Mở trực tiếp sang trang *Quản Lý Nút Tư Vấn*.
+* Nút **Lưu Thay Đổi** được bố trí ở cả góc trên bên phải header và dưới chân form.
 
-### 4.6. Thư Viện Đa Phương Tiện & Nhật Ký Hệ Thống (`/admin/media`, `/admin/audit-logs`)
-* **Media Library**: Xem toàn bộ hình ảnh hoa đã tải lên, sao chép link ảnh nhanh.
-* **Audit Logs**: Ghi vết mọi hành vi thêm, sửa, xóa sản phẩm, danh mục hay thay đổi cài đặt của quản trị viên (ai làm, vào lúc nào, địa chỉ IP nào).
+### 4.7. Quản Lý Nội Dung Trang & Chân Trang (`/admin/navigation`, `/admin/pages`)
+* Tùy chỉnh mô tả thương hiệu và dòng bản quyền ở chân trang.
+* Xem trước bố cục chân trang thực tế (đã đồng bộ tagline mới *"Nghệ Florist - Tiệm hoa & quả nhập khẩu"* cùng địa chỉ, email và hotline).
+* Soạn thảo và chỉnh sửa nội dung trang Về Nghệ (`/about`) và Chính Sách (`/policy`).
+
+### 4.8. Thư Viện Media & Nhật Ký Hệ Thống (`/admin/media`, `/admin/audit-logs`)
+* **Media Library**: Quản lý kho ảnh hoa tải lên, sao chép link ảnh nhanh.
+* **Audit Logs**: Ghi vết bảo mật lịch sử thao tác của admin (thời gian, hành động, đối tượng, địa chỉ IP).
 
 ---
 
 ## 5. KIẾN TRÚC & CHẾ ĐỘ BẢO MẬT TOÀN DIỆN (SECURITY ARCHITECTURE)
 
-Hệ thống Nghé Florist được thiết lập chế độ bảo mật cấp doanh nghiệp theo chuẩn **OWASP Top 10**:
+Hệ thống Nghệ Florist được thiết lập chế độ bảo mật cấp doanh nghiệp theo chuẩn **OWASP Top 10**:
 
 ```
                     Internet Request
@@ -191,7 +224,7 @@ Hệ thống Nghé Florist được thiết lập chế độ bảo mật cấp 
             [ 1. Nginx Web Server Hardening ]
             - Giới hạn body size: 25M
             - Ẩn Nginx Version & Server Info
-            - Chặn các truy cập trái phép
+            - SSL/TLS Let's Encrypt chứng chỉ an toàn
                           │
                           ▼
             [ 2. HTTP Security Headers (Helmet) ]
@@ -207,8 +240,9 @@ Hệ thống Nghé Florist được thiết lập chế độ bảo mật cấp 
                           │
                           ▼
             [ 4. JWT & Role-Based Access Control (RBAC) ]
-            - Bearer Token xác thực quản trị
+            - Bearer Token xác thực quản trị nghiêm ngặt
             - Mã hóa mật khẩu bcrypt (10 rounds)
+            - Kiểm soát quyền chặt chẽ (Strict single-admin rule)
                           │
                           ▼
             [ 5. SQL Injection Prevention ]
@@ -222,14 +256,14 @@ Hệ thống Nghé Florist được thiết lập chế độ bảo mật cấp 
             - Tách biệt thư mục uploads tĩnh
 ```
 
-### 5.1. Bảng Chi Tiết Các Lớp Bảo Mật
+### Bảng Chi Tiết Các Lớp Bảo Mật:
 
 | Lớp bảo mật | Công nghệ / Biện pháp | Mục đích ngăn chặn |
 | :--- | :--- | :--- |
 | **Bảo mật Header** | `helmet` middleware trong Node.js | Ngăn chặn Cross-Site Scripting (XSS), Clickjacking, MIME Sniffing |
-| **Chính sách CORS** | Whitelist tên miền cụ thể qua biến môi trường `ALLOWED_ORIGINS` | Chặn các website lạ gọi trộm API từ trình duyệt |
+| **Chính sách CORS** | Whitelist tên miền cụ thể qua `ALLOWED_ORIGINS` | Chặn các website lạ gọi trộm API từ trình duyệt |
 | **Chống Brute-force** | `express-rate-limit` | Chặn tấn công dò mật khẩu Admin và spam form đặt hoa |
-| **Xác thực Admin** | `jsonwebtoken` (JWT) + `bcrypt` hash (10 salt rounds) | Bảo vệ tài khoản quản trị, không lưu mật khẩu dạng văn bản thô |
+| **Xác thực Admin** | `jsonwebtoken` (JWT) + `bcrypt` hash (10 salt rounds) | Bảo vệ tài khoản quản trị, chống lộ lọt thông tin |
 | **Phân quyền chặt chẽ** | RBAC (`roles`, `permissions`, `user_roles`) | Ngăn chặn leo thang đặc quyền (Privilege Escalation) |
 | **Chống SQL Injection** | Sử dụng hoàn toàn MySQL Prepared Statements (`pool.query(sql, [params])`) | Triệt tiêu 100% nguy cơ tấn công SQL Injection |
 | **Bảo vệ File Upload** | `multer` lọc file mime (`jpg`, `jpeg`, `png`, `webp`), giới hạn 10MB | Chặn upload file `.php`, `.sh`, `.exe` chứa mã độc |
@@ -240,99 +274,86 @@ Hệ thống Nghé Florist được thiết lập chế độ bảo mật cấp 
 
 ## 6. QUY CHUẨN UI/UX ĐA NỀN TẢNG (MOBILE, TABLET, DESKTOP)
 
-| Tiêu chí | Mobile (Dưới 768px) | Tablet (768px - 1024px) | Desktop (1024px trở lên) |
+| Tiêu chí | Mobile (Dưới 768px) | Tablet (769px – 1024px) | Desktop (1024px trở lên) |
 | :--- | :--- | :--- | :--- |
-| **Thanh điều hướng** | Header nhỏ 64px, menu trượt Drawer | Header mở rộng, thanh tìm kiếm nhanh | Menu ngang đầy đủ, dropdown danh mục |
-| **Lưới sản phẩm hoa** | **2 cột cân đối** (khoảng cách 12px) | **3 cột thoáng đãng** | **4 cột showroom** sang trọng |
-| **Tỷ lệ ảnh hoa** | Cố định chuẩn **4:5** (chống vỡ layout) | Cố định chuẩn **4:5** | Cố định chuẩn **4:5** |
-| **Bộ lọc ngân sách** | Dạng thẻ trượt ngang ngón tay cái vuốt nhẹ | Thanh pill badges nằm ngang | Bộ lọc danh mục & giá bên trái / ngang |
-| **Xem chi tiết hoa** | Gallery vuốt ngang + Nút dính đáy Sticky | Bố cục 2 cột đối xứng | Bố cục 2 cột gallery lớn bên trái |
-| **Form đặt cắm hoa** | Wizard từng bước dễ bấm, chọn ảnh camera | Chia khối rõ ràng, kéo thả ảnh | Form rộng rãi kèm khu vực preview ảnh |
-| **Khu vực Admin** | Giao diện Lead Cards 1-chạm gọi/Zalo | Bố cục split view, bảng biểu co giãn | Dashboard điều khiển đầy đủ công cụ |
+| **Thanh điều hướng** | Header 60px, logo giữa, menu trượt Drawer | Header mở rộng, logo + hotline gọi nhanh | Menu ngang đầy đủ, dropdown danh mục cao cấp |
+| **Lưới sản phẩm hoa** | **2 cột cân đối** (khoảng cách 8–10px) | **3 cột thoáng đãng** | **4 cột showroom** sang trọng |
+| **Banners quảng cáo** | Tỉ lệ ngang 16:11, không tràn viền | Tỉ lệ 16:9 rộng rãi | Tỉ lệ 16:9 sắc nét, hiệu ứng lướt nhẹ |
+| **Modal đặt tư vấn** | Font gọn `0.82rem`, input `36px`, chip vừa vặn | Form 2 cột thanh thoát | Form rộng rãi, hộp xem trước mẫu trực quan |
+| **Chân trang (Footer)** | Box liên hệ bo tròn (`.footer-mobile-contact`) | Lưới 2 cột (`1.35fr 1fr`) thoáng đãng | 4 cột hoàn chỉnh (`2.2fr 1fr 1fr 1.5fr`) |
+| **Quản trị Admin** | Sidebar trượt Drawer, nút gọi/Zalo 1-chạm | Layout co giãn thông minh | Sidebar cố định 260px, Dashboard 2 cột cân bằng |
 
 ---
 
 ## 7. BÁO CÁO TIẾN ĐỘ & HẠ TẦNG MÁY CHỦ THỰC TẾ (DEPLOYMENT STATUS)
 
-### 7.1. Trạng Thái Triển Khai Hiện Tại: ✅ HOÀN TẤT 100% (LIVE ONLINE)
-Toàn bộ mã nguồn đã được biên dịch và chạy thành công trên máy chủ sản xuất vào ngày **11/09/2026**.
+### 7.1. Trạng Thái Triển Khai Hiện Tại: ✅ LIVE PRODUCTION (HOÀN THIỆN)
+Hệ thống đang hoạt động trực tuyến ổn định tại tên miền chính thức: **[https://ngheflorist.com](https://ngheflorist.com)**.
 
 ```
-[✓] Cài đặt hệ điều hành Ubuntu 22.04 LTS & cập nhật bảo mật
-[✓] Cài đặt Node.js v20.20.2 & PM2 Process Manager
-[✓] Cài đặt Nginx 1.18.0 & Cấu hình Reverse Proxy SPA
-[✓] Cài đặt MySQL 8.0.46 & Thiết lập Database ngheflorist
-[✓] Nạp toàn bộ dữ liệu cấu trúc bảng và dữ liệu hoa mẫu
-[✓] Cấu hình file môi trường .env Production an toàn
-[✓] Build mã nguồn Frontend React + Vite (HTML/CSS/JS nén tối ưu)
-[✓] Build mã nguồn Backend Express TypeScript sang JavaScript
-[✓] Khởi chạy dịch vụ nền PM2 ngheflorist-backend tự động khởi động cùng server
-[✓] Kích hoạt tường lửa UFW (Cổng 22, 80, 443)
-[✓] Kiểm tra kết nối API Storefront & Admin: HTTP 200 OK
+[✓] Hệ điều hành Ubuntu 22.04 LTS & cập nhật bản vá bảo mật
+[✓] NGINX Web Server cấu hình Reverse Proxy & chứng chỉ SSL HTTPS
+[✓] Node.js v20 & PM2 Process Manager chạy tiến trình nền ngheflorist-backend
+[✓] MySQL 8.0 Database lưu trữ toàn bộ dữ liệu cấu trúc và sản phẩm
+[✓] Đồng bộ bộ nhận diện logo xanh thương hiệu #1FAAE1 toàn diện
+[✓] Hoàn thiện module Quản Lý Nút Tư Vấn Nổi đa kênh
+[✓] Hoàn thiện form modal tư vấn tối ưu sâu cho Mobile
+[✓] Đồng bộ hotline, email, địa chỉ từ Cài Đặt Website xuống Chân trang (Footer)
+[✓] Cố định độ rộng Sidebar Admin và khắc phục lỗi hiển thị ảnh banner
+[✓] Tường lửa UFW kích hoạt (chỉ mở 22, 80, 443)
 ```
 
 ### 7.2. Thông Tin Chi Tiết Hạ Tầng
 
-* **Đơn Vị Cung Cấp**: TinoHost (Datacenter Việt Nam - Tốc độ cao).
+* **Đơn Vị Cung Cấp**: TinoHost (Datacenter Việt Nam - Băng thông tốc độ cao).
 * **Loại Máy Chủ**: Cloud VPS NVMe Cao Cấp.
 * **Cấu Hình Phần Cứng**:
   * **CPU**: 2 vCPUs.
   * **RAM**: 2 GB RAM.
-  * **Ổ Cứng**: 30 GB NVMe Storage (Tốc độ đọc/ghi dữ liệu siêu nhanh).
-  * **Hệ Điều Hành**: Ubuntu 22.04.5 LTS (Jammy Jellyfish x86_64).
+  * **Ổ Cứng**: 30 GB NVMe Storage.
+  * **Hệ Điều Hành**: Ubuntu 22.04.5 LTS (x86_64).
 * **Địa Chỉ IP Trực Tiếp**: `180.93.136.241`
-  * Link Storefront: [http://180.93.136.241](http://180.93.136.241)
-  * Link Admin CMS: [http://180.93.136.241/admin](http://180.93.136.241/admin)
-* **Tên Miền Đăng Ký**: `ngheflorist.com` (Đang chờ khách trỏ bản ghi DNS A).
-* **Cổng Dịch Vụ Trên Server**:
-  * Cổng 80/443 (Nginx) $\rightarrow$ Phục vụ web ngoài Internet.
-  * Cổng 4000 (Node.js API) $\rightarrow$ Chỉ lắng nghe cục bộ `127.0.0.1`.
-  * Cổng 3306 (MySQL Server) $\rightarrow$ Chỉ lắng nghe cục bộ `127.0.0.1`.
+* **Tên Miền Chính Thức**: [https://ngheflorist.com](https://ngheflorist.com)
+  * Link Storefront: [https://ngheflorist.com](https://ngheflorist.com)
+  * Link Admin CMS: [https://ngheflorist.com/admin](https://ngheflorist.com/admin)
+* **Cổng Dịch Vụ**:
+  * Cổng 80 / 443 (Nginx) $\rightarrow$ Phục vụ web ra Internet với chứng chỉ SSL.
+  * Cổng 4000 (Node.js API) $\rightarrow$ Lắng nghe nội bộ `127.0.0.1`.
+  * Cổng 3306 (MySQL Server) $\rightarrow$ Lắng nghe nội bộ `127.0.0.1`.
 
 ---
 
 ## 8. QUY TRÌNH VẬN HÀNH & CẬP NHẬT MÃ NGUỒN (DEVOPS & MAINTENANCE)
 
-### 8.1. Hướng Dẫn Kích Hoạt Tên Miền `ngheflorist.com` (Bước Cuối)
-Để tên miền `ngheflorist.com` dẫn thẳng về website thay vì phải gõ IP:
-1. Đăng nhập trang quản lý TinoHost ➜ Mục **Tên miền** ➜ Chọn **`ngheflorist.com`** ➜ Quản lý bản ghi DNS.
-2. Thêm 2 bản ghi:
-   * **Bản ghi 1**: Loại `A` | Tên `@` | Trỏ đến `180.93.136.241`
-   * **Bản ghi 2**: Loại `A` | Tên `www` | Trỏ đến `180.93.136.241`
-3. Kích hoạt chứng chỉ bảo mật SSL (Khóa xanh HTTPS) miễn phí qua lệnh trên server:
-   ```bash
-   sudo certbot --nginx -d ngheflorist.com -d www.ngheflorist.com --non-interactive --agree-tos -m contact@ngheflorist.vn
-   ```
-
-### 8.2. Quy Trình Cập Nhật Code Mới Sau Này (Khi có thay đổi tính năng)
-Khi bạn sửa code trên máy tính và muốn cập nhật lên website đang chạy:
-1. Trên máy bạn: Đẩy code mới lên Git:
+### 8.1. Quy Trình Cập Nhật Code Lên Máy Chủ (CI/CD Deploy)
+Mọi thay đổi trên nhánh `main` được triển khai tự động lên VPS:
+1. **Trên máy phát triển**:
    ```bash
    git add .
-   git commit -m "Cập nhật tính năng mới"
+   git commit -m "feat/fix: mô tả nội dung cập nhật"
    git push origin main
    ```
-2. Trên máy chủ VPS: Kéo code về và làm mới dịch vụ:
+2. **Kéo mã nguồn và biên dịch trên VPS**:
    ```bash
    cd /var/www/ngheflorist
    git pull origin main
 
-   # Nếu có sửa Backend:
+   # Build Frontend:
+   cd /var/www/ngheflorist/frontend
+   npm install && npm run build
+
+   # Build & Restart Backend (nếu có thay đổi API):
    cd /var/www/ngheflorist/backend
    npm install && npm run build
    pm2 restart ngheflorist-backend
-
-   # Nếu có sửa Frontend:
-   cd /var/www/ngheflorist/frontend
-   npm install && npm run build
    ```
 
-### 8.3. Các Lệnh Tiện Ích Kiểm Tra Trạng Thái Trên Máy Chủ
-* Xem trạng thái Backend: `pm2 status`
+### 8.2. Các Lệnh Tiện Ích Kiểm Tra Trạng Thái Server
+* Xem trạng thái tiến trình: `pm2 status`
 * Xem nhật ký hoạt động / lỗi: `pm2 logs ngheflorist-backend`
-* Khởi động lại Web server: `sudo systemctl restart nginx`
+* Khởi động lại dịch vụ web: `sudo systemctl restart nginx`
 * Kiểm tra dung lượng ổ đĩa: `df -h`
-* Kiểm tra mức RAM đang sử dụng: `free -m`
+* Kiểm tra mức RAM: `free -m`
 
 ---
-*Tài liệu bàn giao kỹ thuật hoàn tất — Dự án Nghé Florist sẵn sàng kinh doanh và đón tiếp khách hàng!*
+*Tài liệu bàn giao kỹ thuật toàn diện — Dự án Nghệ Florist vận hành chuyên nghiệp, chuẩn mực và sẵn sàng mở rộng!*
