@@ -326,8 +326,8 @@ export default function ProductListingPage() {
                 className={`mobile-filter-chip-btn ${activeFilterCount > 0 ? 'active' : ''}`}
                 onClick={() => setIsMobileFilterOpen(true)}
               >
-                <FilterOutlined />
-                <span>Bộ lọc</span>
+                <FilterOutlined style={{ flexShrink: 0 }} />
+                <span>Lọc</span>
                 {activeFilterCount > 0 ? (
                   <span className="mobile-active-filter-badge">{activeFilterCount}</span>
                 ) : (
