@@ -5,7 +5,8 @@ import {
   CloseOutlined, 
   ReloadOutlined, 
   SearchOutlined,
-  CheckOutlined 
+  CheckOutlined,
+  DownOutlined 
 } from '@ant-design/icons';
 import ProductCard from '../components/ProductCard';
 
@@ -139,9 +140,13 @@ export default function ProductListingPage() {
     return match ? match.name : 'Danh mục hoa';
   }, [categoryParam, categories]);
 
+  const activeFilterCount = useMemo(() => {
+    return [categoryParam, minPriceParam, maxPriceParam].filter(Boolean).length;
+  }, [categoryParam, minPriceParam, maxPriceParam]);
+
   // Filter content component for both desktop sidebar and mobile drawer
-  const renderFilterContent = () => (
-    <div className="filter-sidebar">
+  const renderFilterContent = (isMobileModal = false) => (
+    <div className={`filter-sidebar ${isMobileModal ? 'mobile-modal-filter' : ''}`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Bộ lọc tìm kiếm</h3>
         {(categoryParam || minPriceParam || maxPriceParam || searchParam) && (
@@ -244,27 +249,35 @@ export default function ProductListingPage() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
           <button 
             type="button" 
-            className="badge badge-pastel" 
+            className={`badge ${maxPriceParam === '500000' && !minPriceParam ? 'badge-primary' : 'badge-pastel'}`}
             onClick={() => { setLocalMinPrice(''); setLocalMaxPrice('500000'); updateFilter('minPrice', null); updateFilter('maxPrice', '500000'); }}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.78rem' }}
           >
             &lt; 500k
           </button>
           <button 
             type="button" 
-            className="badge badge-pastel" 
+            className={`badge ${minPriceParam === '500000' && maxPriceParam === '1000000' ? 'badge-primary' : 'badge-pastel'}`}
             onClick={() => { setLocalMinPrice('500000'); setLocalMaxPrice('1000000'); updateFilter('minPrice', '500000'); updateFilter('maxPrice', '1000000'); }}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.78rem' }}
           >
             500k - 1tr
           </button>
           <button 
             type="button" 
-            className="badge badge-pastel" 
-            onClick={() => { setLocalMinPrice('1000000'); setLocalMaxPrice(''); updateFilter('minPrice', '1000000'); updateFilter('maxPrice', null); }}
-            style={{ cursor: 'pointer' }}
+            className={`badge ${minPriceParam === '1000000' && maxPriceParam === '2000000' ? 'badge-primary' : 'badge-pastel'}`}
+            onClick={() => { setLocalMinPrice('1000000'); setLocalMaxPrice('2000000'); updateFilter('minPrice', '1000000'); updateFilter('maxPrice', '2000000'); }}
+            style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.78rem' }}
           >
-            &gt; 1tr
+            1tr - 2tr
+          </button>
+          <button 
+            type="button" 
+            className={`badge ${minPriceParam === '2000000' && !maxPriceParam ? 'badge-primary' : 'badge-pastel'}`}
+            onClick={() => { setLocalMinPrice('2000000'); setLocalMaxPrice(''); updateFilter('minPrice', '2000000'); updateFilter('maxPrice', null); }}
+            style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.78rem' }}
+          >
+            &gt; 2tr
           </button>
         </div>
       </div>
@@ -303,58 +316,88 @@ export default function ProductListingPage() {
         )}
 
 
-        {/* Action Bar (Sort & Mobile Filter Trigger) */}
-        <div 
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'var(--color-background-soft)',
-            padding: '10px 16px',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)',
-            marginBottom: 24,
-            flexWrap: 'wrap',
-            gap: 12
-          }}
-        >
-          {/* Mobile Filter Button */}
-          <button
-            className="btn btn-outline btn-sm mobile-filter-trigger"
-            onClick={() => setIsMobileFilterOpen(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 38, fontWeight: 600 }}
-          >
-            <FilterOutlined /> Bộ lọc ({[categoryParam, minPriceParam, maxPriceParam].filter(Boolean).length})
-          </button>
+        {/* Action Bar Container: Tách biệt giao diện Mobile và Desktop */}
+        <div className="catalog-action-bar-container">
+          {/* Mobile Filter & Sort Bar (Hiển thị <= 900px) */}
+          <div className="mobile-filter-sort-bar">
+            <div className="mobile-filter-buttons-row">
+              <button
+                type="button"
+                className={`mobile-filter-chip-btn ${activeFilterCount > 0 ? 'active' : ''}`}
+                onClick={() => setIsMobileFilterOpen(true)}
+              >
+                <FilterOutlined />
+                <span>Bộ lọc</span>
+                {activeFilterCount > 0 ? (
+                  <span className="mobile-active-filter-badge">{activeFilterCount}</span>
+                ) : (
+                  <span className="mobile-filter-count-dim">(0)</span>
+                )}
+              </button>
 
-          <div style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)' }}>
-            Hiện có <strong>{totalCount}</strong> tác phẩm hoa
+              <div className="mobile-sort-chip-wrap">
+                <span className="mobile-sort-label">Sắp xếp:</span>
+                <select
+                  className="mobile-sort-select"
+                  value={sortParam}
+                  onChange={e => updateFilter('sort', e.target.value)}
+                >
+                  <option value="newest">Mới nhất</option>
+                  <option value="price-asc">Giá: Thấp → Cao</option>
+                  <option value="price-desc">Giá: Cao → Thấp</option>
+                  <option value="best-seller">Bán chạy nhất</option>
+                </select>
+                <DownOutlined className="mobile-sort-arrow" />
+              </div>
+            </div>
+
+            <div className="mobile-filter-info-row">
+              <span className="mobile-product-count">
+                Hiện có <strong>{totalCount}</strong> tác phẩm hoa
+              </span>
+              {(categoryParam || minPriceParam || maxPriceParam || searchParam) && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="mobile-clear-filters-btn"
+                >
+                  <ReloadOutlined /> Xóa lọc
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Sort Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-            <span style={{ fontSize: '0.84rem', color: 'var(--color-text-secondary)' }}>Sắp xếp:</span>
-            <select
-              value={sortParam}
-              onChange={e => updateFilter('sort', e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--color-border)',
-                background: 'var(--color-white)',
-                fontFamily: 'inherit',
-                fontSize: '0.86rem',
-                color: 'var(--color-text)',
-                outline: 'none',
-                cursor: 'pointer',
-                minHeight: 38
-              }}
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="price-asc">Giá thấp → cao</option>
-              <option value="price-desc">Giá cao → thấp</option>
-              <option value="best-seller">Bán chạy nhất</option>
-            </select>
+          {/* Desktop Action Bar (Hiển thị > 900px) */}
+          <div className="desktop-catalog-action-bar">
+            <div style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)' }}>
+              Hiện có <strong>{totalCount}</strong> tác phẩm hoa
+            </div>
+
+            {/* Sort Selector */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+              <span style={{ fontSize: '0.84rem', color: 'var(--color-text-secondary)' }}>Sắp xếp:</span>
+              <select
+                value={sortParam}
+                onChange={e => updateFilter('sort', e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-white)',
+                  fontFamily: 'inherit',
+                  fontSize: '0.86rem',
+                  color: 'var(--color-text)',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  minHeight: 38
+                }}
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="price-asc">Giá thấp → cao</option>
+                <option value="price-desc">Giá cao → thấp</option>
+                <option value="best-seller">Bán chạy nhất</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -505,7 +548,7 @@ export default function ProductListingPage() {
               </div>
             </div>
             <div style={{ padding: '16px 20px 24px', overflowY: 'auto', flexGrow: 1 }}>
-              {renderFilterContent()}
+              {renderFilterContent(true)}
             </div>
             <div style={{ padding: '14px 20px calc(14px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--color-border)', background: 'var(--color-white)', display: 'flex', gap: 10 }}>
               {(categoryParam || minPriceParam || maxPriceParam || searchParam) && (

@@ -638,7 +638,189 @@ h1, h2, h3, h4, h5, h6 {
   display: none !important;
 }
 
+/* Responsive Action Bar (Filter & Sort) on Catalog */
+.catalog-action-bar-container {
+  margin-bottom: 24px;
+}
+
+.desktop-catalog-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-background-soft);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.mobile-filter-sort-bar {
+  display: none;
+}
+
 @media (max-width: 900px) {
+  .catalog-action-bar-container {
+    margin-bottom: 16px;
+  }
+
+  .desktop-catalog-action-bar {
+    display: none !important;
+  }
+
+  .mobile-filter-sort-bar {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  }
+
+  .mobile-filter-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .mobile-filter-chip-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #1E293B;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .mobile-filter-chip-btn:active {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+  }
+
+  .mobile-filter-chip-btn.has-active,
+  .mobile-filter-chip-btn.active {
+    background: #EAF6F9;
+    border-color: #5D9EAF;
+    color: #1E293B;
+  }
+
+  .mobile-filter-count-dim {
+    color: #94A3B8;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .mobile-active-filter-badge {
+    background: #05ADEE;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .mobile-sort-chip-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 38px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 0 8px;
+    width: 100%;
+  }
+
+  .mobile-sort-prefix,
+  .mobile-sort-label {
+    font-size: 0.76rem;
+    color: #64748B;
+    font-weight: 500;
+    margin-right: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .mobile-sort-select {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1E293B;
+    cursor: pointer;
+    outline: none;
+    padding-right: 14px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-family: inherit;
+  }
+
+  .mobile-sort-arrow {
+    position: absolute;
+    right: 8px;
+    font-size: 8px;
+    color: #94A3B8;
+    pointer-events: none;
+  }
+
+  .mobile-filter-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px 0;
+    font-size: 0.78rem;
+    color: #64748B;
+    border-top: 1px dashed #F1F5F9;
+  }
+
+  .mobile-product-count {
+    font-size: 0.78rem;
+    color: #64748B;
+  }
+
+  .mobile-product-count strong {
+    color: #1E293B;
+    font-weight: 700;
+  }
+
+  .mobile-clear-filters-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: #E11D48;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+
+  .mobile-modal-filter {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
   .product-listing-layout {
     display: block !important;
     width: 100% !important;
@@ -652,9 +834,6 @@ h1, h2, h3, h4, h5, h6 {
   }
   .desktop-sidebar-filter {
     display: none !important;
-  }
-  .mobile-filter-trigger {
-    display: inline-flex !important;
   }
   .product-listing-layout .product-grid-4 {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
