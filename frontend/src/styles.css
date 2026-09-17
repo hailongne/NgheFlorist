@@ -2622,50 +2622,51 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+.consultation-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .consultation-widget-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid #E2E8F0;
-  background: #FFFFFF;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border, #E4EEF1);
+  background: var(--color-background-soft, #F7FBFC);
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
   box-sizing: border-box;
   text-align: left;
 }
 
 .consultation-widget-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.08);
-  border-color: #CBD5E1;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(93, 158, 175, 0.16);
+  border-color: var(--color-primary-dark, #5D9EAF);
+  background: #FFFFFF;
 }
 
-.consultation-widget-btn.zalo-btn {
-  background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%);
-  border-color: #BFDBFE;
-}
-.consultation-widget-btn.zalo-btn:hover {
-  border-color: #3B82F6;
+.consultation-widget-btn.span-2-col {
+  grid-column: span 2;
+  padding: 9px 12px;
 }
 
-.consultation-widget-btn.facebook-btn {
-  background: linear-gradient(135deg, #F0F9FF 0%, #FFFFFF 100%);
-  border-color: #BAE6FD;
-}
-.consultation-widget-btn.facebook-btn:hover {
-  border-color: #0284C7;
+@media (max-width: 480px) {
+  .consultation-buttons-grid {
+    gap: 6px;
+  }
+  .consultation-widget-btn {
+    padding: 7px 8px;
+    gap: 6px;
+  }
 }
 
-.consultation-widget-btn.phone-btn {
-  background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%);
-  border-color: #BBF7D0;
-}
-.consultation-widget-btn.phone-btn:hover {
-  border-color: #10B981;
-}
 
 
