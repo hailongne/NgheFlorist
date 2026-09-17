@@ -181,7 +181,7 @@ export default function AdminHomepageCmsPage() {
       ...prev,
       [target]: {
         ...prev.desktop,
-        hero_image: prev[target].hero_image || prev.desktop.hero_image
+        hero_image: target === 'mobile' ? '' : (prev[target].hero_image || prev.desktop.hero_image)
       }
     }));
     alert(`Đã sao chép nội dung văn bản từ Desktop sang ${target === 'tablet' ? 'Tablet' : 'Mobile'}!`);
@@ -194,7 +194,7 @@ export default function AdminHomepageCmsPage() {
       const payloadHero = {
         desktop: { ...hero.desktop, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
         tablet: { ...hero.tablet, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
-        mobile: { ...hero.mobile, cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
+        mobile: { ...hero.mobile, hero_image: '', cta_primary_url: '/flowers', cta_secondary_url: '/custom-order' },
         // Fallback root fields for backward compatibility
         ...hero.desktop
       };
@@ -564,7 +564,7 @@ export default function AdminHomepageCmsPage() {
               <MobileOutlined />
               <span>[ 📱 Mobile ]</span>
               <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, backgroundColor: activeHeroTab === 'mobile' ? '#E4EEF1' : '#F1F5F9', color: '#475569' }}>
-                Tỉ lệ dọc 4:5
+                Tự động ẩn ảnh
               </span>
             </button>
           </div>
@@ -689,124 +689,163 @@ export default function AdminHomepageCmsPage() {
               </div>
             </div>
 
-            {/* Right Column: Hero Image Upload with Dynamic Device Proportioned Frame */}
+            {/* Right Column: Hero Image Upload for Desktop & Tablet, or Notice for Mobile */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <label className="admin-label" style={{ margin: 0, fontWeight: 700, color: '#26383D' }}>
-                  Hình Ảnh Banner ({activeHeroTab.toUpperCase()})
-                </label>
-                <span style={{ fontSize: '12px', color: '#64748B', background: '#F1F5F9', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>
-                  {activeHeroTab === 'desktop' && 'Tỉ lệ chuẩn: 16:9 (hoặc 4:4.5)'}
-                  {activeHeroTab === 'tablet' && 'Tỉ lệ chuẩn: 4:3 (hoặc 1:1)'}
-                  {activeHeroTab === 'mobile' && 'Tỉ lệ chuẩn: 4:5 (hoặc 4:3)'}
-                </span>
-              </div>
-
-              {/* Hidden file input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/png, image/jpeg, image/webp"
-                style={{ display: 'none' }}
-                onChange={handleUploadImage}
-              />
-
-              {/* Device Proportioned Preview Frame */}
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  maxWidth: activeHeroTab === 'desktop' ? '460px' : activeHeroTab === 'tablet' ? '360px' : '280px',
-                  margin: '0 auto',
-                  aspectRatio: activeHeroTab === 'desktop' ? '16 / 9' : activeHeroTab === 'tablet' ? '4 / 3' : '4 / 5',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  border: '6px solid #FFFFFF',
-                  boxShadow: '0 12px 30px rgba(38, 56, 61, 0.14)',
-                  backgroundColor: '#F7FBFC',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.25s ease'
-                }}
-                onClick={() => fileInputRef.current?.click()}
-                title="Bấm vào để chọn ảnh mới tải lên cho thiết bị này"
-              >
-                {currentDeviceHero.hero_image ? (
-                  <ImageWithFallback
-                    key={currentDeviceHero.hero_image}
-                    src={currentDeviceHero.hero_image}
-                    alt={`Hero ${activeHeroTab} preview`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '24px 16px', color: '#64748B' }}>
-                    <UploadOutlined style={{ fontSize: 40, color: '#5D9EAF', marginBottom: 12 }} />
-                    <div style={{ fontWeight: 700, fontSize: '14px', color: '#0F172A' }}>
-                      Tải ảnh cho {activeHeroTab.toUpperCase()}
-                    </div>
-                    <div style={{ fontSize: '12px', marginTop: 4 }}>Bấm vào để chọn ảnh từ máy tính</div>
-                  </div>
-                )}
-
-                {/* Uploading progress overlay */}
-                {uploading && (
+              {activeHeroTab === 'mobile' ? (
+                <div
+                  style={{
+                    backgroundColor: '#F8FAFC',
+                    border: '1px dashed #CBD5E1',
+                    borderRadius: '16px',
+                    padding: '36px 20px',
+                    textAlign: 'center',
+                    marginTop: '8px'
+                  }}
+                >
                   <div
                     style={{
-                      position: 'absolute',
-                      inset: 0,
-                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      backgroundColor: '#E0F2FE',
+                      color: '#0284C7',
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#5D9EAF',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      backdropFilter: 'blur(2px)'
+                      margin: '0 auto 16px',
+                      fontSize: 26
                     }}
                   >
-                    <LoadingOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                    <span>Đang tải ảnh lên...</span>
+                    <MobileOutlined />
                   </div>
-                )}
-              </div>
+                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#1E293B', marginBottom: 8 }}>
+                    Đã cấu hình tự động ẩn ảnh trên Mobile
+                  </h4>
+                  <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.6, maxWidth: '340px', margin: '0 auto' }}>
+                    Trên giao diện điện thoại di động, hình ảnh banner chính được hệ thống tự động ẩn để màn hình gọn gàng, tăng tốc độ tải trang và tập trung vào thông điệp cùng 2 nút bấm thao tác nhanh.
+                  </p>
+                  <div style={{ marginTop: 18, fontSize: '12px', color: '#059669', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', padding: '7px 16px', borderRadius: '8px', display: 'inline-block', fontWeight: 600 }}>
+                    ✓ Bạn chỉ cần chỉnh sửa Tiêu đề, Mô tả và Nút bấm ở cột bên trái
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <label className="admin-label" style={{ margin: 0, fontWeight: 700, color: '#26383D' }}>
+                      Hình Ảnh Banner ({activeHeroTab.toUpperCase()})
+                    </label>
+                    <span style={{ fontSize: '12px', color: '#64748B', background: '#F1F5F9', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>
+                      {activeHeroTab === 'desktop' ? 'Tỉ lệ chuẩn: 16:9' : 'Tỉ lệ chuẩn: 4:3'}
+                    </span>
+                  </div>
 
-              {/* Action under image preview */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12, gap: 10 }}>
-                <button
-                  type="button"
-                  className="admin-btn-secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}
-                >
-                  <UploadOutlined /> Thay đổi ảnh {activeHeroTab.toUpperCase()}
-                </button>
-                {currentDeviceHero.hero_image && (
-                  <button
-                    type="button"
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/png, image/jpeg, image/webp"
+                    style={{ display: 'none' }}
+                    onChange={handleUploadImage}
+                  />
+
+                  {/* Device Proportioned Preview Frame */}
+                  <div
                     style={{
-                      border: '1px solid #FECACA',
-                      backgroundColor: '#FEF2F2',
-                      color: '#DC2626',
-                      padding: '6px 12px',
-                      borderRadius: 6,
-                      fontSize: 13,
-                      cursor: 'pointer'
+                      position: 'relative',
+                      width: '100%',
+                      maxWidth: activeHeroTab === 'desktop' ? '460px' : '360px',
+                      margin: '0 auto',
+                      aspectRatio: activeHeroTab === 'desktop' ? '16 / 9' : '4 / 3',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      border: '6px solid #FFFFFF',
+                      boxShadow: '0 12px 30px rgba(38, 56, 61, 0.14)',
+                      backgroundColor: '#F7FBFC',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.25s ease'
                     }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setHero(prev => ({
-                        ...prev,
-                        [activeHeroTab]: { ...prev[activeHeroTab], hero_image: '' }
-                      }));
-                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Bấm vào để chọn ảnh mới tải lên cho thiết bị này"
                   >
-                    Xóa ảnh
-                  </button>
-                )}
-              </div>
+                    {currentDeviceHero.hero_image ? (
+                      <ImageWithFallback
+                        key={currentDeviceHero.hero_image}
+                        src={currentDeviceHero.hero_image}
+                        alt={`Hero ${activeHeroTab} preview`}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '24px 16px', color: '#64748B' }}>
+                        <UploadOutlined style={{ fontSize: 40, color: '#5D9EAF', marginBottom: 12 }} />
+                        <div style={{ fontWeight: 700, fontSize: '14px', color: '#0F172A' }}>
+                          Tải ảnh cho {activeHeroTab.toUpperCase()}
+                        </div>
+                        <div style={{ fontSize: '12px', marginTop: 4 }}>Bấm vào để chọn ảnh từ máy tính</div>
+                      </div>
+                    )}
+
+                    {/* Uploading progress overlay */}
+                    {uploading && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#5D9EAF',
+                          fontWeight: 600,
+                          fontSize: '14px',
+                          backdropFilter: 'blur(2px)'
+                        }}
+                      >
+                        <LoadingOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                        <span>Đang tải ảnh lên...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action under image preview */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12, gap: 10 }}>
+                    <button
+                      type="button"
+                      className="admin-btn-secondary"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}
+                    >
+                      <UploadOutlined /> Thay đổi ảnh {activeHeroTab.toUpperCase()}
+                    </button>
+                    {currentDeviceHero.hero_image && (
+                      <button
+                        type="button"
+                        style={{
+                          border: '1px solid #FECACA',
+                          backgroundColor: '#FEF2F2',
+                          color: '#DC2626',
+                          padding: '6px 12px',
+                          borderRadius: 6,
+                          fontSize: 13,
+                          cursor: 'pointer'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHero(prev => ({
+                            ...prev,
+                            [activeHeroTab]: { ...prev[activeHeroTab], hero_image: '' }
+                          }));
+                        }}
+                      >
+                        Xóa ảnh
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

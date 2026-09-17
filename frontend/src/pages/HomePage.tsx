@@ -196,9 +196,7 @@ export default function HomePage() {
 
     if (isMobile) {
       const mobileData = { ...desktopData, ...(hero.mobile || {}) };
-      if (!mobileData.hero_image) {
-        mobileData.hero_image = desktopData.hero_image || hero.hero_image || '/images/hero-mobile.webp';
-      }
+      mobileData.hero_image = ''; // Mobile hides hero image to optimize screen space
       return mobileData;
     }
 
@@ -215,39 +213,17 @@ export default function HomePage() {
 
   return (
     <div className="homepage-showroom">
-      {/* 1. HERO SECTION - MOBILE (<768px) - ẢNH DỌC 4:5 */}
+      {/* 1. HERO SECTION - MOBILE (<768px) - ẨN ẢNH, TẬP TRUNG THÔNG ĐIỆP & NÚT BẤM */}
       {isMobile && (
         <section
           style={{
-            padding: '14px 14px 22px',
-            background: 'var(--color-background-soft)',
+            padding: '24px 16px 28px',
+            background: 'linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)',
             borderBottom: '1px solid var(--color-border)'
           }}
         >
-          {/* Khung ảnh tỉ lệ 4:5 trọn vẹn, tối ưu màn hình di động */}
-          <div
-            style={{
-              position: 'relative',
-              width: '100%',
-              maxWidth: '380px',
-              margin: '0 auto 16px',
-              aspectRatio: '4 / 5',
-              borderRadius: 'var(--radius-md)',
-              overflow: 'hidden',
-              boxShadow: 'var(--shadow-md)',
-              background: '#EAF6F9'
-            }}
-          >
-            <ImageWithFallback
-              src={currentHero.hero_image || '/images/hero-mobile.webp'}
-              alt={currentHero.title || 'Nghệ Florist'}
-              fallbackSrc={BOTANICAL_FALLBACKS[0]}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-
-          {/* Thông điệp & CTA dưới ảnh */}
-          <div style={{ padding: '0 4px', textAlign: 'center' }}>
+          {/* Thông điệp & CTA - Trên Mobile ẩn ảnh hoàn toàn để tối ưu không gian */}
+          <div style={{ padding: '0 4px', textAlign: 'center', maxWidth: '480px', margin: '0 auto' }}>
             {currentHero.badge && (
               <div
                 className="badge badge-pastel"
