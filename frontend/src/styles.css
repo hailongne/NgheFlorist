@@ -2554,3 +2554,118 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Shopee Style Related Products Grid */
+.shopee-related-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 40px;
+  margin-top: 48px;
+}
+
+.shopee-related-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .shopee-related-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shopee-related-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+/* 50/50 Consultation Modal */
+.consultation-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.consultation-modal-box {
+  background: #FFFFFF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 960px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.consultation-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 20px 24px 28px;
+}
+
+@media (max-width: 768px) {
+  .consultation-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 16px;
+  }
+}
+
+.consultation-widget-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.consultation-widget-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.08);
+  border-color: #CBD5E1;
+}
+
+.consultation-widget-btn.zalo-btn {
+  background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%);
+  border-color: #BFDBFE;
+}
+.consultation-widget-btn.zalo-btn:hover {
+  border-color: #3B82F6;
+}
+
+.consultation-widget-btn.facebook-btn {
+  background: linear-gradient(135deg, #F0F9FF 0%, #FFFFFF 100%);
+  border-color: #BAE6FD;
+}
+.consultation-widget-btn.facebook-btn:hover {
+  border-color: #0284C7;
+}
+
+.consultation-widget-btn.phone-btn {
+  background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%);
+  border-color: #BBF7D0;
+}
+.consultation-widget-btn.phone-btn:hover {
+  border-color: #10B981;
+}
+
+

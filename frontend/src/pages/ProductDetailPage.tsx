@@ -4,17 +4,24 @@ import {
   CheckCircleOutlined, 
   CameraOutlined, 
   SafetyCertificateOutlined,
-  HeartOutlined,
-  HeartFilled,
-  ArrowLeftOutlined,
-  MessageOutlined,
-  GiftOutlined,
-  PhoneOutlined,
-  ShoppingOutlined,
-  ThunderboltOutlined
+  HeartOutlined, 
+  HeartFilled, 
+  ArrowLeftOutlined, 
+  MessageOutlined, 
+  GiftOutlined, 
+  PhoneOutlined, 
+  ShoppingOutlined, 
+  ThunderboltOutlined,
+  CopyOutlined,
+  DownloadOutlined,
+  CloseOutlined,
+  SendOutlined,
+  FacebookOutlined,
+  InstagramOutlined,
+  FormOutlined,
+  ShareAltOutlined
 } from '@ant-design/icons';
 import ImageWithFallback, { getFallbackForId } from '../components/ImageWithFallback';
-import { useCustomerRequest } from '../context/RequestContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import ProductCard from '../components/ProductCard';
 
@@ -46,22 +53,58 @@ interface ProductDetail {
     price: number;
     currency: string;
     image_url: string;
+    featured_image?: string;
+    category_name?: string;
   }>;
+}
+
+interface ContactWidget {
+  id: number;
+  platform_type: 'zalo' | 'facebook' | 'instagram' | 'phone' | string;
+  title: string;
+  subtitle?: string | null;
+  action_link: string;
+  sort_order: number;
+  is_active: number | boolean;
 }
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { openRequestModal } = useCustomerRequest();
-  const { zaloUrl1, zaloUrl2, hotline1, hotline2, ctaText1, ctaText2 } = useSiteSettings();
+  const { zaloUrl1 } = useSiteSettings();
 
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const [isWishlisted, setIsWishlisted] = useState(false);
 
+  // Dynamic Contact Widgets from Admin
+  const [contactWidgets, setContactWidgets] = useState<ContactWidget[]>([]);
+
+  // 50/50 Consultation & Order Modal State
+  const [consultModalOpen, setConsultModalOpen] = useState(false);
+  const [activeWidget, setActiveWidget] = useState<ContactWidget | null>(null);
+
+  // Form State in Modal (Left Column)
+  const [orderQuantity, setOrderQuantity] = useState(1);
+  const [deliveryDate, setDeliveryDate] = useState(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
+  const [deliveryTimePreset, setDeliveryTimePreset] = useState('Giao chiều nay (17:30)');
+  const [senderName, setSenderName] = useState('');
+  const [senderPhone, setSenderPhone] = useState('');
+  const [isSameRecipient, setIsSameRecipient] = useState(true);
+  const [recipientPhone, setRecipientPhone] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [cardMessage, setCardMessage] = useState('');
+  const [orderNotes, setOrderNotes] = useState('');
+  const [copyStatus, setCopyStatus] = useState<string>('');
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [hasProfileAutofilled, setHasProfileAutofilled] = useState(false);
+
+  // Load product detail
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
@@ -96,6 +139,35 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  // Load contact widgets from admin
+  useEffect(() => {
+    fetch('/api/contact-widgets')
+      .then(r => (r.ok ? r.json() : []))
+      .then(data => {
+        if (Array.isArray(data)) {
+          setContactWidgets(data.filter(w => Boolean(w.is_active)));
+        }
+      })
+      .catch(err => console.warn('Fetch contact widgets error:', err));
+  }, []);
+
+  // Auto import customer profile data
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('nghe_customer_user');
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        const name = u.full_name || u.name || u.username || '';
+        const phone = u.phone || '';
+        const addr = u.address || '';
+        if (name) setSenderName(name);
+        if (phone) setSenderPhone(phone);
+        if (addr) setDeliveryAddress(addr);
+        if (name || phone || addr) setHasProfileAutofilled(true);
+      }
+    } catch {}
+  }, []);
+
   const toggleWishlist = () => {
     if (!product) return;
     setIsWishlisted(prev => {
@@ -120,26 +192,169 @@ export default function ProductDetailPage() {
 
   const activePrice = product ? Number(product.price) : 0;
 
-  const handleSelectSample = () => {
-    if (!product) return;
-    openRequestModal({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: activePrice,
-      imageUrl: selectedImage || getFallbackForId(product.id)
-    }, 'PRODUCT_SELECTION');
+  // Clipboard Helpers
+  const copyImageToClipboard = async (imageUrl: string) => {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imageUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || 400;
+      canvas.height = img.naturalHeight || 400;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(async (blob) => {
+          if (blob && navigator.clipboard && (window as any).ClipboardItem) {
+            const item = new (window as any).ClipboardItem({ 'image/png': blob });
+            await navigator.clipboard.write([item]);
+            setCopyStatus('image_copied');
+            setTimeout(() => setCopyStatus(''), 4000);
+          }
+        }, 'image/png');
+      }
+    } catch (err) {
+      console.warn('Canvas image copy fallback:', err);
+    }
   };
 
-  const handleCustomDesign = () => {
-    if (!product) return;
-    openRequestModal({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: activePrice,
-      imageUrl: selectedImage || getFallbackForId(product.id)
-    }, 'CUSTOM_DESIGN');
+  const downloadProductImage = (imageUrl: string, title: string) => {
+    fetch(imageUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'nghe-florist-hoa'}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+        document.body.removeChild(a);
+        setCopyStatus('image_downloaded');
+        setTimeout(() => setCopyStatus(''), 4000);
+      })
+      .catch(() => {
+        window.open(imageUrl, '_blank');
+      });
+  };
+
+  const copyProductLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopyStatus('link_copied');
+      setTimeout(() => setCopyStatus(''), 4000);
+    } catch {}
+  };
+
+  // Open Consultation Modal
+  const handleOpenConsultation = (widget: ContactWidget) => {
+    setActiveWidget(widget);
+    setConsultModalOpen(true);
+    const currentImg = selectedImage || (product ? getFallbackForId(product.id) : '');
+    if (currentImg) {
+      copyImageToClipboard(currentImg);
+    }
+  };
+
+  // Submit Order Form & Redirect to Channel (Left 50%)
+  const handleSubmitFormAndSend = async () => {
+    if (!product || !activeWidget) return;
+    if (!senderPhone.trim()) {
+      alert('Vui lòng nhập số điện thoại của anh/chị để Florist tiện liên hệ và gửi ảnh hoa ạ!');
+      return;
+    }
+    setIsSubmittingOrder(true);
+
+    const totalCost = activePrice * orderQuantity;
+    const formattedTotal = formatVND(totalCost);
+    const deliveryText = deliveryTimePreset ? `${deliveryTimePreset} (${deliveryDate})` : `Giao ngày ${deliveryDate}`;
+    const recPhone = isSameRecipient ? senderPhone : (recipientPhone || senderPhone);
+
+    // Format message exactly like the user's uploaded order screenshot
+    const orderMessageLines = [
+      `- ${orderQuantity > 1 ? `${orderQuantity} x ` : ''}${product.name} (${formatVND(activePrice)}). Tổng: ${formattedTotal}`,
+      `- Ngày, thời gian nhận hoa: ${deliveryText}`,
+      `- SĐT của anh/chị: ${senderPhone}${senderName ? ` (${senderName})` : ''}`,
+      `- SĐT người nhận hoa: ${recPhone}`,
+      `- Địa chỉ nhận hoa: ${deliveryAddress || 'Nhận tại cửa hàng / Trao đổi qua chat'}`,
+      cardMessage ? `- Nội dung thiệp/biển: ${cardMessage}` : '- Nội dung thiệp/biển: (Chưa có / Trao đổi thêm)',
+      orderNotes ? `- Ghi chú: ${orderNotes}` : '',
+      `- Link sản phẩm: ${window.location.origin}/product/${product.slug}`
+    ].filter(Boolean);
+
+    const fullOrderMessage = orderMessageLines.join('\n');
+
+    // 1. Copy order message to clipboard
+    try {
+      await navigator.clipboard.writeText(fullOrderMessage);
+    } catch {}
+
+    // 2. Copy image to clipboard
+    const currentImg = selectedImage || getFallbackForId(product.id);
+    copyImageToClipboard(currentImg);
+
+    // 3. Save Lead into backend
+    try {
+      await fetch('/api/customer-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          request_type: 'PRODUCT_SELECTION',
+          product_id: product.id,
+          product_name: product.name,
+          customer_name: senderName || 'Khách đặt hoa',
+          phone: senderPhone,
+          zalo: senderPhone,
+          delivery_area: deliveryAddress,
+          delivery_time: deliveryText,
+          card_message: cardMessage,
+          notes: `[ĐƠN QUA ${activeWidget.title}] ${orderQuantity}x ${product.name}. Tổng: ${formattedTotal}. Người nhận: ${recPhone}. Địa chỉ: ${deliveryAddress}. Thiệp: ${cardMessage}. Ghi chú: ${orderNotes}`,
+          budget: String(totalCost)
+        })
+      });
+    } catch (err) {
+      console.warn('Record lead error:', err);
+    }
+
+    setIsSubmittingOrder(false);
+    setCopyStatus('order_sent');
+
+    // 4. Open destination channel
+    setTimeout(() => {
+      if (activeWidget.platform_type === 'phone' || activeWidget.action_link.startsWith('tel:')) {
+        window.location.href = activeWidget.action_link;
+      } else {
+        window.open(activeWidget.action_link, '_blank');
+      }
+    }, 350);
+  };
+
+  // Skip Form & Direct Chat (Right 50%)
+  const handleSkipFormAndChat = async () => {
+    if (!product || !activeWidget) return;
+    const quickMsg = [
+      `🌸 Chào Nghệ Florist, mình muốn tư vấn mẫu hoa này:`,
+      `- Tên mẫu: ${product.name}`,
+      `- Giá tham khảo: ${formatVND(activePrice)}`,
+      `- Link sản phẩm: ${window.location.origin}/product/${product.slug}`
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(quickMsg);
+    } catch {}
+
+    const currentImg = selectedImage || getFallbackForId(product.id);
+    copyImageToClipboard(currentImg);
+
+    if (activeWidget.platform_type === 'phone' || activeWidget.action_link.startsWith('tel:')) {
+      window.location.href = activeWidget.action_link;
+    } else {
+      window.open(activeWidget.action_link, '_blank');
+    }
   };
 
   if (loading) {
@@ -253,39 +468,22 @@ export default function ProductDetailPage() {
                       fallbackSrc={getFallbackForId(product.id + i)}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    {/* Floating Wishlist Button on Mobile */}
-                    <button
-                      onClick={toggleWishlist}
-                      className="card-wishlist-btn"
-                      style={{ position: 'absolute', top: 10, right: 10, width: 34, height: 34, minHeight: 34, fontSize: 15 }}
-                      aria-label={isWishlisted ? 'Bỏ lưu' : 'Lưu mẫu'}
-                      title="Lưu mẫu hoa"
-                    >
-                      {isWishlisted ? <HeartFilled style={{ color: '#E11D48' }} /> : <HeartOutlined />}
-                    </button>
                   </div>
                 ))}
               </div>
-              {product.images && product.images.length > 1 && (
-                <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--color-text-secondary)', marginTop: -6 }}>
-                  Vuốt ngang để xem {product.images.length} góc chụp ảnh thực tế ➔
-                </div>
-              )}
             </div>
 
-            {/* Desktop / Tablet Gallery */}
-            <div className="desktop-only-element">
-              {/* Main Featured Image */}
+            {/* Desktop / Tablet Main Gallery View */}
+            <div className="desktop-only-element" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div 
-                style={{
-                  borderRadius: 'var(--radius-lg)',
-                  overflow: 'hidden',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-white)',
-                  aspectRatio: '4/5',
-                  position: 'relative',
+                style={{ 
+                  position: 'relative', 
+                  borderRadius: 'var(--radius-md)', 
+                  overflow: 'hidden', 
                   boxShadow: 'var(--shadow-md)',
-                  marginBottom: 16
+                  aspectRatio: '3/4',
+                  maxHeight: '620px',
+                  background: '#F8FAFC'
                 }}
               >
                 <ImageWithFallback
@@ -339,7 +537,6 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* INFORMATION & CONVERSION ACTIONS */}
           {/* INFORMATION & CONVERSION ACTIONS */}
           <div className="product-detail-info">
             {/* Category */}
@@ -416,137 +613,121 @@ export default function ProductDetailPage() {
               <span><strong>Cam kết hoa tươi mới trong ngày</strong> • Chụp ảnh duyệt thực tế trước khi giao</span>
             </div>
 
-            {/* Conversion CTA Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, width: '100%', boxSizing: 'border-box' }}>
-              {/* Primary CTA: Chọn mẫu này & Điền thông tin đặt hoa */}
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={{ 
-                  width: '100%',
-                  padding: '13px 18px',
-                  fontSize: '0.94rem',
-                  fontWeight: 700,
+            {/* NÚT TƯ VẤN NHANH (CONTACT WIDGETS TỪ ADMIN CMS) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24, width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                padding: '2px 0',
+                marginBottom: 2
+              }}>
+                <span style={{ 
+                  fontSize: '0.82rem', 
+                  fontWeight: 800, 
+                  color: 'var(--color-primary-dark)', 
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  boxShadow: '0 4px 14px rgba(42, 117, 211, 0.28)',
-                  borderRadius: 'var(--radius-full)',
-                  boxSizing: 'border-box'
-                }}
-                onClick={handleSelectSample}
-              >
-                <MessageOutlined style={{ fontSize: 18 }} />
-                <span>Đặt mẫu hoa này (Điền thông tin)</span>
-              </button>
-
-              {/* Direct 1-Click Zalo Consultation (NO FORM REQUIRED) */}
-              <div 
-                style={{
-                  backgroundColor: '#F0F9FF',
-                  border: '1px solid #BAE6FD',
-                  borderRadius: 14,
-                  padding: '12px 14px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8
-                }}
-              >
-                <div style={{ fontSize: '0.78rem', color: '#0369A1', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <ThunderboltOutlined style={{ color: '#0284C7' }} />
-                  <span>HOẶC CHAT ZALO NGAY (KHÔNG CẦN ĐIỀN FORM):</span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-                  <a
-                    href={zaloUrl1}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary btn-sm"
-                    style={{
-                      padding: '9px 10px',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      borderRadius: 'var(--radius-full)',
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <span>💬 Zalo 1 ({hotline1})</span>
-                  </a>
-                  <a
-                    href={zaloUrl2}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-soft btn-sm"
-                    style={{
-                      padding: '9px 10px',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      borderRadius: 'var(--radius-full)',
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <span>💬 Zalo 2 ({hotline2})</span>
-                  </a>
-                </div>
+                  gap: 6
+                }}>
+                  <ThunderboltOutlined style={{ color: '#0284C7' }} /> TƯ VẤN & ĐẶT MẪU HOA NHANH
+                </span>
+                <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 600 }}>
+                  ● 1 chạm kết nối
+                </span>
               </div>
 
-              {/* Secondary Actions: Thiết kế riêng & Hotline */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8, width: '100%', boxSizing: 'border-box' }}>
+              {contactWidgets.length > 0 ? (
+                contactWidgets.map(widget => {
+                  const isZalo = widget.platform_type === 'zalo';
+                  const isFb = widget.platform_type === 'facebook';
+                  const isPhone = widget.platform_type === 'phone';
+                  const isInsta = widget.platform_type === 'instagram';
+
+                  const btnClass = isZalo ? 'consultation-widget-btn zalo-btn' :
+                                   isFb ? 'consultation-widget-btn facebook-btn' :
+                                   isPhone ? 'consultation-widget-btn phone-btn' :
+                                   'consultation-widget-btn';
+
+                  const iconBg = isZalo ? '#0068FF' : isFb ? '#0084FF' : isPhone ? '#10B981' : isInsta ? '#E1306C' : '#3B82F6';
+
+                  return (
+                    <button
+                      key={widget.id}
+                      type="button"
+                      className={btnClass}
+                      onClick={() => handleOpenConsultation(widget)}
+                    >
+                      <div style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        background: iconBg,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#FFFFFF',
+                        fontSize: 18,
+                        flexShrink: 0
+                      }}>
+                        {isZalo && <MessageOutlined />}
+                        {isFb && <FacebookOutlined />}
+                        {isPhone && <PhoneOutlined />}
+                        {isInsta && <InstagramOutlined />}
+                        {!isZalo && !isFb && !isPhone && !isInsta && <MessageOutlined />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1E293B', lineHeight: 1.3 }}>
+                          {widget.title}
+                        </div>
+                        {widget.subtitle && (
+                          <div style={{ fontSize: '0.78rem', color: '#64748B', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {widget.subtitle}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: iconBg,
+                        padding: '4px 10px',
+                        borderRadius: 'var(--radius-full)',
+                        background: 'rgba(255, 255, 255, 0.85)',
+                        border: `1px solid ${iconBg}40`,
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0
+                      }}>
+                        Tư vấn ngay ➜
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
                 <button
                   type="button"
-                  className="btn btn-soft"
-                  style={{ 
-                    padding: '10px 8px',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6,
-                    whiteSpace: 'nowrap',
-                    borderRadius: 'var(--radius-full)',
-                    minWidth: 0,
-                    boxSizing: 'border-box'
-                  }}
-                  onClick={handleCustomDesign}
+                  className="consultation-widget-btn zalo-btn"
+                  onClick={() => handleOpenConsultation({
+                    id: 1,
+                    platform_type: 'zalo',
+                    title: 'Chat Zalo Tư Vấn Nhanh',
+                    subtitle: 'Gửi ảnh & Báo giá trong 1 phút',
+                    action_link: zaloUrl1 || 'https://zalo.me/0862926866',
+                    sort_order: 1,
+                    is_active: 1
+                  })}
                 >
-                  <GiftOutlined />
-                  <span>Thiết kế riêng</span>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: '#0068FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', fontSize: 18 }}>
+                    <MessageOutlined />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1E293B' }}>Chat Zalo Tư Vấn Nhanh</div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748B' }}>Gửi ảnh & Báo giá trong 1 phút</div>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0068FF' }}>Tư vấn ngay ➜</div>
                 </button>
-
-                <a
-                  href={`tel:${hotline1.replace(/\s+/g, '')}`}
-                  className="btn btn-outline"
-                  style={{ 
-                    padding: '10px 8px',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6,
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap',
-                    borderRadius: 'var(--radius-full)',
-                    minWidth: 0,
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <PhoneOutlined />
-                  <span>Hotline: {hotline1}</span>
-                </a>
-              </div>
+              )}
             </div>
 
             {/* Flower Care & Guarantees (4 cam kết dịch vụ) */}
@@ -583,13 +764,45 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* RELATED PRODUCTS */}
+        {/* RELATED PRODUCTS - SHOPEE STYLE */}
         {product.related && product.related.length > 0 && (
-          <section style={{ borderTop: '1px solid var(--color-border)', paddingTop: 48, marginTop: 48 }}>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: 20, textAlign: 'center' }}>
-              Mẫu hoa cùng bộ sưu tập {product.category_name}
-            </h3>
-            <div className="product-grid-4">
+          <section className="shopee-related-section">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 4, height: 26, background: '#F97316', borderRadius: 2 }} />
+                <div>
+                  <h3 style={{ 
+                    fontSize: 'clamp(1.15rem, 2.5vw, 1.4rem)', 
+                    fontWeight: 800, 
+                    color: '#1E293B', 
+                    textTransform: 'uppercase', 
+                    letterSpacing: 0.5,
+                    margin: 0 
+                  }}>
+                    Có thể bạn cũng thích
+                  </h3>
+                  <div style={{ fontSize: '0.82rem', color: '#64748B', marginTop: 2 }}>
+                    Gợi ý các mẫu hoa tươi cùng phong cách & mức giá được yêu thích nhất
+                  </div>
+                </div>
+              </div>
+              <Link 
+                to={product.category_slug ? `/category/${product.category_slug}` : '/flowers'} 
+                style={{ 
+                  color: '#F97316', 
+                  fontSize: '0.88rem', 
+                  fontWeight: 700, 
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                Xem tất cả {product.category_name || 'mẫu hoa'} <span>&rarr;</span>
+              </Link>
+            </div>
+
+            <div className="shopee-related-grid">
               {product.related.map(rel => (
                 <ProductCard
                   key={rel.id}
@@ -597,10 +810,28 @@ export default function ProductDetailPage() {
                   name={rel.name}
                   slug={rel.slug}
                   price={rel.price}
-                  imageUrl={rel.image_url}
-                  categoryName={product.category_name}
+                  imageUrl={rel.image_url || rel.featured_image}
+                  categoryName={rel.category_name || product.category_name}
                 />
               ))}
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 32 }}>
+              <Link 
+                to="/flowers" 
+                className="btn btn-outline"
+                style={{ 
+                  padding: '11px 28px', 
+                  borderRadius: 'var(--radius-full)', 
+                  fontWeight: 700, 
+                  fontSize: '0.92rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                Xem thêm các mẫu hoa khác
+              </Link>
             </div>
           </section>
         )}
@@ -617,45 +848,565 @@ export default function ProductDetailPage() {
           </span>
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-          <a
-            href={zaloUrl1}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-soft"
-            style={{
-              minHeight: 38,
-              padding: '7px 10px',
-              fontWeight: 700,
-              fontSize: '0.78rem',
-              borderRadius: 'var(--radius-full)',
-              whiteSpace: 'nowrap',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              textDecoration: 'none'
-            }}
-            title="Chat Zalo ngay không cần điền form"
-          >
-            <span>💬 Chat Zalo ({hotline1})</span>
-          </a>
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ 
-              minHeight: 38, 
-              padding: '7px 14px', 
-              fontWeight: 700, 
-              fontSize: '0.82rem', 
-              borderRadius: 'var(--radius-full)',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
-            onClick={handleSelectSample}
-          >
-            Đặt mẫu này
-          </button>
+          {contactWidgets.length > 0 ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{
+                minHeight: 40,
+                padding: '8px 16px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-full)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6
+              }}
+              onClick={() => handleOpenConsultation(contactWidgets[0])}
+            >
+              <MessageOutlined />
+              <span>Tư vấn mẫu này ngay</span>
+            </button>
+          ) : (
+            <a
+              href={zaloUrl1 || 'https://zalo.me/0862926866'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+              style={{
+                minHeight: 40,
+                padding: '8px 16px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                borderRadius: 'var(--radius-full)',
+                textDecoration: 'none'
+              }}
+            >
+              <span>Chat Zalo tư vấn</span>
+            </a>
+          )}
         </div>
       </div>
+
+      {/* 50/50 CONSULTATION & ORDER MODAL */}
+      {consultModalOpen && activeWidget && (
+        <div className="consultation-modal-backdrop" onClick={() => setConsultModalOpen(false)}>
+          <div className="consultation-modal-box" onClick={e => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid #E2E8F0',
+              background: '#F8FAFC',
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: activeWidget.platform_type === 'zalo' ? '#0068FF' :
+                              activeWidget.platform_type === 'facebook' ? '#0084FF' :
+                              activeWidget.platform_type === 'phone' ? '#10B981' : '#3B82F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFFFFF',
+                  fontSize: 16
+                }}>
+                  {activeWidget.platform_type === 'phone' ? <PhoneOutlined /> : <MessageOutlined />}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1E293B' }}>
+                    Tư vấn qua {activeWidget.title}
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#64748B' }}>
+                    Mẫu hoa: {product.name} ({formatVND(activePrice)})
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setConsultModalOpen(false)}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: '#EDF2F7',
+                  color: '#475569',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: 16
+                }}
+                aria-label="Đóng"
+              >
+                <CloseOutlined />
+              </button>
+            </div>
+
+            {/* Notification Bar for Auto Copy Status */}
+            {copyStatus && (
+              <div style={{
+                background: '#ECFDF5',
+                borderBottom: '1px solid #A7F3D0',
+                padding: '8px 20px',
+                fontSize: '0.82rem',
+                color: '#065F46',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}>
+                <CheckCircleOutlined style={{ color: '#059669', fontSize: 16 }} />
+                <span>
+                  {copyStatus === 'image_copied' && 'Đã tự động sao chép ảnh mẫu hoa vào bộ nhớ tạm! Bạn có thể Dán (Ctrl+V) vào khung chat.'}
+                  {copyStatus === 'image_downloaded' && 'Đã tải ảnh mẫu hoa về máy của bạn!'}
+                  {copyStatus === 'link_copied' && 'Đã sao chép link sản phẩm vào bộ nhớ tạm!'}
+                  {copyStatus === 'order_sent' && 'Đã lưu đơn & sao chép nội dung đặt hoa! Đang mở ứng dụng chat...'}
+                </span>
+              </div>
+            )}
+
+            {/* Modal Body: 50% Left (Order Form) & 50% Right (Direct Chat) */}
+            <div className="consultation-modal-grid">
+              {/* CỘT TRÁI (50%): FORM ĐẶT HOA NHANH */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingBottom: 8,
+                  borderBottom: '1px solid #E2E8F0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FormOutlined style={{ color: '#0284C7', fontSize: 18 }} />
+                    <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0F172A', textTransform: 'uppercase' }}>
+                      Điền thông tin đặt hoa
+                    </span>
+                  </div>
+                  {hasProfileAutofilled && (
+                    <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, background: '#ECFDF5', padding: '2px 8px', borderRadius: 4 }}>
+                      ✓ Đã tự động điền từ tài khoản
+                    </span>
+                  )}
+                </div>
+
+                {/* 1. Mẫu hoa & Số lượng */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Mẫu hoa & Số lượng:
+                  </label>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '8px 12px',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 10
+                  }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B' }}>
+                      {product.name}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setOrderQuantity(prev => Math.max(1, prev - 1))}
+                        style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #CBD5E1', background: '#FFF', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        -
+                      </button>
+                      <span style={{ fontWeight: 800, fontSize: '0.95rem', minWidth: 20, textAlign: 'center' }}>
+                        {orderQuantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setOrderQuantity(prev => prev + 1)}
+                        style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #CBD5E1', background: '#FFF', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#0284C7', fontWeight: 700, marginTop: 4, textAlign: 'right' }}>
+                    Tạm tính: {formatVND(activePrice * orderQuantity)}
+                  </div>
+                </div>
+
+                {/* 2. Ngày, thời gian nhận hoa */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Ngày & Thời gian nhận hoa:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 8 }}>
+                    <input
+                      type="date"
+                      value={deliveryDate}
+                      onChange={e => setDeliveryDate(e.target.value)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        border: '1px solid #CBD5E1',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="VD: 17:30 chiều nay"
+                      value={deliveryTimePreset}
+                      onChange={e => setDeliveryTimePreset(e.target.value)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        border: '1px solid #CBD5E1',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* 3. SĐT & Họ tên người đặt hoa */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    SĐT của anh/chị <span style={{ color: '#EF4444' }}>*</span> :
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <input
+                      type="tel"
+                      placeholder="Số điện thoại *"
+                      value={senderPhone}
+                      onChange={e => setSenderPhone(e.target.value)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        border: '1px solid #CBD5E1',
+                        fontSize: '0.85rem',
+                        fontWeight: 600
+                      }}
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Họ tên của anh/chị"
+                      value={senderName}
+                      onChange={e => setSenderName(e.target.value)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        border: '1px solid #CBD5E1',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* 4. SĐT người nhận hoa */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                      SĐT người nhận hoa:
+                    </label>
+                    <label style={{ fontSize: '0.78rem', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <input
+                        type="checkbox"
+                        checked={isSameRecipient}
+                        onChange={e => setIsSameRecipient(e.target.checked)}
+                      />
+                      <span>Người nhận là tôi</span>
+                    </label>
+                  </div>
+                  {!isSameRecipient && (
+                    <input
+                      type="tel"
+                      placeholder="Nhập SĐT người nhận hoa"
+                      value={recipientPhone}
+                      onChange={e => setRecipientPhone(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        border: '1px solid #CBD5E1',
+                        fontSize: '0.85rem',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* 5. Địa chỉ nhận hoa */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Địa chỉ nhận hoa:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Số nhà, tên đường, tòa nhà, quận/huyện..."
+                    value={deliveryAddress}
+                    onChange={e => setDeliveryAddress(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: '1px solid #CBD5E1',
+                      fontSize: '0.85rem',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* 6. Nội dung thiệp / biển chúc mừng */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Nội dung thiệp / biển băng rôn chúc mừng:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: TPBank Chi Nhánh Đội Cấn - Chúc Mừng Khai Trương"
+                    value={cardMessage}
+                    onChange={e => setCardMessage(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: '1px solid #CBD5E1',
+                      fontSize: '0.85rem',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* 7. Ghi chú thêm */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Ghi chú thêm (nếu có):
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: Giao trước 17h, hoa tone vàng cam..."
+                    value={orderNotes}
+                    onChange={e => setOrderNotes(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: '1px solid #CBD5E1',
+                      fontSize: '0.85rem',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* Submit Form Button */}
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSubmitFormAndSend}
+                  disabled={isSubmittingOrder}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: 10,
+                    fontWeight: 800,
+                    fontSize: '0.92rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    marginTop: 6
+                  }}
+                >
+                  <SendOutlined />
+                  <span>
+                    {isSubmittingOrder ? 'Đang tạo đơn...' : `Gửi đơn & Kết nối qua ${activeWidget.title} ➜`}
+                  </span>
+                </button>
+                <div style={{ fontSize: '0.72rem', color: '#64748B', textAlign: 'center', lineHeight: 1.3 }}>
+                  * Tự động sao chép nội dung đơn hàng & ảnh mẫu hoa. Khi sang khung chat, bạn chỉ cần bấm <strong>Dán (Paste)</strong>!
+                </div>
+              </div>
+
+              {/* CỘT PHẢI (50%): BỎ QUA FORM - TƯ VẤN TRỰC TIẾP */}
+              <div style={{
+                background: 'linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)',
+                border: '1px solid #E2E8F0',
+                borderRadius: 16,
+                padding: '18px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 16
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <ThunderboltOutlined style={{ color: '#F97316', fontSize: 18 }} />
+                    <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0F172A', textTransform: 'uppercase' }}>
+                      Bỏ qua form - Chat trực tiếp
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: '#64748B', margin: 0, lineHeight: 1.45 }}>
+                    Nếu bạn đang bận hoặc muốn Florist tư vấn mẫu hoa riêng, hãy kết nối ngay không cần điền thông tin:
+                  </p>
+                </div>
+
+                {/* Product Preview Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  borderRadius: 12,
+                  padding: 12,
+                  border: '1px solid #E2E8F0',
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center'
+                }}>
+                  <div style={{ width: 80, height: 80, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#F1F5F9' }}>
+                    <ImageWithFallback
+                      src={selectedImage}
+                      alt={product.name}
+                      fallbackSrc={getFallbackForId(product.id)}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1E293B', lineHeight: 1.3 }}>
+                      {product.name}
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-primary-dark)', marginTop: 4 }}>
+                      {formatVND(activePrice)}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748B', marginTop: 2 }}>
+                      {product.category_name}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auto Copy Reminder Card */}
+                <div style={{
+                  background: '#EFF6FF',
+                  border: '1px solid #BFDBFE',
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'flex-start'
+                }}>
+                  <CheckCircleOutlined style={{ color: '#0284C7', fontSize: 16, marginTop: 2, flexShrink: 0 }} />
+                  <div style={{ fontSize: '0.78rem', color: '#1E40AF', lineHeight: 1.4 }}>
+                    <strong>Đã sao chép ảnh mẫu hoa vào bộ nhớ tạm!</strong><br />
+                    Khi khung chat Zalo / Messenger mở ra, bạn chỉ cần bấm <strong>Dán (Ctrl + V)</strong> để gửi ảnh cho Florist.
+                  </div>
+                </div>
+
+                {/* Direct Action Utilities */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => copyImageToClipboard(selectedImage || getFallbackForId(product.id))}
+                    style={{
+                      padding: '8px 4px',
+                      borderRadius: 8,
+                      border: '1px solid #CBD5E1',
+                      background: '#FFF',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <CopyOutlined style={{ fontSize: 15, color: '#0284C7' }} />
+                    <span>Sao chép ảnh</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => downloadProductImage(selectedImage || getFallbackForId(product.id), product.name)}
+                    style={{
+                      padding: '8px 4px',
+                      borderRadius: 8,
+                      border: '1px solid #CBD5E1',
+                      background: '#FFF',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <DownloadOutlined style={{ fontSize: 15, color: '#10B981' }} />
+                    <span>Tải ảnh về máy</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={copyProductLink}
+                    style={{
+                      padding: '8px 4px',
+                      borderRadius: 8,
+                      border: '1px solid #CBD5E1',
+                      background: '#FFF',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <ShareAltOutlined style={{ fontSize: 15, color: '#6366F1' }} />
+                    <span>Sao chép link</span>
+                  </button>
+                </div>
+
+                {/* Big Skip Form Action Button */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleSkipFormAndChat}
+                    style={{
+                      width: '100%',
+                      padding: '13px 16px',
+                      borderRadius: 10,
+                      fontWeight: 800,
+                      fontSize: '0.95rem',
+                      background: activeWidget.platform_type === 'zalo' ? '#0068FF' :
+                                  activeWidget.platform_type === 'facebook' ? '#0084FF' :
+                                  activeWidget.platform_type === 'phone' ? '#10B981' : '#1E293B',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)'
+                    }}
+                  >
+                    <MessageOutlined />
+                    <span>Mở {activeWidget.title} ngay ➜</span>
+                  </button>
+                  <div style={{ fontSize: '0.72rem', color: '#64748B', textAlign: 'center', marginTop: 6 }}>
+                    Chuyển thẳng sang kênh chat • Không cần điền thông tin
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

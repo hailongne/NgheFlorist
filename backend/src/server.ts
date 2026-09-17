@@ -404,25 +404,49 @@ app.get('/api/products/:slugOrId', async (req: Request, res: Response) => {
       ORDER BY is_featured DESC, sort_order ASC
     `, [product.id]);
 
-    // Related products (same category)
-    const [related] = await pool.query<RowDataPacket[]>(`
-      SELECT p.id, p.name, p.slug, p.price, p.currency,
+    // Related products (same category, supplemented up to 12 products like Shopee)
+    let [related] = await pool.query<RowDataPacket[]>(`
+      SELECT p.id, p.name, p.slug, p.price, p.currency, c.name as category_name,
              (
                SELECT url FROM product_images pi 
                WHERE pi.product_id = p.id 
                ORDER BY pi.is_featured DESC, pi.sort_order ASC LIMIT 1
              ) as featured_image
       FROM products p
+      LEFT JOIN categories c ON c.id = p.category_id
       WHERE p.category_id = ? AND p.id != ? AND p.is_active = 1
       ORDER BY RAND()
-      LIMIT 4
+      LIMIT 12
     `, [product.category_id, product.id]);
+
+    if (related.length < 8) {
+      const existingIds = [product.id, ...related.map((r: any) => r.id)];
+      const [additional] = await pool.query<RowDataPacket[]>(`
+        SELECT p.id, p.name, p.slug, p.price, p.currency, c.name as category_name,
+               (
+                 SELECT url FROM product_images pi 
+                 WHERE pi.product_id = p.id 
+                 ORDER BY pi.is_featured DESC, pi.sort_order ASC LIMIT 1
+               ) as featured_image
+        FROM products p
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.id NOT IN (?) AND p.is_active = 1
+        ORDER BY p.id DESC
+        LIMIT ?
+      `, [existingIds, 12 - related.length]);
+      related = [...related, ...additional];
+    }
 
     res.json({
       ...product,
       price: Number(product.price),
       images,
-      related: related.map(r => ({ ...r, price: Number(r.price) }))
+      related: related.map(r => ({
+        ...r,
+        price: Number(r.price),
+        image_url: r.featured_image || '',
+        featured_image: r.featured_image || ''
+      }))
     });
   } catch (err) {
     console.error('Error fetching product detail:', err);
