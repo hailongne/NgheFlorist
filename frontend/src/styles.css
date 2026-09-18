@@ -2607,12 +2607,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .consultation-modal-box {
   background: #FFFFFF;
-  border-radius: 20px;
+  border-radius: 18px;
   width: 100%;
-  max-width: 640px;
-  max-height: 90vh;
+  max-width: 480px;
+  max-height: 88vh;
   overflow: hidden;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.25);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -2622,8 +2622,8 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #E2E8F0;
+  padding: 14px 18px;
+  border-bottom: 1px solid #F1F5F9;
   background: #FFFFFF;
   flex-shrink: 0;
   position: sticky;
@@ -2634,12 +2634,12 @@ h1, h2, h3, h4, h5, h6 {
 .consultation-modal-tabs-bar {
   display: flex;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 8px 18px;
   background: #FFFFFF;
   border-bottom: 1px solid #F1F5F9;
   flex-shrink: 0;
   position: sticky;
-  top: 68px;
+  top: 61px;
   z-index: 45;
 }
 
@@ -2647,7 +2647,7 @@ h1, h2, h3, h4, h5, h6 {
   overflow-y: auto;
   flex: 1;
   -webkit-overflow-scrolling: touch;
-  padding: 20px 20px 24px;
+  padding: 16px 18px 20px;
 }
 
 @media (max-width: 768px) {
@@ -2655,18 +2655,19 @@ h1, h2, h3, h4, h5, h6 {
     padding: 10px;
   }
   .consultation-modal-box {
-    max-height: 92vh;
+    max-width: 100%;
+    max-height: 90vh;
     border-radius: 16px;
   }
   .consultation-modal-header {
-    padding: 14px 16px;
+    padding: 12px 14px;
   }
   .consultation-modal-tabs-bar {
-    padding: 8px 14px;
-    top: 65px;
+    padding: 8px 12px;
+    top: 57px;
   }
   .consultation-modal-body {
-    padding: 16px 14px 20px;
+    padding: 14px 12px 18px;
   }
 }
 

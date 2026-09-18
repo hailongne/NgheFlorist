@@ -7,7 +7,7 @@ import {
   InstagramOutlined,
   RightOutlined
 } from '@ant-design/icons';
-import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useSiteSettings, formatPhoneNumber, formatAllPhoneNumbersInText } from '../context/SiteSettingsContext';
 import { RealSocialIcon } from './RealSocialIcons';
 
 export type PlatformType = 'zalo' | 'facebook' | 'instagram' | 'phone';
@@ -36,8 +36,8 @@ export default function QuickContactWidget({
   zalo2Url: propZalo2Url
 }: QuickContactWidgetProps) {
   const siteSettings = useSiteSettings();
-  const hotline1 = propHotline1 || siteSettings.hotline1 || '0862 926 866';
-  const hotline2 = propHotline2 || siteSettings.hotline2 || '0329 806 866';
+  const hotline1 = propHotline1 || siteSettings.hotline1 || '086 292 6866';
+  const hotline2 = propHotline2 || siteSettings.hotline2 || '032 980 6866';
   const zalo1Url = propZalo1Url || siteSettings.zaloUrl1 || 'https://zalo.me/0862926866';
   const zalo2Url = propZalo2Url || siteSettings.zaloUrl2 || 'https://zalo.me/0329806866';
 
@@ -331,11 +331,11 @@ export default function QuickContactWidget({
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>
-                          {w.title}
+                          {formatAllPhoneNumbersInText(w.title)}
                         </div>
                         {w.subtitle && (
                           <div className="quick-contact-subtitle" style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {w.subtitle}
+                            {formatAllPhoneNumbersInText(w.subtitle)}
                           </div>
                         )}
                       </div>
@@ -357,7 +357,7 @@ export default function QuickContactWidget({
                       <RealZaloIcon size={32} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 1: {hotline1}</div>
+                      <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 1: {formatPhoneNumber(hotline1)}</div>
                       <div className="quick-contact-subtitle" style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 1 }}>Tư vấn mẫu hoa & Báo giá nhanh</div>
                     </div>
                     <RightOutlined className="quick-contact-arrow" style={{ fontSize: 10, color: '#94A3B8', flexShrink: 0 }} />
@@ -374,7 +374,7 @@ export default function QuickContactWidget({
                       <RealZaloIcon size={32} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 2: {hotline2}</div>
+                      <div className="quick-contact-title" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', lineHeight: 1.25 }}>Chat Zalo 2: {formatPhoneNumber(hotline2)}</div>
                       <div className="quick-contact-subtitle" style={{ fontSize: '0.7rem', color: '#64748B', marginTop: 1 }}>Gửi ảnh hoa thực tế & Đặt theo mẫu</div>
                     </div>
                     <RightOutlined className="quick-contact-arrow" style={{ fontSize: 10, color: '#94A3B8', flexShrink: 0 }} />

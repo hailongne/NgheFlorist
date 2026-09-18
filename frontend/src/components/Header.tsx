@@ -25,7 +25,7 @@ import {
 } from '@ant-design/icons';
 import { useCustomerRequest } from '../context/RequestContext';
 import { useAdminAuth } from '../admin/AdminAuthContext';
-import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useSiteSettings, formatPhoneNumber, formatAllPhoneNumbersInText } from '../context/SiteSettingsContext';
 import { useWishlist, notifyAuthChange } from '../context/WishlistContext';
 import { useOverlayLock } from '../hooks/useOverlayLock';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
@@ -985,11 +985,11 @@ export default function Header() {
 
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {w.title}
+                                {formatAllPhoneNumbersInText(w.title)}
                               </div>
                               {w.subtitle && (
                                 <div style={{ fontSize: '0.70rem', color: '#64748B', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {w.subtitle}
+                                  {formatAllPhoneNumbersInText(w.subtitle)}
                                 </div>
                               )}
                             </div>
@@ -1037,7 +1037,7 @@ export default function Header() {
                             <RealSocialIcon platform="zalo" size={28} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>Chat Zalo 1: {hotline1}</div>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>Chat Zalo 1: {formatPhoneNumber(hotline1)}</div>
                             <div style={{ fontSize: '0.70rem', color: '#64748B' }}>{ctaText1 || 'Báo giá & chọn mẫu nhanh'}</div>
                           </div>
                           <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0068FF', backgroundColor: '#EFF6FF', padding: '4px 9px', borderRadius: 16 }}>
@@ -1066,7 +1066,7 @@ export default function Header() {
                             <RealSocialIcon platform="zalo" size={28} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>Chat Zalo 2: {hotline2}</div>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>Chat Zalo 2: {formatPhoneNumber(hotline2)}</div>
                             <div style={{ fontSize: '0.70rem', color: '#64748B' }}>{ctaText2 || 'Sự kiện & thiết kế riêng'}</div>
                           </div>
                           <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0068FF', backgroundColor: '#EFF6FF', padding: '4px 9px', borderRadius: 16 }}>

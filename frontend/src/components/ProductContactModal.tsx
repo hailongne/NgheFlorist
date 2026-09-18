@@ -7,7 +7,7 @@ import {
   RightOutlined
 } from '@ant-design/icons';
 import { useCustomerRequest } from '../context/RequestContext';
-import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useSiteSettings, formatAllPhoneNumbersInText } from '../context/SiteSettingsContext';
 import { RealSocialIcon } from './RealSocialIcons';
 import ImageWithFallback, { getFallbackForId } from './ImageWithFallback';
 import { useOverlayLock } from '../hooks/useOverlayLock';
@@ -110,7 +110,7 @@ export default function ProductContactModal() {
     {
       id: 1,
       platform_type: 'zalo',
-      title: `Chat Zalo 1: ${siteSettings.hotline1 || '0862 926 866'}`,
+      title: `Chat Zalo 1: ${siteSettings.hotline1 || '086 292 6866'}`,
       subtitle: 'Tư vấn mẫu hoa & Báo giá nhanh trong 3 phút',
       action_link: siteSettings.zaloUrl1 || 'https://zalo.me/0862926866',
       sort_order: 1,
@@ -119,7 +119,7 @@ export default function ProductContactModal() {
     {
       id: 2,
       platform_type: 'zalo',
-      title: `Chat Zalo 2: ${siteSettings.hotline2 || '0329 806 866'}`,
+      title: `Chat Zalo 2: ${siteSettings.hotline2 || '032 980 6866'}`,
       subtitle: 'Hỗ trợ đặt hoa theo yêu cầu & Duyệt ảnh thành phẩm',
       action_link: siteSettings.zaloUrl2 || 'https://zalo.me/0329806866',
       sort_order: 2,
@@ -137,7 +137,7 @@ export default function ProductContactModal() {
     {
       id: 4,
       platform_type: 'phone',
-      title: `Hotline ${siteSettings.hotline1 || '0862 926 866'}`,
+      title: `Hotline ${siteSettings.hotline1 || '086 292 6866'}`,
       subtitle: 'Tư vấn mẫu hoa & Báo giá nhanh',
       action_link: `tel:${(siteSettings.hotline1 || '0862926866').replace(/\s+/g, '')}`,
       sort_order: 4,
@@ -463,11 +463,11 @@ export default function ProductContactModal() {
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1E293B', lineHeight: 1.25 }}>
-                      {widget.title}
+                      {formatAllPhoneNumbersInText(widget.title)}
                     </div>
                     {widget.subtitle && (
                       <div style={{ fontSize: '0.71rem', color: '#64748B', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {widget.subtitle}
+                        {formatAllPhoneNumbersInText(widget.subtitle)}
                       </div>
                     )}
                   </div>

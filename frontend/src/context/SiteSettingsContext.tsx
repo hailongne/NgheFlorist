@@ -51,39 +51,51 @@ export function normalizeZaloUrl(url?: string, defaultPhone = '0987654321'): str
   return clean;
 }
 
-export function extractPhoneFromZalo(url?: string, fallback = ''): string {
+export function extractPhoneFromZalo(url?: string, fallback = '086 292 6866'): string {
   if (!url) return fallback;
   const match = url.match(/(?:zalo\.me\/|\b)(0\d{9,10})\b/);
   if (match) {
     const raw = match[1];
     if (raw.length === 10) {
-      return `${raw.slice(0, 4)} ${raw.slice(4, 7)} ${raw.slice(7)}`;
+      return `${raw.slice(0, 3)} ${raw.slice(3, 6)} ${raw.slice(6)}`;
     }
     if (raw.length === 11) {
-      return `${raw.slice(0, 5)} ${raw.slice(5, 8)} ${raw.slice(8)}`;
+      return `${raw.slice(0, 4)} ${raw.slice(4, 7)} ${raw.slice(7)}`;
     }
     return raw;
   }
   const digits = url.replace(/\D/g, '');
   if (digits.length >= 10) {
     const d = digits.slice(-10);
-    return `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}`;
+    return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
   }
   return fallback || url;
 }
 
-export function formatPhoneNumber(phone?: string, fallback = '0862 926 866'): string {
+export function formatPhoneNumber(phone?: string, fallback = '086 292 6866'): string {
   if (!phone) return fallback;
-  const clean = phone.trim();
-  if (clean.includes(' ') || clean.includes('.') || clean.includes('-')) return clean;
-  const digits = clean.replace(/\D/g, '');
+  const digits = phone.replace(/\D/g, '');
   if (digits.length === 10) {
-    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
   }
   if (digits.length === 11) {
-    return `${digits.slice(0, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
   }
-  return clean;
+  return phone.trim();
+}
+
+export function formatAllPhoneNumbersInText(text?: string | null): string {
+  if (!text) return '';
+  return text.replace(/\b(0\d[\d\s.-]{7,13}\d)\b/g, (match) => {
+    const digits = match.replace(/\D/g, '');
+    if (digits.length === 10) {
+      return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+    }
+    if (digits.length === 11) {
+      return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+    }
+    return match;
+  });
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -108,8 +120,8 @@ const DEFAULT_CONVERSION: ConversionConfig = {
 const SiteSettingsContext = createContext<SiteSettingsContextValue>({
   settings: DEFAULT_SETTINGS,
   conversion: DEFAULT_CONVERSION,
-  hotline1: '0862 926 866',
-  hotline2: '0329 806 866',
+  hotline1: '086 292 6866',
+  hotline2: '032 980 6866',
   zaloUrl1: 'https://zalo.me/0862926866',
   zaloUrl2: 'https://zalo.me/0329806866',
   ctaText1: 'Tư vấn qua Zalo',
@@ -159,8 +171,8 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const zaloUrl2 = normalizeZaloUrl(conversion.fanpage_url, '0329806866');
   const hotline1 = settings.hotline 
     ? formatPhoneNumber(settings.hotline) 
-    : extractPhoneFromZalo(conversion.zalo_url, '0862 926 866');
-  const hotline2 = extractPhoneFromZalo(conversion.fanpage_url, '0329 806 866');
+    : extractPhoneFromZalo(conversion.zalo_url, '086 292 6866');
+  const hotline2 = extractPhoneFromZalo(conversion.fanpage_url, '032 980 6866');
   const ctaText1 = conversion.primary_cta_text || 'Tư vấn qua Zalo';
   const ctaText2 = conversion.secondary_cta_text || 'Tư vấn qua Zalo';
 

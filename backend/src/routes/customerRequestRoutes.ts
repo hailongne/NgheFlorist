@@ -173,10 +173,10 @@ router.post('/', orderRateLimiter, async (req: Request, res: Response) => {
       zalo_url: "https://zalo.me/0987654321",
       zalo2_url: "https://zalo.me/0862926866",
       hotline1: "0987 654 321",
-      hotline2: "0862 926 866",
+      hotline2: "086 292 6866",
       primary_channel: "zalo",
       primary_cta_text: "Gửi đơn qua Zalo 1 (0987 654 321)",
-      secondary_cta_text: "Gửi đơn qua Zalo 2 (0862 926 866)"
+      secondary_cta_text: "Gửi đơn qua Zalo 2 (086 292 6866)"
     };
 
     if (cfgRows.length > 0) {

@@ -22,7 +22,7 @@ import {
   ShareAltOutlined
 } from '@ant-design/icons';
 import ImageWithFallback, { getFallbackForId } from '../components/ImageWithFallback';
-import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useSiteSettings, formatAllPhoneNumbersInText } from '../context/SiteSettingsContext';
 import ProductCard from '../components/ProductCard';
 import { RealSocialIcon } from '../components/RealSocialIcons';
 import { useWishlist } from '../context/WishlistContext';
@@ -712,7 +712,7 @@ export default function ProductDetailPage() {
                         type="button"
                         className={`consultation-widget-btn ${isSpan2 ? 'span-2-col' : ''}`}
                         onClick={() => handleOpenConsultation(widget)}
-                        title={widget.title}
+                        title={formatAllPhoneNumbersInText(widget.title)}
                       >
                         <RealSocialIcon platform={widget.platform_type} size={28} />
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -725,7 +725,7 @@ export default function ProductDetailPage() {
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                           }}>
-                            {widget.title}
+                            {formatAllPhoneNumbersInText(widget.title)}
                           </div>
                           <div style={{
                             fontSize: '0.72rem',
@@ -735,7 +735,7 @@ export default function ProductDetailPage() {
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                           }}>
-                            {widget.subtitle || (widget.platform_type === 'phone' ? 'Gọi đặt hoa nhanh' : 'Tư vấn & báo giá')}
+                            {formatAllPhoneNumbersInText(widget.subtitle || (widget.platform_type === 'phone' ? 'Gọi đặt hoa nhanh' : 'Tư vấn & báo giá'))}
                           </div>
                         </div>
                         <div style={{
@@ -884,20 +884,20 @@ export default function ProductDetailPage() {
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  <RealSocialIcon platform={activeWidget.platform_type} size={32} />
+                  <RealSocialIcon platform={activeWidget.platform_type} size={30} />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{
-                    fontWeight: 800,
-                    fontSize: '1rem',
+                    fontWeight: 700,
+                    fontSize: '0.94rem',
                     color: '#1E293B',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }}>
-                    Tư vấn qua {activeWidget.title}
+                    Tư vấn qua {formatAllPhoneNumbersInText(activeWidget.title)}
                   </div>
-                  <div style={{ fontSize: '0.76rem', color: '#64748B', marginTop: 1 }}>
+                  <div style={{ fontSize: '0.74rem', color: '#64748B', marginTop: 1 }}>
                     Mẫu hoa: <strong style={{ color: '#1E293B' }}>{product.name}</strong> • <strong style={{ color: 'var(--color-primary-dark)' }}>{formatVND(activePrice)}</strong>
                   </div>
                 </div>
@@ -907,17 +907,17 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={() => setConsultModalOpen(false)}
                 style={{
-                  width: 36,
-                  height: 36,
+                  width: 32,
+                  height: 32,
                   borderRadius: '50%',
                   border: 'none',
-                  background: '#EDF2F7',
+                  background: '#F1F5F9',
                   color: '#475569',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  fontSize: 16,
+                  fontSize: 14,
                   flexShrink: 0,
                   transition: 'all 0.15s ease'
                 }}
@@ -934,12 +934,12 @@ export default function ProductDetailPage() {
                 onClick={() => setModalTab('quick_chat')}
                 style={{
                   flex: 1,
-                  padding: '9px 12px',
+                  padding: '8px 12px',
                   borderRadius: 10,
                   border: '1px solid',
                   borderColor: modalTab === 'quick_chat' ? 'var(--color-primary-dark)' : '#E2E8F0',
-                  fontWeight: 800,
-                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -953,12 +953,12 @@ export default function ProductDetailPage() {
               >
                 <span>⚡ Tư vấn nhanh</span>
                 <span style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.66rem',
                   background: modalTab === 'quick_chat' ? 'var(--color-primary-dark)' : '#F1F5F9',
                   color: modalTab === 'quick_chat' ? '#FFFFFF' : '#64748B',
-                  padding: '1px 6px',
+                  padding: '1px 5px',
                   borderRadius: 4,
-                  fontWeight: 700
+                  fontWeight: 600
                 }}>
                   Khuyên dùng
                 </span>
@@ -969,12 +969,12 @@ export default function ProductDetailPage() {
                 onClick={() => setModalTab('order_form')}
                 style={{
                   flex: 1,
-                  padding: '9px 12px',
+                  padding: '8px 12px',
                   borderRadius: 10,
                   border: '1px solid',
                   borderColor: modalTab === 'order_form' ? 'var(--color-primary-dark)' : '#E2E8F0',
-                  fontWeight: 800,
-                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -990,13 +990,13 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Notification Bar for Auto Copy Status */}
+            {/* Notification Bar for Auto Copy Status (Chỉ hiển thị khi có sự kiện copy/download) */}
             {copyStatus && (
               <div style={{
                 background: '#ECFDF5',
                 borderBottom: '1px solid #A7F3D0',
-                padding: '8px 20px',
-                fontSize: '0.82rem',
+                padding: '7px 16px',
+                fontSize: '0.78rem',
                 color: '#065F46',
                 fontWeight: 600,
                 display: 'flex',
@@ -1004,12 +1004,12 @@ export default function ProductDetailPage() {
                 gap: 8,
                 flexShrink: 0
               }}>
-                <CheckCircleOutlined style={{ color: '#059669', fontSize: 16, flexShrink: 0 }} />
+                <CheckCircleOutlined style={{ color: '#059669', fontSize: 14, flexShrink: 0 }} />
                 <span>
-                  {copyStatus === 'image_copied' && 'Đã tự động sao chép ảnh mẫu hoa vào bộ nhớ tạm! Bạn có thể Dán (Ctrl+V) vào khung chat.'}
+                  {copyStatus === 'image_copied' && 'Đã tự động sao chép ảnh mẫu hoa vào bộ nhớ tạm!'}
                   {copyStatus === 'image_downloaded' && 'Đã tải ảnh mẫu hoa về máy của bạn!'}
                   {copyStatus === 'link_copied' && 'Đã sao chép link sản phẩm vào bộ nhớ tạm!'}
-                  {copyStatus === 'order_sent' && 'Đã lưu đơn & sao chép nội dung đặt hoa! Đang mở ứng dụng chat...'}
+                  {copyStatus === 'order_sent' && 'Đã lưu đơn & sao chép nội dung! Đang mở ứng dụng chat...'}
                 </span>
               </div>
             )}
@@ -1018,18 +1018,18 @@ export default function ProductDetailPage() {
             <div className="consultation-modal-body">
               {modalTab === 'quick_chat' ? (
                 /* ===== TAB 1: TƯ VẤN NHANH TRỰC TIẾP (1 CHẠM, KHÔNG CẦN FORM) ===== */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {/* Product Card */}
                   <div style={{
                     background: '#F8FAFC',
-                    borderRadius: 14,
-                    padding: 12,
+                    borderRadius: 12,
+                    padding: '10px 12px',
                     border: '1px solid #E2E8F0',
                     display: 'flex',
                     gap: 12,
                     alignItems: 'center'
                   }}>
-                    <div style={{ width: 76, height: 76, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: '#F1F5F9' }}>
+                    <div style={{ width: 62, height: 62, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#F1F5F9' }}>
                       <ImageWithFallback
                         src={selectedImage}
                         alt={product.name}
@@ -1038,32 +1038,35 @@ export default function ProductDetailPage() {
                       />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#1E293B', lineHeight: 1.3 }}>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E293B', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {product.name}
                       </div>
-                      <div style={{ fontSize: '1.08rem', fontWeight: 800, color: 'var(--color-primary-dark)', marginTop: 4 }}>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-primary-dark)', marginTop: 2 }}>
                         {formatVND(activePrice)}
                       </div>
-                      <div style={{ fontSize: '0.76rem', color: '#64748B', marginTop: 2 }}>
-                        {product.category_name}
-                      </div>
+                      {product.category_name && (
+                        <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: 1 }}>
+                          {product.category_name}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Auto Copy Reminder Card */}
+                  {/* Single Clean Auto Copy Tip */}
                   <div style={{
-                    background: '#EFF6FF',
-                    border: '1px solid #BFDBFE',
-                    borderRadius: 12,
-                    padding: '12px 14px',
+                    background: '#F0FDF4',
+                    border: '1px solid #DCFCE7',
+                    borderRadius: 10,
+                    padding: '8px 12px',
                     display: 'flex',
-                    gap: 10,
-                    alignItems: 'flex-start'
+                    alignItems: 'center',
+                    gap: 8,
+                    fontSize: '0.76rem',
+                    color: '#166534'
                   }}>
-                    <CheckCircleOutlined style={{ color: '#0284C7', fontSize: 18, marginTop: 2, flexShrink: 0 }} />
-                    <div style={{ fontSize: '0.82rem', color: '#1E40AF', lineHeight: 1.45 }}>
-                      <strong>Đã tự động sao chép ảnh mẫu hoa vào bộ nhớ tạm!</strong><br />
-                      Khi khung chat {activeWidget.title} mở ra, bạn chỉ cần bấm <strong>Dán (Ctrl + V)</strong> để gửi ảnh cho Florist tư vấn báo giá ngay.
+                    <CheckCircleOutlined style={{ color: '#16A34A', fontSize: 14, flexShrink: 0 }} />
+                    <div style={{ lineHeight: 1.35 }}>
+                      Đã tự động lưu ảnh mẫu hoa. Khi mở chat bạn chỉ cần <strong>Dán (Ctrl + V)</strong> để gửi shop.
                     </div>
                   </div>
 
@@ -1073,21 +1076,22 @@ export default function ProductDetailPage() {
                       type="button"
                       onClick={() => copyImageToClipboard(selectedImage || getFallbackForId(product.id))}
                       style={{
-                        padding: '9px 6px',
+                        padding: '8px 6px',
                         borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        background: '#FFF',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
+                        border: '1px solid #E2E8F0',
+                        background: '#FFFFFF',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
                         color: '#334155',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 4
+                        gap: 3,
+                        transition: 'all 0.15s ease'
                       }}
                     >
-                      <CopyOutlined style={{ fontSize: 16, color: '#0284C7' }} />
+                      <CopyOutlined style={{ fontSize: 14, color: '#0284C7' }} />
                       <span>Sao chép ảnh</span>
                     </button>
 
@@ -1095,58 +1099,61 @@ export default function ProductDetailPage() {
                       type="button"
                       onClick={() => downloadProductImage(selectedImage || getFallbackForId(product.id), product.name)}
                       style={{
-                        padding: '9px 6px',
+                        padding: '8px 6px',
                         borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        background: '#FFF',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
+                        border: '1px solid #E2E8F0',
+                        background: '#FFFFFF',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
                         color: '#334155',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 4
+                        gap: 3,
+                        transition: 'all 0.15s ease'
                       }}
                     >
-                      <DownloadOutlined style={{ fontSize: 16, color: '#10B981' }} />
-                      <span>Tải ảnh về máy</span>
+                      <DownloadOutlined style={{ fontSize: 14, color: '#10B981' }} />
+                      <span>Tải ảnh</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={copyProductLink}
                       style={{
-                        padding: '9px 6px',
+                        padding: '8px 6px',
                         borderRadius: 8,
-                        border: '1px solid #CBD5E1',
-                        background: '#FFF',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
+                        border: '1px solid #E2E8F0',
+                        background: '#FFFFFF',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
                         color: '#334155',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 4
+                        gap: 3,
+                        transition: 'all 0.15s ease'
                       }}
                     >
-                      <ShareAltOutlined style={{ fontSize: 16, color: '#6366F1' }} />
+                      <ShareAltOutlined style={{ fontSize: 14, color: '#6366F1' }} />
                       <span>Sao chép link</span>
                     </button>
                   </div>
 
                   {/* Big Primary Action Button */}
-                  <div style={{ marginTop: 4 }}>
+                  <div style={{ marginTop: 2 }}>
                     <button
                       type="button"
                       onClick={handleSkipFormAndChat}
                       style={{
                         width: '100%',
-                        padding: '14px 18px',
+                        padding: '12px 18px',
                         borderRadius: 12,
-                        fontWeight: 800,
-                        fontSize: '0.98rem',
+                        fontWeight: 700,
+                        fontSize: '0.94rem',
+                        letterSpacing: 0.2,
                         background: activeWidget.platform_type === 'zalo' ? '#0068FF' :
                                     activeWidget.platform_type === 'facebook' ? '#1877F2' :
                                     activeWidget.platform_type === 'instagram' ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' :
@@ -1157,38 +1164,45 @@ export default function ProductDetailPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 10,
-                        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)'
+                        gap: 8,
+                        boxShadow: activeWidget.platform_type === 'zalo' ? '0 4px 14px rgba(0, 104, 255, 0.25)' : '0 4px 14px rgba(0, 0, 0, 0.12)',
+                        transition: 'all 0.15s ease'
                       }}
                     >
-                      <RealSocialIcon platform={activeWidget.platform_type} size={24} />
+                      <RealSocialIcon platform={activeWidget.platform_type} size={22} />
                       <span>
-                        {activeWidget.platform_type === 'phone' 
-                          ? `Gọi hotline ${activeWidget.title} ngay ➜` 
-                          : `Mở ${activeWidget.title} để gửi ảnh & chat ngay ➜`}
+                        {activeWidget.platform_type === 'phone'
+                          ? 'Gọi hotline ngay ➜'
+                          : activeWidget.platform_type === 'zalo'
+                          ? 'Mở Chat Zalo ngay ➜'
+                          : activeWidget.platform_type === 'facebook'
+                          ? 'Nhắn Fanpage ngay ➜'
+                          : activeWidget.platform_type === 'instagram'
+                          ? 'Nhắn Instagram ngay ➜'
+                          : 'Liên hệ tư vấn ngay ➜'}
                       </span>
                     </button>
-                    <div style={{ fontSize: '0.76rem', color: '#64748B', textAlign: 'center', marginTop: 8 }}>
-                      ⚡ Kết nối trực tiếp 1 chạm • Không cần điền form
+                    <div style={{ fontSize: '0.73rem', color: '#64748B', textAlign: 'center', marginTop: 7 }}>
+                      ⚡ Kết nối 1 chạm • Không cần điền form
                     </div>
                   </div>
 
                   {/* Suggestion to switch to Tab 2 */}
                   <div style={{
-                    marginTop: 8,
-                    padding: '12px 14px',
-                    borderRadius: 12,
+                    marginTop: 4,
+                    padding: '9px 12px',
+                    borderRadius: 10,
                     background: '#F8FAFC',
-                    border: '1px dashed #CBD5E1',
+                    border: '1px dashed #E2E8F0',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
-                    gap: 10
+                    gap: 6
                   }}>
-                    <div style={{ fontSize: '0.82rem', color: '#475569' }}>
-                      Bạn muốn hẹn giờ nhận hoa hoặc ghi nội dung thiệp chúc mừng?
-                    </div>
+                    <span style={{ fontSize: '0.76rem', color: '#64748B' }}>
+                      Cần hẹn giờ giao hoặc ghi thiệp chúc mừng?
+                    </span>
                     <button
                       type="button"
                       onClick={() => setModalTab('order_form')}
@@ -1196,14 +1210,15 @@ export default function ProductDetailPage() {
                         background: 'none',
                         border: 'none',
                         color: 'var(--color-primary-dark)',
-                        fontSize: '0.84rem',
-                        fontWeight: 800,
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
                         cursor: 'pointer',
                         padding: 0,
-                        textDecoration: 'underline'
+                        textDecoration: 'underline',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      👉 Điền thông tin đặt hoa ➜
+                      Điền thông tin ➜
                     </button>
                   </div>
                 </div>
@@ -1320,7 +1335,7 @@ export default function ProductDetailPage() {
                           }}
                         >
                           <SendOutlined />
-                          <span>Mở {activeWidget.title} để dán gửi ngay ➜</span>
+                          <span>Mở {formatAllPhoneNumbersInText(activeWidget.title)} gửi ngay ➜</span>
                         </button>
 
                         <button
