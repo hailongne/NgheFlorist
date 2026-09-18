@@ -1357,7 +1357,7 @@ h1, h2, h3, h4, h5, h6 {
 .product-detail-layout {
   display: grid;
   grid-template-columns: 1.05fr 1fr;
-  gap: clamp(24px, 4vw, 52px);
+  gap: clamp(24px, 4vw, 48px);
   align-items: start;
   width: 100%;
   max-width: 100%;
@@ -1369,6 +1369,72 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.product-main-image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+  border-radius: var(--radius-md, 16px);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: #F8FAFC;
+  touch-action: pan-y;
+}
+
+.product-album-thumbnails-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  padding: 6px 4px 10px;
+  margin-top: 14px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.product-album-thumbnails-row::-webkit-scrollbar {
+  height: 4px;
+}
+.product-album-thumbnails-row::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+.product-album-thumbnail-btn {
+  width: 62px;
+  height: 62px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.65;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.product-album-thumbnail-btn:hover {
+  opacity: 0.95;
+  border-color: var(--color-primary-dark, #5D9EAF);
+  transform: translateY(-1px);
+}
+
+.product-album-thumbnail-btn.active {
+  border: 2px solid var(--color-primary-dark, #5D9EAF);
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(93, 158, 175, 0.32);
 }
 
 .product-detail-info {
@@ -1378,61 +1444,76 @@ h1, h2, h3, h4, h5, h6 {
   box-sizing: border-box;
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+/* Tablet & Mobile Layout: centered, largest, 3:4 portrait ratio, album below */
+@media (max-width: 992px) {
   .product-detail-layout {
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .product-detail-gallery {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  .product-main-image-wrapper {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    aspect-ratio: 3 / 4;
+  }
+
+  .product-album-thumbnails-row {
+    max-width: 520px;
+    margin: 12px auto 0;
+  }
+
+  .product-detail-info {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
   }
 }
 
 @media (max-width: 768px) {
   .product-detail-layout {
-    display: flex;
-    flex-direction: column;
     gap: 16px;
-    width: 100%;
-    min-width: 0;
   }
-  
-  .product-detail-gallery,
+
+  .product-detail-gallery {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .product-main-image-wrapper {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 14px;
+  }
+
+  .product-album-thumbnails-row {
+    gap: 8px;
+    margin-top: 10px;
+    padding-bottom: 6px;
+  }
+
+  .product-album-thumbnail-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 7px;
+  }
+
   .product-detail-info {
     width: 100%;
     max-width: 100%;
-    min-width: 0;
   }
-}
-
-/* Lookbook Horizontal Image Gallery for Mobile */
-.lookbook-gallery-mobile {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  gap: 12px;
-  margin: 0 0 14px 0;
-  padding: 2px 0 6px 0;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-.lookbook-gallery-mobile::-webkit-scrollbar {
-  display: none;
-}
-.lookbook-slide {
-  flex: 0 0 92%;
-  scroll-snap-align: start;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--color-background-soft);
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-.lookbook-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 

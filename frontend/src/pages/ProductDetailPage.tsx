@@ -121,6 +121,31 @@ export default function ProductDetailPage() {
   const [hasProfileAutofilled, setHasProfileAutofilled] = useState(false);
   const [submittedText, setSubmittedText] = useState<string | null>(null);
   const [isCopiedSuccess, setIsCopiedSuccess] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null || !product || !product.images || product.images.length <= 1) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+    if (Math.abs(diffX) > 40) {
+      const currentIndex = product.images.findIndex(img => img.url === selectedImage);
+      const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+      if (diffX > 0) {
+        // Swipe left -> Next image
+        const nextIndex = (safeIndex + 1) % product.images.length;
+        setSelectedImage(product.images[nextIndex].url);
+      } else {
+        // Swipe right -> Prev image
+        const prevIndex = (safeIndex - 1 + product.images.length) % product.images.length;
+        setSelectedImage(product.images[prevIndex].url);
+      }
+    }
+    setTouchStartX(null);
+  };
 
   // Load product detail
   useEffect(() => {
@@ -484,74 +509,72 @@ export default function ProductDetailPage() {
 
         {/* MAIN PRODUCT DETAIL GRID */}
         <div className="product-detail-layout">
-          {/* GALLERY */}
+          {/* GALLERY: 3:4 PORTRAIT RATIO, CENTERED, ALBUM THUMBNAILS BELOW */}
           <div className="product-detail-gallery">
-            {/* Mobile Lookbook Swipe Gallery */}
-            <div className="mobile-only-element" style={{ marginBottom: 18, width: '100%', boxSizing: 'border-box' }}>
-              <div className="lookbook-gallery-mobile">
-                {(product.images && product.images.length > 0 ? product.images : [{ id: product.id, url: selectedImage, alt_text: product.name, is_featured: 1, sort_order: 0 }]).map((img, i) => (
-                  <div key={img.id || i} className="lookbook-slide" style={{ position: 'relative' }}>
-                    <ImageWithFallback
-                      src={img.url}
-                      alt={img.alt_text || product.name}
-                      fallbackSrc={getFallbackForId(product.id + i)}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  </div>
-                ))}
-              </div>
+            {/* Main Image Container (3:4 ratio, centered, max width on desktop/tablet/mobile) */}
+            <div
+              className="product-main-image-wrapper"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <ImageWithFallback
+                src={selectedImage}
+                alt={product.name}
+                fallbackSrc={getFallbackForId(product.id)}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
+
+              {/* Wishlist Button */}
+              <button
+                type="button"
+                onClick={toggleWishlist}
+                className="card-wishlist-btn"
+                style={{
+                  position: 'absolute',
+                  top: 14,
+                  right: 14,
+                  width: 38,
+                  height: 38,
+                  borderRadius: '50%',
+                  backgroundColor: '#FFFFFF',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.12)',
+                  cursor: 'pointer',
+                  zIndex: 10,
+                  transition: 'all 0.2s ease'
+                }}
+                aria-label={isWishlisted ? 'Bỏ lưu' : 'Lưu mẫu'}
+                title="Lưu mẫu hoa"
+              >
+                {isWishlisted ? (
+                  <HeartFilled style={{ color: '#E11D48', fontSize: 18 }} />
+                ) : (
+                  <HeartOutlined style={{ fontSize: 18, color: '#475569' }} />
+                )}
+              </button>
             </div>
 
-            {/* Desktop / Tablet Main Gallery View */}
-            <div className="desktop-only-element" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div 
-                style={{ 
-                  position: 'relative', 
-                  borderRadius: 'var(--radius-md)', 
-                  overflow: 'hidden', 
-                  boxShadow: 'var(--shadow-md)',
-                  aspectRatio: '3/4',
-                  maxHeight: '620px',
-                  background: '#F8FAFC'
-                }}
-              >
-                <ImageWithFallback
-                  src={selectedImage}
-                  alt={product.name}
-                  fallbackSrc={getFallbackForId(product.id)}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-
-                {/* Wishlist Button */}
-                <button
-                  onClick={toggleWishlist}
-                  className="card-wishlist-btn"
-                  style={{ position: 'absolute', top: 16, right: 16 }}
-                  aria-label={isWishlisted ? 'Bỏ lưu' : 'Lưu mẫu'}
-                  title="Lưu mẫu hoa"
-                >
-                  {isWishlisted ? <HeartFilled style={{ color: '#E11D48' }} /> : <HeartOutlined />}
-                </button>
-              </div>
-
-              {/* Thumbnails */}
-              {product.images && product.images.length > 1 && (
-                <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
-                  {product.images.map((img, i) => (
-                    <div
+            {/* Album Thumbnails Row (Small album beneath main image - Image 2 reference) */}
+            {product.images && product.images.length > 1 && (
+              <div className="product-album-thumbnails-row">
+                {product.images.map((img, i) => {
+                  const isSelected = selectedImage === img.url;
+                  return (
+                    <button
                       key={img.id || i}
+                      type="button"
                       onClick={() => setSelectedImage(img.url)}
-                      style={{
-                        width: 72,
-                        height: 72,
-                        borderRadius: 'var(--radius-sm)',
-                        overflow: 'hidden',
-                        border: selectedImage === img.url ? '2px solid var(--color-primary-dark)' : '1px solid var(--color-border)',
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                        opacity: selectedImage === img.url ? 1 : 0.7,
-                        transition: 'all 0.2s'
-                      }}
+                      className={`product-album-thumbnail-btn ${isSelected ? 'active' : ''}`}
+                      title={img.alt_text || `${product.name} - ảnh ${i + 1}`}
+                      aria-label={`${product.name} - ảnh ${i + 1}`}
                     >
                       <ImageWithFallback
                         src={img.url}
@@ -559,11 +582,11 @@ export default function ProductDetailPage() {
                         fallbackSrc={getFallbackForId(product.id + i)}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* INFORMATION & CONVERSION ACTIONS */}
