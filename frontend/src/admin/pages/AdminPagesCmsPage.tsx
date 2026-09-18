@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
+import { generateSlug } from '../../utils/slugify';
 import { 
   EditOutlined, 
   FileTextOutlined, 
@@ -48,6 +49,7 @@ export default function AdminPagesCmsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [isSlugManual, setIsSlugManual] = useState(false);
   const [content, setContent] = useState('');
   const [metaDesc, setMetaDesc] = useState('');
   const [isPublished, setIsPublished] = useState(true);
@@ -78,6 +80,7 @@ export default function AdminPagesCmsPage() {
     setEditingId(null);
     setTitle('');
     setSlug('');
+    setIsSlugManual(false);
     setContent('<h2>1. Tiêu đề mục chính</h2>\n<p>Nội dung giới thiệu hoặc quy định chi tiết tại Nghệ Florist...</p>');
     setMetaDesc('');
     setIsPublished(true);
@@ -88,23 +91,22 @@ export default function AdminPagesCmsPage() {
   const handleOpenEdit = async (id: number) => {
     setIsCreating(false);
     setEditingId(id);
+    setIsSlugManual(true);
     setActiveModalTab('editor');
     setModalOpen(true);
+
     try {
       const targetPage = pages.find(p => p.id === id);
       if (targetPage) {
         setTitle(targetPage.title);
         setSlug(targetPage.slug);
         setMetaDesc(targetPage.meta_description || '');
-        setIsPublished(targetPage.is_published !== 0);
+        setIsPublished(targetPage.is_published === 1);
 
         const res = await fetch(`/api/pages/${targetPage.slug}`);
         if (res.ok) {
-          const full = await res.json();
-          setContent(full.content || '');
-          setTitle(full.title);
-          setMetaDesc(full.meta_description || '');
-          setIsPublished(full.is_published !== 0);
+          const fullData = await res.json();
+          setContent(fullData.content || '');
         }
       }
     } catch (err) {
@@ -119,7 +121,7 @@ export default function AdminPagesCmsPage() {
     setSaving(true);
     try {
       if (isCreating) {
-        const cleanSlug = slug.trim() || title.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+        const cleanSlug = (slug.trim() || generateSlug(title)).trim();
         const res = await fetch('/api/admin/pages', {
           method: 'POST',
           headers: {
@@ -604,20 +606,52 @@ export default function AdminPagesCmsPage() {
                       required
                       placeholder="VD: Chính Sách Đổi Trả & Bảo Hành"
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setTitle(val);
+                        if (isCreating && !isSlugManual) {
+                          setSlug(generateSlug(val));
+                        }
+                      }}
                     />
                   </div>
 
                   {isCreating && (
                     <div>
-                      <label className="admin-label">Đường dẫn tĩnh (Slug) *</label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label className="admin-label" style={{ margin: 0 }}>Đường dẫn tĩnh (Slug) *</label>
+                        {title && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSlug(generateSlug(title));
+                              setIsSlugManual(false);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#5D9EAF',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              padding: 0,
+                              textDecoration: 'underline'
+                            }}
+                            title="Tự động tạo lại slug theo tiêu đề"
+                          >
+                            Tự động tạo từ tiêu đề
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="text"
                         className="admin-input"
                         required
                         placeholder="VD: chinh-sach-doi-tra"
                         value={slug}
-                        onChange={(e) => setSlug(e.target.value)}
+                        onChange={(e) => {
+                          setSlug(e.target.value);
+                          setIsSlugManual(true);
+                        }}
                       />
                     </div>
                   )}

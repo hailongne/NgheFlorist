@@ -2,6 +2,8 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../AdminAuthContext';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
+import { generateSlug } from '../../utils/slugify';
+import { handleNumberFocus, handleNumberKeyDown, handleNumberChange } from '../../utils/numberInput';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -48,9 +50,10 @@ export default function AdminCategoriesPage() {
   const [categoryType, setCategoryType] = useState<'parent' | 'sub'>('parent');
   const [formName, setFormName] = useState('');
   const [formSlug, setFormSlug] = useState('');
+  const [isSlugManual, setIsSlugManual] = useState(false);
   const [formParentId, setFormParentId] = useState<string>('');
   const [formDescription, setFormDescription] = useState('');
-  const [formSortOrder, setFormSortOrder] = useState<number>(0);
+  const [formSortOrder, setFormSortOrder] = useState<number | ''>(0);
   const [formIsActive, setFormIsActive] = useState<number>(1);
   const [saving, setSaving] = useState(false);
 
@@ -119,6 +122,7 @@ export default function AdminCategoriesPage() {
     setCategoryType('parent');
     setFormName('');
     setFormSlug('');
+    setIsSlugManual(false);
     setFormParentId('');
     setFormDescription('');
     setFormSortOrder(0);
@@ -132,6 +136,7 @@ export default function AdminCategoriesPage() {
     setCategoryType('sub');
     setFormName('');
     setFormSlug('');
+    setIsSlugManual(false);
     setFormParentId(parent ? parent.id.toString() : (parentCategories[0]?.id.toString() || ''));
     setFormDescription('');
     setFormSortOrder(0);
@@ -145,6 +150,7 @@ export default function AdminCategoriesPage() {
     setCategoryType(c.parent_id ? 'sub' : 'parent');
     setFormName(c.name);
     setFormSlug(c.slug);
+    setIsSlugManual(true);
     setFormParentId(c.parent_id ? c.parent_id.toString() : '');
     setFormDescription(c.description || '');
     setFormSortOrder(c.sort_order || 0);
@@ -158,22 +164,19 @@ export default function AdminCategoriesPage() {
       const res = await fetch(`/api/admin/categories/${c.id}/toggle-active`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         }
       });
-      if (res.ok) {
-        fetchCategories();
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Lỗi đổi trạng thái danh mục');
+      if (!res.ok) {
+        throw new Error('Lỗi cập nhật trạng thái');
       }
-    } catch (err) {
-      alert('Lỗi khi đổi trạng thái danh mục');
+      fetchCategories();
+    } catch (err: any) {
+      alert(err.message);
     }
   };
 
-  // Save Category
+  // Save Category (Create or Update)
   const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) {
@@ -191,12 +194,14 @@ export default function AdminCategoriesPage() {
       return;
     }
 
+    const finalSlug = (formSlug.trim() || generateSlug(formName)).trim();
+
     const payload = {
       name: formName.trim(),
-      slug: formSlug.trim() || undefined,
+      slug: finalSlug || undefined,
       parent_id: categoryType === 'sub' && formParentId ? Number(formParentId) : null,
       description: formDescription,
-      sort_order: Number(formSortOrder),
+      sort_order: Number(formSortOrder) || 0,
       is_active: Number(formIsActive)
     };
 
@@ -778,19 +783,51 @@ export default function AdminCategoriesPage() {
                     required
                     placeholder={categoryType === 'parent' ? 'VD: Bó Hoa, Giỏ Hoa, Kệ Hoa Chúc Mừng...' : 'VD: 500k - 1000k, Dưới 500k, Trên 2000k...'}
                     value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormName(val);
+                      if (!isSlugManual) {
+                        setFormSlug(generateSlug(val));
+                      }
+                    }}
                   />
                 </div>
 
                 {/* Slug */}
                 <div className="admin-form-group">
-                  <label className="admin-label">Đường dẫn Slug (Tự động tạo nếu để trống)</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label className="admin-label" style={{ margin: 0 }}>Đường dẫn Slug (Tự động tạo nếu để trống)</label>
+                    {formName && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormSlug(generateSlug(formName));
+                          setIsSlugManual(false);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#5D9EAF',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          padding: 0,
+                          textDecoration: 'underline'
+                        }}
+                        title="Tự động tạo lại slug theo tên danh mục"
+                      >
+                        Tự động tạo từ tên
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="text"
                     className="admin-input"
                     placeholder="VD: bo-hoa, 500k-1000k"
                     value={formSlug}
-                    onChange={(e) => setFormSlug(e.target.value)}
+                    onChange={(e) => {
+                      setFormSlug(e.target.value);
+                      setIsSlugManual(true);
+                    }}
                   />
                 </div>
 
@@ -801,8 +838,12 @@ export default function AdminCategoriesPage() {
                     <input
                       type="number"
                       className="admin-input"
+                      placeholder="0"
                       value={formSortOrder}
-                      onChange={(e) => setFormSortOrder(Number(e.target.value))}
+                      onFocus={handleNumberFocus}
+                      onKeyDown={handleNumberKeyDown}
+                      onChange={(e) => handleNumberChange(e, setFormSortOrder)}
+                      onBlur={() => { if (formSortOrder === '') setFormSortOrder(0); }}
                     />
                   </div>
 

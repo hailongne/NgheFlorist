@@ -19,8 +19,9 @@ import {
   UploadOutlined,
   LoadingOutlined
 } from '@ant-design/icons';
-import ImageWithFallback, { BOTANICAL_FALLBACKS } from '../../components/ImageWithFallback';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
+import { generateSlug } from '../../utils/slugify';
+import { handleNumberFocus, handleNumberKeyDown, handleNumberChange } from '../../utils/numberInput';
 
 interface ProductItem {
   id: number;
@@ -89,7 +90,8 @@ export default function AdminProductsPage() {
   const [formName, setFormName] = useState('');
   const [formSku, setFormSku] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formPrice, setFormPrice] = useState<number>(0);
+  const [isSlugManual, setIsSlugManual] = useState(false);
+  const [formPrice, setFormPrice] = useState<number | ''>(0);
   const [formCategory, setFormCategory] = useState<string>('');
   const [formDescription, setFormDescription] = useState('');
   const [formActive, setFormActive] = useState(true);
@@ -261,6 +263,7 @@ export default function AdminProductsPage() {
     setFormName('');
     setFormSku('');
     setFormSlug('');
+    setIsSlugManual(false);
     setFormPrice(0);
     setFormDescription('');
     setFormActive(true);
@@ -294,6 +297,7 @@ export default function AdminProductsPage() {
         setFormName(p.name);
         setFormSku(p.sku || '');
         setFormSlug(p.slug);
+        setIsSlugManual(true);
         setFormPrice(p.price);
         setFormCategory(p.category_id ? p.category_id.toString() : '');
         setFormDescription(p.description || '');
@@ -314,16 +318,19 @@ export default function AdminProductsPage() {
   // Save Product (Create / Update)
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || formPrice <= 0) {
+    const numPrice = Number(formPrice) || 0;
+    if (!formName.trim() || numPrice <= 0) {
       alert('Vui lòng nhập tên sản phẩm và giá bán hợp lệ');
       return;
     }
 
+    const finalSlug = (formSlug.trim() || generateSlug(formName)).trim();
+
     const payload = {
       name: formName.trim(),
       sku: formSku.trim() || undefined,
-      slug: formSlug.trim() || undefined,
-      price: Number(formPrice),
+      slug: finalSlug || undefined,
+      price: numPrice,
       category_id: formCategory ? Number(formCategory) : null,
       description: formDescription,
       is_active: formActive ? 1 : 0,
@@ -1070,7 +1077,13 @@ export default function AdminProductsPage() {
                         required
                         placeholder="VD: Bó Hoa Hồng Juliet Giấc Mơ"
                         value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormName(val);
+                          if (!isSlugManual) {
+                            setFormSlug(generateSlug(val));
+                          }
+                        }}
                       />
                     </div>
                     <div className="admin-form-group">
@@ -1095,8 +1108,12 @@ export default function AdminProductsPage() {
                         required
                         min="0"
                         step="10000"
+                        placeholder="0"
                         value={formPrice}
-                        onChange={(e) => setFormPrice(Number(e.target.value))}
+                        onFocus={handleNumberFocus}
+                        onKeyDown={handleNumberKeyDown}
+                        onChange={(e) => handleNumberChange(e, setFormPrice)}
+                        onBlur={() => { if (formPrice === '') setFormPrice(0); }}
                       />
                     </div>
 
@@ -1131,12 +1148,38 @@ export default function AdminProductsPage() {
                   {/* Slug & Status */}
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px' }}>
                     <div className="admin-form-group">
-                      <label className="admin-label">Đường dẫn thân thiện (Slug)</label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label className="admin-label" style={{ margin: 0 }}>Đường dẫn thân thiện (Slug)</label>
+                        {formName && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormSlug(generateSlug(formName));
+                              setIsSlugManual(false);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#5D9EAF',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              padding: 0,
+                              textDecoration: 'underline'
+                            }}
+                            title="Tự động tạo lại slug theo tên sản phẩm"
+                          >
+                            Tự động tạo từ tên
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="text"
                         className="admin-input"
                         value={formSlug}
-                        onChange={(e) => setFormSlug(e.target.value)}
+                        onChange={(e) => {
+                          setFormSlug(e.target.value);
+                          setIsSlugManual(true);
+                        }}
                         placeholder="bo-hoa-hong-juliet"
                       />
                     </div>

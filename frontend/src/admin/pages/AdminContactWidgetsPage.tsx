@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
+import { handleNumberFocus, handleNumberKeyDown, handleNumberChange } from '../../utils/numberInput';
 import {
   PlusOutlined,
   EditOutlined,
@@ -188,7 +189,10 @@ export default function AdminContactWidgetsPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          sort_order: Number(formData.sort_order) || 0
+        })
       });
 
       const resData = await res.json();
@@ -754,8 +758,12 @@ export default function AdminContactWidgetsPage() {
                     type="number"
                     min={0}
                     className="admin-input"
+                    placeholder="0"
                     value={formData.sort_order}
-                    onChange={e => setFormData({ ...formData, sort_order: Number(e.target.value) })}
+                    onFocus={handleNumberFocus}
+                    onKeyDown={handleNumberKeyDown}
+                    onChange={(e) => handleNumberChange(e, (val) => setFormData(prev => ({ ...prev, sort_order: val === '' ? ('' as any) : val })))}
+                    onBlur={() => { if (formData.sort_order === ('' as any)) setFormData(prev => ({ ...prev, sort_order: 0 })); }}
                   />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

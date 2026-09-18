@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAdminAuth } from '../AdminAuthContext';
 import { DeleteOutlined, EditOutlined, UploadOutlined, LoadingOutlined, CloseOutlined, PictureOutlined } from '@ant-design/icons';
-import ImageWithFallback from '../../components/ImageWithFallback';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
+import { handleNumberFocus, handleNumberKeyDown, handleNumberChange } from '../../utils/numberInput';
 
 interface BannerItem {
   id: number;
@@ -40,7 +40,7 @@ export default function AdminBannersPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [ctaText, setCtaText] = useState('Khám phá ngay');
   const [ctaUrl, setCtaUrl] = useState('/flowers');
-  const [sortOrder, setSortOrder] = useState(0);
+  const [sortOrder, setSortOrder] = useState<number | ''>(0);
 
   // Image upload
   const [uploading, setUploading] = useState(false);
@@ -163,7 +163,7 @@ export default function AdminBannersPage() {
           image_url: imageUrl.trim(),
           cta_text: ctaText.trim(),
           cta_url: ctaUrl.trim(),
-          sort_order: Number(sortOrder),
+          sort_order: Number(sortOrder) || 0,
           is_active: 1
         })
       });
@@ -415,8 +415,12 @@ export default function AdminBannersPage() {
                   <input
                     type="number"
                     className="admin-input"
+                    placeholder="0"
                     value={sortOrder}
-                    onChange={(e) => setSortOrder(Number(e.target.value))}
+                    onFocus={handleNumberFocus}
+                    onKeyDown={handleNumberKeyDown}
+                    onChange={(e) => handleNumberChange(e, setSortOrder)}
+                    onBlur={() => { if (sortOrder === '') setSortOrder(0); }}
                   />
                 </div>
               </div>

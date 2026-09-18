@@ -17,6 +17,7 @@ import {
 } from '@ant-design/icons';
 import ImageWithFallback, { BOTANICAL_FALLBACKS } from '../../components/ImageWithFallback';
 import { DEFAULT_SHOWROOM_COLLECTIONS, ShowroomCollectionItem } from '../../pages/HomePage';
+import { generateSlug } from '../../utils/slugify';
 
 export interface HeroDeviceConfig {
   badge: string;
@@ -301,10 +302,19 @@ export default function AdminHomepageCmsPage() {
   const handleUpdateCollection = (index: number, field: keyof ShowroomCollectionItem, value: string) => {
     setCollections(prev => {
       const next = [...prev];
-      next[index] = {
-        ...next[index],
+      const current = next[index];
+      if (!current) return prev;
+      const updated = {
+        ...current,
         [field]: value
       };
+      if (field === 'title') {
+        const oldSlug = current.slug || '';
+        if (!oldSlug || oldSlug.startsWith('danh-muc-') || oldSlug === generateSlug(current.title)) {
+          updated.slug = generateSlug(value);
+        }
+      }
+      next[index] = updated;
       return next;
     });
   };
@@ -314,7 +324,7 @@ export default function AdminHomepageCmsPage() {
       ...prev,
       {
         title: 'Bộ sưu tập mới',
-        slug: `danh-muc-${Date.now()}`,
+        slug: generateSlug('Bộ sưu tập mới'),
         icon: '🌸',
         image: '/images/bo-hoa-hong.webp',
         desc: 'Mô tả bộ sưu tập hoa'
