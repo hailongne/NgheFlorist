@@ -114,7 +114,14 @@ export default function AdminHomepageCmsPage() {
   const [commitments, setCommitments] = useState<CommitmentItem[]>([]);
 
   // Showroom collections state (Section 2)
-  const [collections, setCollections] = useState<ShowroomCollectionItem[]>(DEFAULT_SHOWROOM_COLLECTIONS);
+  const ensureCollectionIds = (items: ShowroomCollectionItem[]): ShowroomCollectionItem[] => {
+    return (items || []).map((item, idx) => ({
+      ...item,
+      id: item.id || `col_${idx}_${Math.random().toString(36).substring(2, 7)}`
+    }));
+  };
+
+  const [collections, setCollections] = useState<ShowroomCollectionItem[]>(() => ensureCollectionIds(DEFAULT_SHOWROOM_COLLECTIONS));
   const [uploadingCollectionIndex, setUploadingCollectionIndex] = useState<number | null>(null);
   const collectionFileInputRef = useRef<HTMLInputElement>(null);
   const [activeCollectionUploadIdx, setActiveCollectionUploadIdx] = useState<number | null>(null);
@@ -163,7 +170,7 @@ export default function AdminHomepageCmsPage() {
         if (data.customDesign) setCustomDesign(data.customDesign);
         if (data.commitments && data.commitments.length > 0) setCommitments(data.commitments);
         if (data.collections && Array.isArray(data.collections) && data.collections.length > 0) {
-          setCollections(data.collections);
+          setCollections(ensureCollectionIds(data.collections));
         }
       }
     } catch (err) {
@@ -323,6 +330,7 @@ export default function AdminHomepageCmsPage() {
     setCollections(prev => [
       ...prev,
       {
+        id: `col_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         title: 'Bộ sưu tập mới',
         slug: generateSlug('Bộ sưu tập mới'),
         icon: '🌸',
@@ -344,7 +352,7 @@ export default function AdminHomepageCmsPage() {
 
   const handleResetCollectionsToDefault = () => {
     if (window.confirm('Khôi phục danh sách 5 bộ sưu tập về mặc định ban đầu của Nghệ Florist?')) {
-      setCollections(DEFAULT_SHOWROOM_COLLECTIONS);
+      setCollections(ensureCollectionIds(DEFAULT_SHOWROOM_COLLECTIONS));
     }
   };
 
@@ -904,7 +912,7 @@ export default function AdminHomepageCmsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
             {collections.map((col, index) => (
               <div
-                key={col.id || col.slug || index}
+                key={col.id || `col-card-${index}`}
                 style={{
                   backgroundColor: '#FFFFFF',
                   borderRadius: 12,
@@ -1061,9 +1069,29 @@ export default function AdminHomepageCmsPage() {
                   </div>
 
                   <div className="admin-form-group" style={{ margin: 0 }}>
-                    <label className="admin-label" style={{ fontSize: '0.78rem', marginBottom: 4 }}>
-                      Đường dẫn (Slug):
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <label className="admin-label" style={{ fontSize: '0.78rem', margin: 0 }}>
+                        Đường dẫn (Slug):
+                      </label>
+                      {col.title && (
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateCollection(index, 'slug', generateSlug(col.title))}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#0284C7',
+                            fontSize: '0.72rem',
+                            cursor: 'pointer',
+                            padding: 0,
+                            textDecoration: 'underline'
+                          }}
+                          title="Tự động tạo slug theo tên bộ sưu tập"
+                        >
+                          Tự động tạo
+                        </button>
+                      )}
+                    </div>
                     <input
                       type="text"
                       className="admin-input"

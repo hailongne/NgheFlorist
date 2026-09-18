@@ -20,6 +20,7 @@ import {
   LoadingOutlined
 } from '@ant-design/icons';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
+import ImageWithFallback, { BOTANICAL_FALLBACKS } from '../../components/ImageWithFallback';
 import { generateSlug } from '../../utils/slugify';
 import { handleNumberFocus, handleNumberKeyDown, handleNumberChange } from '../../utils/numberInput';
 
