@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CustomerRequestModal from './components/CustomerRequestModal';
+import ProductContactModal from './components/ProductContactModal';
 import QuickContactWidget from './components/QuickContactWidget';
 import { RequestProvider } from './context/RequestContext';
 import { AdminAuthProvider } from './admin/AdminAuthContext';
@@ -77,6 +78,7 @@ export default function App() {
                     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                       <Header />
                       <CustomerRequestModal />
+                      <ProductContactModal />
                       <QuickContactWidget />
                       <div style={{ flexGrow: 1 }}>
                         <Routes>

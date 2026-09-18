@@ -26,7 +26,7 @@ export default function ProductCard({
   categoryName,
   tags = []
 }: ProductCardProps) {
-  const { openRequestModal } = useCustomerRequest();
+  const { openProductContactModal } = useCustomerRequest();
   const { isWishlisted: checkWishlisted, toggleWishlist } = useWishlist();
   const isWishlisted = checkWishlisted(id);
 
@@ -36,16 +36,17 @@ export default function ProductCard({
     toggleWishlist(id);
   };
 
-  const handleSelectSample = (e: React.MouseEvent) => {
+  const handleOpenContact = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    openRequestModal({
+    openProductContactModal({
       id,
       name,
       slug,
       price,
-      imageUrl: imageUrl || getFallbackForId(id)
-    }, 'PRODUCT_SELECTION');
+      imageUrl: imageUrl || getFallbackForId(id),
+      categoryName
+    });
   };
 
   const formatVND = (amount: number) => {
@@ -102,13 +103,13 @@ export default function ProductCard({
 
           <button
             type="button"
-            onClick={handleSelectSample}
+            onClick={handleOpenContact}
             className="product-card-select-btn"
-            title="Chọn mẫu hoa này để được tư vấn"
-            aria-label="Chọn mẫu hoa này để được tư vấn"
+            title="Liên hệ tư vấn mẫu hoa này"
+            aria-label="Liên hệ tư vấn mẫu hoa này"
           >
             <MessageOutlined className="product-card-select-icon" />
-            <span className="product-card-select-text">Chọn mẫu</span>
+            <span className="product-card-select-text">Liên hệ</span>
           </button>
         </div>
       </div>
