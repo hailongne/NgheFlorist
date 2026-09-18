@@ -113,11 +113,19 @@ export async function getAllSystemMediaReferences(): Promise<Array<{ refUrl: str
   }
 
   try {
-    // 3. Settings (Showroom collections, homepage hero, custom design banner, site logo)
+    // 3. Settings (Showroom collections, homepage hero, custom design banner, site logo, footer, conversion)
     const [settingsRows] = await pool.query<RowDataPacket[]>(`
       SELECT key_name, value_data
       FROM settings
-      WHERE key_name IN ('homepage_hero', 'showroom_collections', 'custom_design_banner', 'site_settings')
+      WHERE key_name IN (
+        'homepage_hero',
+        'showroom_collections',
+        'custom_design_banner',
+        'service_commitments',
+        'site_settings',
+        'footer_config',
+        'conversion_config'
+      )
     `);
 
     for (const row of settingsRows) {
@@ -134,9 +142,10 @@ export async function getAllSystemMediaReferences(): Promise<Array<{ refUrl: str
 
       if (row.key_name === 'showroom_collections' && Array.isArray(data)) {
         for (const col of data) {
-          if (col && col.image) {
+          const colImg = col?.image || col?.image_url;
+          if (colImg) {
             references.push({
-              refUrl: col.image,
+              refUrl: colImg,
               usage: {
                 type: 'collection',
                 name: col.title || 'Bộ sưu tập hoa',
@@ -158,19 +167,57 @@ export async function getAllSystemMediaReferences(): Promise<Array<{ refUrl: str
           });
         }
       } else if (row.key_name === 'homepage_hero' && typeof data === 'object') {
-        if (Array.isArray(data.slides)) {
-          for (const s of data.slides) {
-            if (s && s.image) {
-              references.push({
-                refUrl: s.image,
-                usage: {
-                  type: 'banner',
-                  name: s.title || 'Hero Slide',
-                  detail: 'Slide banner trang chủ'
-                }
-              });
-            }
+        // Multi-device banner images (PC/Desktop, Tablet, Mobile)
+        if (data.desktop && typeof data.desktop === 'object') {
+          const desktopImg = data.desktop.hero_image || data.desktop.image || data.desktop.image_url;
+          if (desktopImg) {
+            references.push({
+              refUrl: desktopImg,
+              usage: {
+                type: 'banner',
+                name: 'Banner Hero Desktop',
+                detail: 'Banner chính trang chủ (Desktop)'
+              }
+            });
           }
+        }
+        if (data.tablet && typeof data.tablet === 'object') {
+          const tabletImg = data.tablet.hero_image || data.tablet.image || data.tablet.image_url;
+          if (tabletImg) {
+            references.push({
+              refUrl: tabletImg,
+              usage: {
+                type: 'banner',
+                name: 'Banner Hero Tablet',
+                detail: 'Banner chính trang chủ (Tablet)'
+              }
+            });
+          }
+        }
+        if (data.mobile && typeof data.mobile === 'object') {
+          const mobileImg = data.mobile.hero_image || data.mobile.image || data.mobile.image_url;
+          if (mobileImg) {
+            references.push({
+              refUrl: mobileImg,
+              usage: {
+                type: 'banner',
+                name: 'Banner Hero Mobile',
+                detail: 'Banner chính trang chủ (Mobile)'
+              }
+            });
+          }
+        }
+
+        // Backward compatibility & root fallback
+        if (data.hero_image) {
+          references.push({
+            refUrl: data.hero_image,
+            usage: {
+              type: 'banner',
+              name: 'Banner Hero Trang Chủ',
+              detail: 'Banner chính trang chủ'
+            }
+          });
         }
         if (data.desktop_image) {
           references.push({
@@ -191,6 +238,21 @@ export async function getAllSystemMediaReferences(): Promise<Array<{ refUrl: str
               detail: 'Banner trang chủ'
             }
           });
+        }
+        if (Array.isArray(data.slides)) {
+          for (const s of data.slides) {
+            const slideImg = s?.image || s?.image_url || s?.url;
+            if (slideImg) {
+              references.push({
+                refUrl: slideImg,
+                usage: {
+                  type: 'banner',
+                  name: s?.title || 'Hero Slide',
+                  detail: 'Slide banner trang chủ'
+                }
+              });
+            }
+          }
         }
       } else if (row.key_name === 'site_settings' && typeof data === 'object') {
         if (data.logo_url) {
@@ -213,7 +275,71 @@ export async function getAllSystemMediaReferences(): Promise<Array<{ refUrl: str
             }
           });
         }
+      } else if (row.key_name === 'footer_config' && typeof data === 'object') {
+        if (data.logo_url) {
+          references.push({
+            refUrl: data.logo_url,
+            usage: {
+              type: 'settings',
+              name: 'Logo Chân Trang (Footer)',
+              detail: 'Cấu hình giao diện'
+            }
+          });
+        }
+        if (data.qr_code) {
+          references.push({
+            refUrl: data.qr_code,
+            usage: {
+              type: 'settings',
+              name: 'Mã QR Chân Trang',
+              detail: 'Cấu hình giao diện'
+            }
+          });
+        }
+      } else if (row.key_name === 'conversion_config' && typeof data === 'object') {
+        if (data.zalo_qr || data.qr_image) {
+          references.push({
+            refUrl: data.zalo_qr || data.qr_image,
+            usage: {
+              type: 'settings',
+              name: 'QR Zalo Tư Vấn',
+              detail: 'Cấu hình chuyển đổi'
+            }
+          });
+        }
       }
+
+      // Safety scanner for any other image URLs within settings
+      const scanUrls = (val: any) => {
+        if (!val) return;
+        if (typeof val === 'string') {
+          const str = val.trim();
+          if (
+            (str.startsWith('/uploads/') || str.startsWith('http://') || str.startsWith('https://')) &&
+            /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(str)
+          ) {
+            if (!references.some(r => r.refUrl === str)) {
+              references.push({
+                refUrl: str,
+                usage: {
+                  type: 'settings',
+                  name: `Cấu hình ${row.key_name}`,
+                  detail: 'Cài đặt hệ thống'
+                }
+              });
+            }
+          }
+          return;
+        }
+        if (Array.isArray(val)) {
+          for (const item of val) scanUrls(item);
+          return;
+        }
+        if (typeof val === 'object') {
+          for (const k of Object.keys(val)) scanUrls(val[k]);
+        }
+      };
+      scanUrls(data);
     }
   } catch (err) {
     console.error('Error fetching settings media references:', err);
