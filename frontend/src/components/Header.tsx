@@ -878,52 +878,63 @@ export default function Header() {
                 title="Tư vấn nhanh trực tiếp (Không cần điền form)"
               >
                 <MessageOutlined /> Tư vấn Zalo
+                <DownOutlined style={{ fontSize: 10, marginLeft: 2, transition: 'transform 0.2s ease', transform: showZaloDropdown ? 'rotate(180deg)' : 'rotate(0)' }} />
               </button>
 
               {showZaloDropdown && (
                 <div
                   style={{
                     position: 'absolute',
-                    top: 'calc(100% + 8px)',
+                    top: 'calc(100% + 10px)',
                     right: 0,
-                    width: 320,
+                    width: 336,
                     backgroundColor: '#FFFFFF',
-                    borderRadius: 16,
-                    boxShadow: '0 12px 36px rgba(15, 23, 42, 0.18), 0 2px 10px rgba(0, 104, 255, 0.12)',
+                    borderRadius: 18,
+                    boxShadow: '0 16px 40px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(0, 0, 0, 0.04)',
                     border: '1px solid #E2E8F0',
-                    padding: 16,
+                    padding: '14px 14px 10px 14px',
                     zIndex: 1000,
-                    animation: 'fadeIn 0.15s ease'
+                    animation: 'fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1E293B', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                      TƯ VẤN NHANH TRỰC TIẾP
+                  {/* Dropdown Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #F1F5F9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#10B981', display: 'inline-block' }} />
+                      <div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1B363C', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                          TƯ VẤN NHANH TRỰC TIẾP
+                        </div>
+                        <div style={{ fontSize: '0.68rem', color: '#64748B', marginTop: 1 }}>
+                          Phản hồi nhanh trong 3 phút
+                        </div>
+                      </div>
                     </div>
                     {activeContactWidgets.length > 0 && (
-                      <span style={{ fontSize: '0.7rem', backgroundColor: '#ECFDF5', color: '#059669', fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>
-                        {activeContactWidgets.length} kênh hỗ trợ
+                      <span style={{ fontSize: '0.68rem', backgroundColor: '#F0FDF4', color: '#15803D', border: '1px solid #DCFCE7', fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>
+                        {activeContactWidgets.length} kênh
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 600, marginBottom: 12 }}>
-                    ● 1 chạm kết nối ngay (Không cần điền form)
-                  </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 400, overflowY: 'auto' }}>
+                  {/* Channel List */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7, maxHeight: 380, overflowY: 'auto' }}>
                     {activeContactWidgets.length > 0 ? (
-                      activeContactWidgets.map((w, idx) => {
+                      activeContactWidgets.map((w) => {
                         const isZalo = w.platform_type === 'zalo';
                         const isPhone = w.platform_type === 'phone';
                         const isFb = w.platform_type === 'facebook';
                         const isInsta = w.platform_type === 'instagram';
-                        
-                        const bg = isZalo 
-                          ? (idx % 2 === 0 ? '#0068FF' : '#0284C7')
-                          : isPhone ? '#10B981'
-                          : isFb ? '#0084FF'
-                          : isInsta ? 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)'
-                          : '#0F172A';
+
+                        const cfg = isZalo
+                          ? { badgeBg: '#EBF5FF', borderHover: '#BFDBFE', bgHover: '#F8FAFF', actionText: 'Chat Zalo', actionBg: '#EFF6FF', actionColor: '#0068FF' }
+                          : isFb
+                          ? { badgeBg: '#EEF2FF', borderHover: '#C7D2FE', bgHover: '#FAF5FF', actionText: 'Nhắn tin', actionBg: '#EEF2FF', actionColor: '#1877F2' }
+                          : isPhone
+                          ? { badgeBg: '#ECFDF5', borderHover: '#A7F3D0', bgHover: '#F6FDF9', actionText: 'Gọi ngay', actionBg: '#ECFDF5', actionColor: '#059669' }
+                          : isInsta
+                          ? { badgeBg: '#FFF1F2', borderHover: '#FBCFE8', bgHover: '#FFF5F5', actionText: 'Xem IG', actionBg: '#FFF1F2', actionColor: '#E1306C' }
+                          : { badgeBg: '#F1F5F9', borderHover: '#CBD5E1', bgHover: '#F8FAFC', actionText: 'Liên hệ', actionBg: '#F1F5F9', actionColor: '#334155' };
 
                         return (
                           <a
@@ -936,35 +947,70 @@ export default function Header() {
                               display: 'flex',
                               alignItems: 'center',
                               gap: 10,
-                              background: bg,
-                              color: '#FFFFFF',
+                              backgroundColor: '#FFFFFF',
+                              border: '1px solid #EDF2F7',
                               borderRadius: 12,
-                              padding: '10px 14px',
+                              padding: '8px 12px',
                               textDecoration: 'none',
-                              boxShadow: '0 3px 10px rgba(0, 0, 0, 0.08)',
-                              transition: 'transform 0.15s ease'
+                              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                              cursor: 'pointer'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = cfg.borderHover;
+                              e.currentTarget.style.backgroundColor = cfg.bgHover;
+                              e.currentTarget.style.transform = 'translateY(-1.5px)';
+                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(15, 23, 42, 0.06)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#EDF2F7';
+                              e.currentTarget.style.backgroundColor = '#FFFFFF';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = 'none';
                             }}
                           >
-                            <div style={{
-                              width: 32,
-                              height: 32,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexShrink: 0
-                            }}>
-                              <RealSocialIcon platform={w.platform_type} size={32} />
+                            <div
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 8,
+                                backgroundColor: cfg.badgeBg,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                              }}
+                            >
+                              <RealSocialIcon platform={w.platform_type} size={28} />
                             </div>
-                            <div style={{ flexGrow: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '0.86rem', fontWeight: 700, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {w.title}
                               </div>
                               {w.subtitle && (
-                                <div style={{ fontSize: '0.72rem', opacity: 0.92, fontWeight: 400, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ fontSize: '0.70rem', color: '#64748B', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {w.subtitle}
                                 </div>
                               )}
                             </div>
+
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                color: cfg.actionColor,
+                                backgroundColor: cfg.actionBg,
+                                padding: '4px 9px',
+                                borderRadius: 16,
+                                flexShrink: 0,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 3
+                              }}
+                            >
+                              {cfg.actionText}
+                              <RightOutlined style={{ fontSize: 9 }} />
+                            </span>
                           </a>
                         );
                       })
@@ -979,20 +1025,24 @@ export default function Header() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 10,
-                            backgroundColor: '#0068FF',
-                            color: '#FFFFFF',
-                            borderRadius: 10,
-                            padding: '10px 12px',
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid #EDF2F7',
+                            borderRadius: 12,
+                            padding: '8px 12px',
                             textDecoration: 'none',
-                            fontSize: '0.86rem',
-                            fontWeight: 700
+                            transition: 'all 0.18s ease'
                           }}
                         >
-                          <MessageOutlined style={{ fontSize: 16 }} />
-                          <div>
-                            <div>Zalo 1: {hotline1}</div>
-                            <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText1 || 'Báo giá & chọn mẫu nhanh'}</div>
+                          <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#EBF5FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <RealSocialIcon platform="zalo" size={28} />
                           </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>Chat Zalo 1: {hotline1}</div>
+                            <div style={{ fontSize: '0.70rem', color: '#64748B' }}>{ctaText1 || 'Báo giá & chọn mẫu nhanh'}</div>
+                          </div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0068FF', backgroundColor: '#EFF6FF', padding: '4px 9px', borderRadius: 16 }}>
+                            Chat Zalo
+                          </span>
                         </a>
 
                         <a
@@ -1004,23 +1054,47 @@ export default function Header() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 10,
-                            backgroundColor: '#0284C7',
-                            color: '#FFFFFF',
-                            borderRadius: 10,
-                            padding: '10px 12px',
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid #EDF2F7',
+                            borderRadius: 12,
+                            padding: '8px 12px',
                             textDecoration: 'none',
-                            fontSize: '0.86rem',
-                            fontWeight: 700
+                            transition: 'all 0.18s ease'
                           }}
                         >
-                          <MessageOutlined style={{ fontSize: 16 }} />
-                          <div>
-                            <div>Zalo 2: {hotline2}</div>
-                            <div style={{ fontSize: '0.72rem', opacity: 0.9, fontWeight: 400 }}>{ctaText2 || 'Sự kiện & thiết kế riêng'}</div>
+                          <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#EBF5FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <RealSocialIcon platform="zalo" size={28} />
                           </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>Chat Zalo 2: {hotline2}</div>
+                            <div style={{ fontSize: '0.70rem', color: '#64748B' }}>{ctaText2 || 'Sự kiện & thiết kế riêng'}</div>
+                          </div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0068FF', backgroundColor: '#EFF6FF', padding: '4px 9px', borderRadius: 16 }}>
+                            Chat Zalo
+                          </span>
                         </a>
                       </>
                     )}
+                  </div>
+
+                  {/* Dropdown Footer */}
+                  <div
+                    style={{
+                      marginTop: 10,
+                      paddingTop: 8,
+                      borderTop: '1px solid #F1F5F9',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.69rem',
+                      color: '#94A3B8',
+                      textAlign: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <span>✦ Chụp ảnh duyệt hoa trước khi giao</span>
+                    <span>•</span>
+                    <span>Giao nhanh 2h</span>
                   </div>
                 </div>
               )}
