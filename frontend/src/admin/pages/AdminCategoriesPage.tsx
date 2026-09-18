@@ -62,23 +62,21 @@ export default function AdminCategoriesPage() {
   const blockModalRef = useRef<HTMLDivElement>(null);
 
   useOverlayLock({
-    id: 'admin-category-edit-modal',
+    overlayId: 'admin-category-edit-modal',
     isOpen: modalOpen,
     onClose: () => setModalOpen(false),
     containerRef: categoryModalRef,
-    role: 'dialog',
     priority: 10
   });
 
   useOverlayLock({
-    id: 'admin-category-block-delete-modal',
+    overlayId: 'admin-category-block-delete-modal',
     isOpen: blockModalOpen,
     onClose: () => {
       setBlockModalOpen(false);
       setBlockedCategory(null);
     },
     containerRef: blockModalRef,
-    role: 'alertdialog',
     priority: 20
   });
 

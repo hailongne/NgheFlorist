@@ -86,11 +86,10 @@ export default function AdminContactWidgetsPage() {
   const widgetModalRef = useRef<HTMLDivElement>(null);
 
   useOverlayLock({
-    id: 'admin-contact-widget-modal',
+    overlayId: 'admin-contact-widget-modal',
     isOpen: modalOpen,
     onClose: () => setModalOpen(false),
     containerRef: widgetModalRef,
-    role: 'dialog',
     priority: 10
   });
 

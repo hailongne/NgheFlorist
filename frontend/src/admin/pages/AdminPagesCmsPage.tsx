@@ -37,11 +37,10 @@ export default function AdminPagesCmsPage() {
   const pageModalRef = useRef<HTMLDivElement>(null);
 
   useOverlayLock({
-    id: 'admin-page-cms-modal',
+    overlayId: 'admin-page-cms-modal',
     isOpen: modalOpen,
     onClose: () => setModalOpen(false),
     containerRef: pageModalRef,
-    role: 'dialog',
     priority: 10
   });
   

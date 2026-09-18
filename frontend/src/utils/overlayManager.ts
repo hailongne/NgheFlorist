@@ -34,11 +34,17 @@ class OverlayManager {
    * Register and activate an overlay
    */
   public register(item: OverlayItem): void {
-    // Remove if already exists to update or re-add at top
-    this.stack = this.stack.filter(o => o.id !== item.id);
+    // Check if this overlay was already registered (re-registration / update)
+    const existingIndex = this.stack.findIndex(o => o.id === item.id);
+    const isReRegistration = existingIndex !== -1;
 
-    // Save active element if not provided
-    if (!item.triggerEl && document.activeElement instanceof HTMLElement) {
+    // Remove existing entry to update
+    if (isReRegistration) {
+      this.stack.splice(existingIndex, 1);
+    }
+
+    // Save active element if not provided and this is a fresh registration
+    if (!isReRegistration && !item.triggerEl && document.activeElement instanceof HTMLElement) {
       item.triggerEl = document.activeElement;
     }
 
@@ -57,8 +63,12 @@ class OverlayManager {
     // Attach global listeners
     this.attachListeners();
 
-    // Auto focus into the overlay container
-    this.focusInitialElement(item.containerEl);
+    // Auto focus into the overlay container ONLY on first registration.
+    // Re-registration (e.g. from useEffect re-run) must NOT steal focus
+    // from an active input inside the modal.
+    if (!isReRegistration) {
+      this.focusInitialElement(item.containerEl);
+    }
   }
 
   /**

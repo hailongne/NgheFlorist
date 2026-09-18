@@ -86,11 +86,10 @@ export default function AdminCustomerRequestsPage() {
   const detailModalRef = useRef<HTMLDivElement>(null);
 
   useOverlayLock({
-    id: 'admin-customer-request-detail-modal',
+    overlayId: 'admin-customer-request-detail-modal',
     isOpen: Boolean(selectedRequest),
     onClose: () => setSelectedRequest(null),
     containerRef: detailModalRef,
-    role: 'dialog',
     priority: 10
   });
 

@@ -27,11 +27,10 @@ export default function AdminBannersPage() {
   const bannerModalRef = useRef<HTMLDivElement>(null);
 
   useOverlayLock({
-    id: 'admin-banner-modal',
+    overlayId: 'admin-banner-modal',
     isOpen: modalOpen,
     onClose: () => setModalOpen(false),
     containerRef: bannerModalRef,
-    role: 'dialog',
     priority: 10
   });
 
