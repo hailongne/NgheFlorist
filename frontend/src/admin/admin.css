@@ -454,26 +454,277 @@
   gap: 12px;
 }
 
-/* Media Grid */
+/* Media Library Tabs, Filters & Toolbar */
+.admin-media-header-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.admin-media-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 12px;
+}
+
+.admin-media-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.admin-media-tab:hover {
+  background: #F1F5F9;
+  color: #1E293B;
+  border-color: #CBD5E1;
+}
+
+.admin-media-tab.active {
+  background: #1E293B;
+  color: #FFFFFF;
+  border-color: #1E293B;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+.admin-media-tab-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: #E2E8F0;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.admin-media-tab.active .admin-media-tab-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.admin-media-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-media-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+  max-width: 420px;
+}
+
+.admin-media-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.admin-media-search-input {
+  width: 100%;
+  padding: 7px 32px 7px 34px;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  font-size: 13px;
+  outline: none;
+  background: #FFFFFF;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #1E293B;
+}
+
+.admin-media-search-input:focus {
+  border-color: #5D9EAF;
+  box-shadow: 0 0 0 3px rgba(93, 158, 175, 0.15);
+}
+
+.admin-media-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 12px;
+  border-radius: 50%;
+}
+
+.admin-media-sort-select {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  background: #FFFFFF;
+  cursor: pointer;
+  outline: none;
+}
+
+.admin-media-sort-select:focus {
+  border-color: #5D9EAF;
+}
+
+/* Media Grid & Cards */
 .admin-media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
 }
 
 .admin-media-card {
-  border: 1px solid var(--admin-border);
-  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  position: relative;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-media-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #CBD5E1;
+}
+
+.admin-media-img-wrap {
+  width: 100%;
+  height: 130px;
+  border-radius: 9px 9px 0 0;
   overflow: hidden;
   position: relative;
-  background: #fff;
+  background: #F8FAFC;
 }
 
 .admin-media-card img {
   width: 100%;
-  height: 120px;
+  height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s ease;
+}
+
+.admin-media-card:hover img {
+  transform: scale(1.03);
+}
+
+/* Status Badges */
+.admin-media-badge-used {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(4px);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-media-badge-unused {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  color: #64748B;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  z-index: 2;
+  user-select: none;
+}
+
+/* Tooltip floating card */
+.admin-media-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: 220px;
+  background: #0F172A;
+  color: #F8FAFC;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+  text-align: left;
+}
+
+.admin-media-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #0F172A transparent transparent transparent;
+}
+
+.admin-media-tooltip-trigger {
+  position: relative;
+}
+
+.admin-media-tooltip-trigger:hover .admin-media-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.admin-media-btn-disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  background: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+  color: #94A3B8 !important;
+}
+
+.admin-media-btn-disabled:hover {
+  background: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+  color: #94A3B8 !important;
 }
 
 .admin-mobile-menu-btn {

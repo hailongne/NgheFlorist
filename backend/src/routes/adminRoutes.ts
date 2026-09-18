@@ -4,6 +4,7 @@ import { pool } from '../db';
 import { authenticateToken, requireSoleAdmin, requirePermission, logAudit } from '../middleware/auth';
 import { uploadImage } from '../middleware/upload';
 import { uploadToStorage, deleteFromStorage } from '../services/supabaseStorage';
+import { getAllSystemMediaReferences, findUsagesForMedia, checkMediaUsage } from '../services/mediaUsageService';
 import path from 'path';
 import fs from 'fs';
 import ExcelJS from 'exceljs';
@@ -1229,9 +1230,49 @@ router.patch('/settings', requirePermission('manage_settings'), async (req: Requ
 // ==========================================
 router.get('/media', requirePermission('manage_media'), async (_req: Request, res: Response) => {
   try {
-    const [files] = await pool.query<RowDataPacket[]>('SELECT * FROM media_files ORDER BY created_at DESC LIMIT 100');
-    res.json(files);
+    const [files] = await pool.query<RowDataPacket[]>('SELECT * FROM media_files ORDER BY created_at DESC LIMIT 1000');
+    const allRefs = await getAllSystemMediaReferences();
+
+    let usedCount = 0;
+    let unusedCount = 0;
+    let productCount = 0;
+    let bannerCount = 0;
+
+    const enrichedFiles = files.map((f: any) => {
+      const usages = findUsagesForMedia({ id: f.id, url: f.url, filename: f.filename }, allRefs);
+      const is_used = usages.length > 0;
+      if (is_used) {
+        usedCount++;
+      } else {
+        unusedCount++;
+      }
+      if (usages.some(u => u.type === 'product')) {
+        productCount++;
+      }
+      if (usages.some(u => u.type === 'banner' || u.type === 'collection')) {
+        bannerCount++;
+      }
+
+      return {
+        ...f,
+        is_used,
+        usage_count: usages.length,
+        usages
+      };
+    });
+
+    res.json({
+      files: enrichedFiles,
+      counts: {
+        total: files.length,
+        used: usedCount,
+        unused: unusedCount,
+        product: productCount,
+        banner: bannerCount
+      }
+    });
   } catch (err: any) {
+    console.error('Error fetching media library:', err);
     res.status(500).json({ error: 'Lỗi tải thư viện ảnh' });
   }
 });
@@ -1263,7 +1304,10 @@ router.post('/media/upload', requirePermission('manage_media'), uploadImage.sing
         filename: uploadResult.filename,
         original_name: uploadResult.original_name,
         url: uploadResult.url,
-        size: uploadResult.file_size
+        size: uploadResult.file_size,
+        is_used: false,
+        usage_count: 0,
+        usages: []
       },
       message: 'Tải ảnh lên thành công'
     });
@@ -1276,15 +1320,33 @@ router.post('/media/upload', requirePermission('manage_media'), uploadImage.sing
 router.delete('/media/:id', requirePermission('manage_media'), async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT filename, url FROM media_files WHERE id = ?', [id]);
-    if (rows.length > 0) {
-      const fileTarget = rows[0].filename || rows[0].url;
-      await deleteFromStorage(fileTarget);
-      await pool.query('DELETE FROM media_files WHERE id = ?', [id]);
-      await logAudit(req, 'DELETE', 'media_file', id);
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT id, filename, original_name, url FROM media_files WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy hình ảnh' });
     }
+
+    const media = rows[0];
+    const usageInfo = await checkMediaUsage({ id: media.id, url: media.url, filename: media.filename });
+
+    if (usageInfo.isUsed) {
+      const usageNames = usageInfo.usages.slice(0, 3).map(u => `${u.name} (${u.detail || u.type})`).join(', ');
+      const moreCount = usageInfo.usages.length > 3 ? ` và ${usageInfo.usages.length - 3} mục khác` : '';
+      return res.status(409).json({
+        error: `Không thể xóa ảnh này vì đang được sử dụng bởi: ${usageNames}${moreCount}`,
+        isUsed: true,
+        usageCount: usageInfo.usageCount,
+        usages: usageInfo.usages
+      });
+    }
+
+    const fileTarget = media.filename || media.url;
+    await deleteFromStorage(fileTarget);
+    await pool.query('DELETE FROM media_files WHERE id = ?', [id]);
+    await logAudit(req, 'DELETE', 'media_file', id, { filename: media.filename, original_name: media.original_name });
+
     res.json({ success: true, message: 'Xóa ảnh thành công' });
   } catch (err: any) {
+    console.error('Error deleting media:', err);
     res.status(500).json({ error: 'Lỗi xóa ảnh' });
   }
 });
